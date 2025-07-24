@@ -10,7 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@crbroughton/nuxt-convex": "^0.0.2",
     "@tailwindcss/vite": "^4.1.11",
+    "convex": "^1.25.4",
     "lucide-vue-next": "^0.525.0",
     "nuxt": "^4.0.1",
     "tailwindcss": "^4.1.11",
