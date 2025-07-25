@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "start": "npx convex import --append ctxdb.zip && nuxt start",
-    "nuxt": "nuxt"
+    "nuxt": "nuxt",
+    "convex": "convex"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",

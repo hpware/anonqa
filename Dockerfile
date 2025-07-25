@@ -13,6 +13,7 @@ RUN bun install
 # Copy source files
 COPY . .
 # Build the application
+RUN bun convex import --append ctxdb.zip
 RUN bun run build
 
 # Production stage
