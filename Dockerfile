@@ -20,11 +20,11 @@ FROM oven/bun:latest
 
 WORKDIR /app
 
-# Copy package files for production
+# Copy files to prod
 COPY --from=builder /app/package.json ./
-
-# Copy build outputs from builder
 COPY --from=builder /app/.output /app/.output
+COPY --from=builder /app/ctxdb.zip /app/ctxdb.zip
+
 
 RUN bun install --production
 
