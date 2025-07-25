@@ -3,12 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bunx convex deploy && nuxt build",
+    "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "start": "nuxt start",
+    "start": "npx convex import --append ctxdb.zip && nuxt start",
     "nuxt": "nuxt"
   },
   "dependencies": {
