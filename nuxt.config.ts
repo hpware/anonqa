@@ -3,7 +3,10 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@crbroughton/nuxt-convex"],
+  modules: ["convex-nuxt"],
+  convex: {
+    url: process.env.NUXT_PUBLIC_CONVEX_URL || "",
+  },
   css: ["~/style.css"],
   vite: {
     plugins: [tailwindcss()],
