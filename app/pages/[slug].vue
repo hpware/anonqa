@@ -1,9 +1,19 @@
 <script setup lang="ts">
 "use server";
-import { api } from "../convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug;
+
+if (!slug) {
+  throw createError("Can't find page");
+}
+
+// Convex
+const { data, error, suspense } = useConvexQuery(api.pages.users, {
+  slug: slug,
+});
+await suspense();
 
 useHead({
   title: `@${slug} || QA`,
@@ -16,14 +26,10 @@ const submitted = ref(false);
 const submitAction = async () => {
   console.log("Hi");
   console.log(textareavalue.value);
+  const sendQa = useConvexMutation(api.qa.qa);
+  sendQa({ toUser: slug, msg: textareavalue.value });
   submitted.value = true;
 };
-
-// Convex
-const { data, error, suspense } = useConvexQuery(
-    api.pages.users
-  );
-await suspense(); 
 </script>
 <template>
   <div>
