@@ -13,8 +13,7 @@ RUN bun install
 # Copy source files
 COPY . .
 # Build the application
-RUN bun run convex deploy
-RUN bun run build
+RUN bun run convex deploy --cmd 'bun run build'
 
 # Production stage
 FROM oven/bun:latest
