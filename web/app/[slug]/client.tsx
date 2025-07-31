@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
 
 export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const [placeholder, setPlaceholder] = useState<string>("");
@@ -21,7 +23,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
     }
     dotAnimation();
     intervalRef.current = setInterval(dotAnimation, 1500);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await fetchMutation(api.qa.qa, { toUser: slug, msg: ptavalue });
     // Stop animation when done
     if (intervalRef.current) clearInterval(intervalRef.current);
     setTimeout(() => {

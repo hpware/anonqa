@@ -13,14 +13,3 @@ export const qa = mutation({
     });
   },
 });
-
-/**
- * [
-  {
-    answered: false,
-    msg: "",
-    msgId: "",
-    toUser: "",
-  },
-]
- */
