@@ -1,4 +1,5 @@
 # anon qa app
+![](https://hackatime-badge.hackclub.com/U087ATD163V/anon-ngl-app)
 
 A free and self hostable alternative to `ngl.link`, with no paid subscription, just a simple app that you and your friends can share to manage their QAs (also team support is coming soon!).
 
