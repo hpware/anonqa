@@ -17,10 +17,6 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   };
   const submitForm = async () => {
     setError("");
-    if (ptavalue.length == 0) {
-      setError("This CANNOT be blank.");
-      return;
-    }
     dotAnimation();
     intervalRef.current = setInterval(dotAnimation, 1500);
     await fetchMutation(api.qa.qa, { toUser: slug, msg: ptavalue });
@@ -62,8 +58,9 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
       <button>🎲</button>
       {error.length > 0 && <span className="text-red-600">{error}</span>}
       <button
-        className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300"
+        className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed"
         onClick={submitForm}
+        disabled={ptavalue.length == 0}
       >
         {loadingq}
       </button>

@@ -22,4 +22,7 @@ export default defineSchema({
     userId: v.string(),
     messages: v.array(v.string()),
   }),
+  loggedInUsers: defineTable({
+    // Fields are optional
+  }),
 });
