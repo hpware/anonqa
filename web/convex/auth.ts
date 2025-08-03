@@ -27,12 +27,12 @@ export const {
 } = betterAuthComponent.createAuthFunctions<DataModel>({
   // Must create a user and return the user id
   onCreateUser: async (ctx, user) => {
-    return ctx.db.insert("users", {});
+    return ctx.db.insert("loggedInUsers", {});
   },
 
   // Delete the user when they are deleted from Better Auth
   onDeleteUser: async (ctx, userId) => {
-    await ctx.db.delete(userId as Id<"users">);
+    await ctx.db.delete(userId as Id<"loggedInUsers">);
   },
 });
 
@@ -48,7 +48,7 @@ export const getCurrentUser = query({
     }
     // Get user data from your application's database
     // (skip this if you have no fields in your users table schema)
-    const user = await ctx.db.get(userMetadata.userId as Id<"users">);
+    const user = await ctx.db.get(userMetadata.userId as Id<"loggedInUsers">);
     return {
       ...user,
       ...userMetadata,
