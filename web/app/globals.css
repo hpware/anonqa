@@ -1,1 +1,325 @@
 @import "tailwindcss";
+
+/* Tailwind base reset and sensible defaults */
+@layer base {
+  :root {
+    /* Color palette (light) */
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 46%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 262 83% 58%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 192 95% 43%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Radii */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.06);
+    --shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-lg:
+      0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+
+    /* Typography */
+    --leading: 1.6;
+  }
+
+  .dark {
+    /* Color palette (dark) */
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
+    --muted: 223 15% 15%;
+    --muted-foreground: 215 20% 65%;
+    --card: 224 71% 4%;
+    --card-foreground: 210 40% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 221 83% 53%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 262 83% 58%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 192 95% 43%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 210 40% 98%;
+  }
+
+  html {
+    hanging-punctuation: first allow-end;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    line-height: var(--leading);
+  }
+
+  /* Better focus defaults */
+  :focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
+    border-radius: var(--radius-sm);
+  }
+
+  /* Smooth scroll and selection */
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
+}
+
+/* Typography presets */
+@layer components {
+  .container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .prose-base {
+    @apply text-base leading-7 text-foreground;
+  }
+
+  .heading-1 {
+    @apply text-4xl/tight sm:text-5xl/tight font-semibold tracking-tight;
+  }
+
+  .heading-2 {
+    @apply text-3xl/tight sm:text-4xl/tight font-semibold tracking-tight;
+  }
+
+  .heading-3 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  .subtle {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Card */
+  .card {
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm;
+    box-shadow: var(--shadow);
+  }
+  .card-hover {
+    @apply transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+  }
+  .btn-outline {
+    @apply border border-border bg-transparent hover:bg-muted;
+  }
+  .btn-ghost {
+    @apply hover:bg-muted;
+  }
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring;
+  }
+  .textarea {
+    @apply w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring;
+  }
+  .label {
+    @apply mb-1 block text-sm font-medium text-foreground;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center rounded-full border border-transparent px-2.5 py-0.5 text-xs font-medium;
+  }
+  .badge-muted {
+    @apply bg-muted text-muted-foreground;
+  }
+  .badge-primary {
+    @apply bg-primary/10 text-primary;
+  }
+
+  /* Surface helpers */
+  .surface {
+    @apply rounded-xl border bg-card/60 backdrop-blur;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Divider */
+  .divider {
+    @apply my-6 h-px w-full bg-border;
+  }
+
+  /* App header/footer spacing helpers */
+  .app-page {
+    @apply container py-10;
+  }
+}
+
+/* Utilities: color tokens as Tailwind-friendly classes */
+@layer utilities {
+  .bg-base {
+    background-color: hsl(var(--background));
+  }
+  .text-base {
+    color: hsl(var(--foreground));
+  }
+  .text-muted {
+    color: hsl(var(--muted-foreground));
+  }
+  .border-base {
+    border-color: hsl(var(--border));
+  }
+  .shadow-elevate {
+    box-shadow: var(--shadow);
+  }
+  .shadow-elevate-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  .rounded-md {
+    border-radius: var(--radius-md);
+  }
+  .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+  .rounded-xl {
+    border-radius: var(--radius-xl);
+  }
+
+  /* Fancy gradient text */
+  .gradient-brand {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 50%,
+      hsl(var(--accent)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Subtle grid background utility for hero sections */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Animation utilities */
+  @keyframes float {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+/* Form element polish */
+@layer base {
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Default scrollbar styling */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+/* Helpful layout primitives for quick composition */
+@layer components {
+  .stack-sm {
+    @apply flex flex-col gap-2;
+  }
+  .stack-md {
+    @apply flex flex-col gap-4;
+  }
+  .stack-lg {
+    @apply flex flex-col gap-6;
+  }
+
+  .cluster-sm {
+    @apply flex flex-row flex-wrap items-center gap-2;
+  }
+  .cluster-md {
+    @apply flex flex-row flex-wrap items-center gap-4;
+  }
+  .cluster-lg {
+    @apply flex flex-row flex-wrap items-center gap-6;
+  }
+
+  .center {
+    @apply grid place-items-center;
+  }
+}
+
+/* Prefer antialiased text globally with variable fonts */
+@layer base {
+  .antialiased {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

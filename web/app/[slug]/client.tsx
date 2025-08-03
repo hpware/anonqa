@@ -9,61 +9,102 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const [loadingq, setLoadingq] = useState<string>("Submit");
   const [error, setError] = useState<string>("");
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    setPlaceholder("Hello World!");
+    setPlaceholder("Type your anonymous question here...");
   }, []);
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPtavalue(e.target.value);
+    if (e.target.value.length > 280) {
+      setError("Please keep your question under 280 characters.");
+    } else {
+      setError("");
+    }
   };
+
   const submitForm = async () => {
     setError("");
     dotAnimation();
     intervalRef.current = setInterval(dotAnimation, 1500);
-    await fetchMutation(api.qa.qa, { toUser: slug, msg: ptavalue });
-    // Stop animation when done
+    await fetchMutation(api.qa.qa, { toUser: slug, msg: ptavalue.trim() });
     if (intervalRef.current) clearInterval(intervalRef.current);
     setTimeout(() => {
       setLoadingq("Submitted!");
-    }, 1500);
+    }, 500);
   };
 
   const dotAnimation = () => {
     setLoadingq("Submitting.");
-    setTimeout(() => setLoadingq("Submitting.."), 500);
-    setTimeout(() => setLoadingq("Submitting..."), 1000);
+    setTimeout(() => setLoadingq("Submitting.."), 300);
+    setTimeout(() => setLoadingq("Submitting..."), 600);
   };
 
-  console.log(user);
   const thisUser = user[0];
+
   return (
-    <div className="justify-center m-auto flex flex-col w-full md:w-md">
-      <div className="flex flex-row pt-3 border border-b-0 mt-2 rounded-t-lg bg-gradient-to-br from-blue-600 to-pink-300 text-white">
-        <img
-          alt="Profile Picture"
-          src={thisUser.imageUrl}
-          className="w-12 h-12 rounded-full p-1"
-        />
-        <div className="flex flex-col">
-          <span>{thisUser.displayName}</span>
-          <span>@{thisUser.handle}</span>
+    <section className="container max-w-2xl">
+      <div className="card surface p-4 sm:p-6">
+        <header className="flex items-center gap-3 pb-4 border-b border-base/50">
+          <img
+            alt="Profile Picture"
+            src={thisUser.imageUrl}
+            className="w-12 h-12 rounded-full ring-2 ring-white/50"
+          />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold truncate">
+                {thisUser.displayName}
+              </span>
+              <span className="badge badge-primary">@{thisUser.handle}</span>
+            </div>
+            <p className="subtle truncate">Ask a question anonymously</p>
+          </div>
+        </header>
+
+        <div className="stack-md pt-4">
+          <label className="label" htmlFor="question">
+            Your question
+          </label>
+          <textarea
+            id="question"
+            required
+            maxLength={280}
+            className="textarea min-h-[140px]"
+            placeholder={placeholder}
+            value={ptavalue}
+            onChange={handleTextareaChange}
+          />
+          <div className="flex items-center justify-between text-sm">
+            <span className="subtle">
+              {280 - ptavalue.length} characters left
+            </span>
+            {error.length > 0 && <span className="text-red-600">{error}</span>}
+          </div>
+
+          <div className="cluster-md justify-between">
+            <button
+              type="button"
+              title="Random prompt"
+              className="btn btn-ghost"
+              onClick={() =>
+                setPtavalue(
+                  "What's one thing you wish more people knew about you?",
+                )
+              }
+            >
+              🎲 Random prompt
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={submitForm}
+              disabled={ptavalue.trim().length === 0 || ptavalue.length > 280}
+            >
+              {loadingq}
+            </button>
+          </div>
         </div>
       </div>
-      <textarea
-        required
-        className="rounded rounded-t-none p-1 pt-0 h-[150px] border border-t-0"
-        placeholder={placeholder}
-        value={ptavalue}
-        onChange={handleTextareaChange}
-      />
-      <button>🎲</button>
-      {error.length > 0 && <span className="text-red-600">{error}</span>}
-      <button
-        className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed"
-        onClick={submitForm}
-        disabled={ptavalue.length == 0}
-      >
-        {loadingq}
-      </button>
-    </div>
+    </section>
   );
 }

@@ -12,9 +12,11 @@ import { api } from "../../convex/_generated/api";
 
 export default function App() {
   return (
-    <>
+    <section className="container">
       <AuthLoading>
-        <div>Loading...</div>
+        <div className="center min-h-[40vh]">
+          <div className="subtle">Loading...</div>
+        </div>
       </AuthLoading>
       <Unauthenticated>
         <SignIn />
@@ -22,16 +24,23 @@ export default function App() {
       <Authenticated>
         <Dashboard />
       </Authenticated>
-    </>
+    </section>
   );
 }
 
 function Dashboard() {
   const user = useQuery(api.auth.getCurrentUser);
   return (
-    <div>
-      <div>Hello {user?.name}!</div>
-      <button onClick={() => authClient.signOut()}>Sign out</button>
+    <div className="max-w-lg mx-auto my-10 card surface p-6 sm:p-8">
+      <div className="flex items-center justify-between">
+        <div className="text-lg font-semibold">Hello {user?.name}!</div>
+        <button
+          className="btn btn-outline"
+          onClick={() => authClient.signOut()}
+        >
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }
@@ -71,19 +80,65 @@ function SignIn() {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        {!showSignIn && <input name="name" placeholder="Name" />}
-        <input type="email" name="email" placeholder="Email" />
-        <input type="password" name="password" placeholder="Password" />
-        <button type="submit">{showSignIn ? "Sign in" : "Sign up"}</button>
+    <div className="max-w-md mx-auto my-10 card surface p-6 sm:p-8">
+      <h1 className="heading-3 text-center">
+        {showSignIn ? "Welcome back" : "Create your account"}
+      </h1>
+      <p className="subtle text-center mt-2">
+        {showSignIn ? "Sign in to continue" : "Sign up to get started"}
+      </p>
+      <div className="divider" />
+      <form onSubmit={handleSubmit} className="stack-md">
+        {!showSignIn && (
+          <div>
+            <label className="label" htmlFor="name">
+              Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              placeholder="Your name"
+              className="input"
+            />
+          </div>
+        )}
+        <div>
+          <label className="label" htmlFor="email">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            className="input"
+          />
+        </div>
+        <div>
+          <label className="label" htmlFor="password">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            className="input"
+          />
+        </div>
+        <button type="submit" className="btn btn-primary w-full">
+          {showSignIn ? "Sign in" : "Sign up"}
+        </button>
       </form>
-      <p>
+      <p className="text-center subtle mt-4">
         {showSignIn ? "Don't have an account? " : "Already have an account? "}
-        <button onClick={() => setShowSignIn(!showSignIn)}>
+        <button
+          className="btn btn-ghost"
+          onClick={() => setShowSignIn(!showSignIn)}
+        >
           {showSignIn ? "Sign up" : "Sign in"}
         </button>
       </p>
-    </>
+    </div>
   );
 }
