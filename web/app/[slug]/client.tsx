@@ -8,6 +8,8 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const [ptavalue, setPtavalue] = useState<string>("");
   const [loadingq, setLoadingq] = useState<string>("Submit");
   const [error, setError] = useState<string>("");
+  const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
+  const defultImage = "https://ngl.link/images/default_avatar.png";
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     setPlaceholder("Hello World!");
@@ -33,6 +35,10 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
     setTimeout(() => setLoadingq("Submitting..."), 1000);
   };
 
+  const changeImage = () => {
+    setImageNotAvailable(true);
+  };
+
   console.log(user);
   const thisUser = user[0];
   return (
@@ -40,22 +46,30 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
       <div className="flex flex-row pt-3 border border-b-0 mt-2 rounded-t-lg bg-gradient-to-br from-blue-600 to-pink-300 text-white">
         <img
           alt="Profile Picture"
-          src={thisUser.imageUrl}
+          src={imageNotAvailable ? defultImage : thisUser.imageUrl}
           className="w-12 h-12 rounded-full p-1"
+          onError={changeImage}
         />
         <div className="flex flex-col">
           <span>{thisUser.displayName}</span>
           <span>@{thisUser.handle}</span>
         </div>
       </div>
-      <textarea
-        required
-        className="rounded rounded-t-none p-1 pt-0 h-[150px] border border-t-0"
-        placeholder={placeholder}
-        value={ptavalue}
-        onChange={handleTextareaChange}
-      />
-      <button>🎲</button>
+      <div className="relative">
+        <textarea
+          required
+          className="rounded rounded-t-none p-1 pt-0 h-[150px] border border-t-0 w-full pr-14"
+          placeholder={placeholder}
+          value={ptavalue}
+          onChange={handleTextareaChange}
+        />
+        <button
+          className="absolute bottom-2 right-2 transform -translate-y-1/2 rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+          style={{ pointerEvents: "auto" }}
+        >
+          🎲
+        </button>
+      </div>
       {error.length > 0 && <span className="text-red-600">{error}</span>}
       <button
         className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed"
