@@ -35,6 +35,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
 
   console.log(user);
   const thisUser = user[0];
+
   return (
     <div className="justify-center m-auto flex flex-col w-full md:w-md">
       <div className="flex flex-row pt-3 border border-b-0 mt-2 rounded-t-lg bg-gradient-to-br from-blue-600 to-pink-300 text-white">

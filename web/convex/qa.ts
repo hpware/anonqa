@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,3 +13,11 @@ export const qa = mutation({
     });
   },
 });
+
+
+export const get = query({
+  args: {},
+  handler: async (ctx, args) => {
+    return ctx.db.query("qas");
+  }
+})
