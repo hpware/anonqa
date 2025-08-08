@@ -15,8 +15,11 @@ export const qa = mutation({
 });
 
 export const get = query({
-  args: {},
+  args: { user: v.string() },
   handler: async (ctx, args) => {
-    return ctx.db.query("qas");
+    return ctx.db
+      .query("qas")
+      .filter((q) => q.eq(q.field("toUser"), args.user))
+      .collect();
   },
 });
