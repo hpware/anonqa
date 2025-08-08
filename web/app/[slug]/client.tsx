@@ -9,6 +9,9 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const [loadingq, setLoadingq] = useState<string>("Submit");
   const [error, setError] = useState<string>("");
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
+  const [customRandomizedMessages, setCustomRandomizedMessages] = useState<[]>(
+    [],
+  );
   const defultImage = "https://ngl.link/images/default_avatar.png";
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
@@ -41,6 +44,8 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
 
   console.log(user);
   const thisUser = user[0];
+  if (thisUser.setCustomRandomMessages) {
+  }
 
   return (
     <div className="justify-center m-auto flex flex-col w-full md:w-md">

@@ -10,3 +10,13 @@ export const users = query({
       .collect();
   },
 });
+
+export const specialSelections = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("randomizer")
+      .filter((q) => q.eq(q.field("userId"), args.slug))
+      .collect();
+  },
+});

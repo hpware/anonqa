@@ -14,10 +14,9 @@ export const qa = mutation({
   },
 });
 
-
 export const get = query({
   args: {},
   handler: async (ctx, args) => {
     return ctx.db.query("qas");
-  }
-})
+  },
+});

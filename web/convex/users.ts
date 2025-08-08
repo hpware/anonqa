@@ -1,4 +1,5 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation, query } from "./_generated/server";
+import { v } from "convex/values";
 
 export const removedeleted = internalMutation({
   args: {},
@@ -19,5 +20,16 @@ export const removedeleted = internalMutation({
       }
     }
     return;
+  },
+});
+
+export const doesUserNameExist = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("handle"), args.username))
+      .first();
+    return !!user;
   },
 });
