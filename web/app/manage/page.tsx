@@ -27,13 +27,25 @@ export default function Page() {
       router.push("/manage/login");
     }
   }, [router]);
+  const logoutAction = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    router.push("/manage/login");
+  };
   const messages = useQuery(api.qa.get, { user: userData }) || [];
   return (
     <div>
-      <div>
+      <div className="flex flex-col">
+        <h2>This is a Proof of Concept.</h2>
         <span>
           Yeah I think you are logged in :) You are logged in as "{userData}"!
         </span>
+        <button
+          className="p-2 bg-gray-400 w-fit m-auto rounded"
+          onClick={logoutAction}
+        >
+          Logout
+        </button>
         <div className="w-[80%] m-auto p-2">
           <Table>
             <TableCaption>Messages</TableCaption>

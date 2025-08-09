@@ -14,7 +14,7 @@ export default function Page() {
     if (!userHandle) {
       return;
     }
-    const req = await fetch("/api/testing/login", {
+    const req = await fetch("/api/testing/signup", {
       method: "POST",
       headers: {
         "content-type": "application/json",
