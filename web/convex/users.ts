@@ -1,5 +1,6 @@
-import { internalMutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { v4 as uuidv4 } from "uuid";
 
 export const removedeleted = internalMutation({
   args: {},
@@ -31,5 +32,27 @@ export const doesUserNameExist = query({
       .filter((q) => q.eq(q.field("handle"), args.username))
       .first();
     return !!user;
+  },
+});
+
+export const addUser = mutation({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const newUser = ctx.db
+      .insert("users", {
+        imageUrl: "",
+        displayName: args.username,
+        controlableUsers: [ args.username],
+        userId: uuidv4(),
+        deleted: false,
+        handle:  args.username,
+        setCustomRandomMessages:false,
+        pageType: "basic",
+      })
+      .catch((err) => {
+        console.error("Error inserting user:", err);
+        throw new Error("Failed to create user");
+      });
+    return newUser;
   },
 });
