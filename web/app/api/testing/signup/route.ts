@@ -1,5 +1,5 @@
 import { api } from "@/convex/_generated/api";
-import { fetchQuery } from "convex/nextjs";
+import { fetchMutation } from "convex/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (request: NextRequest) => {
@@ -13,11 +13,11 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    const userExists = await fetchQuery(api.users.doesUserNameExist, {
+    await fetchMutation(api.users.addUser, {
       username,
     });
 
-    return NextResponse.json({ exists: userExists });
+    return NextResponse.json({ exists: username });
   } catch (error) {
     console.error("Error checking username:", error);
     return NextResponse.json(

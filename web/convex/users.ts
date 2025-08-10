@@ -42,11 +42,11 @@ export const addUser = mutation({
       .insert("users", {
         imageUrl: "",
         displayName: args.username,
-        controlableUsers: [ args.username],
+        controlableUsers: [args.username],
         userId: uuidv4(),
         deleted: false,
-        handle:  args.username,
-        setCustomRandomMessages:false,
+        handle: args.username,
+        setCustomRandomMessages: false,
         pageType: "basic",
       })
       .catch((err) => {

@@ -33,7 +33,9 @@ export default function Page() {
   return (
     <div className="absolute inset-0 flex flex-col justify-center text-center m-auto w-1/2">
       <span>Enter your username:</span>
-      <span className="text-sm">Spin up a account!</span>
+      <span className="text-sm">
+        Spin up an account! (This will be deleted in after prod release)
+      </span>
       <input
         type="text"
         required
