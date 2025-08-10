@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { useQuery } from "convex/react";
+import { SendIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -67,6 +68,16 @@ export default function Page() {
               ))}
             </TableBody>
           </Table>
+        </div>
+        <div className="flex flex-col">
+          <span>Add your custom short link!</span>
+          <div className="flex flex-row">
+            <span>{`http://localhost:3000`}/l/ </span>
+            <input type="text" className="bg-gray-100 rounded" />
+            <button>
+              <SendIcon />
+            </button>
+          </div>
         </div>
       </div>
     </div>

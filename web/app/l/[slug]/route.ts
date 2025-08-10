@@ -1,6 +1,7 @@
 import { api } from "@/convex/_generated/api";
 import { fetchQuery } from "convex/nextjs";
 import { NextRequest, NextResponse } from "next/server";
+import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{
@@ -15,10 +16,11 @@ export const GET = async (request: NextRequest, context: Props) => {
       slug: slug,
     });
     if (fetchUrlStuff === null) {
-      return Response.redirect("/oops", 308);
+      return Response.redirect("/404", 301);
     }
     return Response.redirect(fetchUrlStuff, 308);
   } catch (e) {
+    console.log(e);
     return new Response("500 Server Error", {
       status: 500,
     });
