@@ -13,8 +13,3 @@ Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for
 
 ## Admin controls
 You, the admin that controls the server CAN view users anon messages sent to a member that is on your server, HOWEVER this doesn't give you the person who sent you the data's IP, location, etc... You can delete, modify, and create users in the dashboard, and force remove the current going to be deleted users, forcing it to NOT be recoverable.
-
-## User names that are not allowed:
-- `s`
-- `api`
-- `admin`

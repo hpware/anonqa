@@ -22,6 +22,11 @@ export default defineSchema({
     userId: v.string(),
     messages: v.array(v.string()),
   }),
+  urls: defineTable({
+    slug: v.string(),
+    toUser: v.string(),
+    deleted: v.string(),
+  }),
   loggedInUsers: defineTable({
     // Fields are optional
   }),

@@ -13,6 +13,7 @@ import type * as cron from "../cron.js";
 import type * as http from "../http.js";
 import type * as pages from "../pages.js";
 import type * as qa from "../qa.js";
+import type * as shortlink from "../shortlink.js";
 import type * as users from "../users.js";
 
 import type {
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   pages: typeof pages;
   qa: typeof qa;
+  shortlink: typeof shortlink;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
