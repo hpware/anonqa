@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { useQuery } from "convex/react";
-import { SendIcon } from "lucide-react";
+import { SendIcon, ToggleRightIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -41,12 +41,12 @@ export default function Page() {
         <span>
           Yeah I think you are logged in :) You are logged in as "{userData}"!
         </span>
-        <button
-          className="p-2 bg-gray-400 w-fit m-auto rounded"
-          onClick={logoutAction}
-        >
-          Logout
-        </button>
+        <div className="flex flex-row w-fit m-auto gap-2">
+          <button className="p-2 bg-gray-400 rounded" onClick={logoutAction}>
+            Logout
+          </button>
+          <button className="p-2 bg-gray-400 rounded">Disable Flagging</button>
+        </div>
         <div className="w-[80%] m-auto p-2">
           <Table>
             <TableCaption>Messages</TableCaption>
@@ -55,6 +55,8 @@ export default function Page() {
                 <TableHead className="w-[100px]">MsgID</TableHead>
                 <TableHead>Question</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Flagged?</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -63,7 +65,11 @@ export default function Page() {
                   <TableCell className="font-medium">{i.msgId}</TableCell>
                   <TableCell>{i.msg}</TableCell>
                   <TableCell>{i.answered ? "已回答" : "尚未回答"}</TableCell>
-                  {/*<button onClick={}>Answer</button>*/}
+                  <TableCell>No</TableCell>
+                  <TableCell className="flex flex-row gap-2">
+                    <button>Report</button>
+                    <button>Answer</button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
