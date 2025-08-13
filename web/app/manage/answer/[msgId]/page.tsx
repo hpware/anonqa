@@ -45,7 +45,7 @@ export default function Page() {
           </button>
           <button className="bg-gray-300 border rounded">Post with text</button>
         </div>
-      </div>>
+      </div>
     </div>
   );
 }
