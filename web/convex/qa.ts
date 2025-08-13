@@ -23,3 +23,13 @@ export const get = query({
       .collect();
   },
 });
+
+export const getViaId = query({
+  args: { id: v.string() },
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("qas")
+      .filter((q) => q.eq(q.field("msgId"), args.id))
+      .collect();
+  },
+});
