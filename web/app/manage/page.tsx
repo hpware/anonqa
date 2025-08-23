@@ -39,7 +39,7 @@ export default function Page() {
           Logout
         </button>
         <button className="p-2 bg-gray-400 rounded">
-          {flaggingFeat ? "Disable" : "Enable"} Flagging
+          {flaggingFeat ? "Disable" : "Enable"} Flagging Messages
         </button>
       </div>
       <div className="w-[80%] m-auto p-2">
@@ -66,6 +66,7 @@ export default function Page() {
                   <Link href={`/manage/answer/${i.msgId}`}>
                     <button>Answer</button>
                   </Link>
+                  <button>Ignore</button>
                 </TableCell>
               </TableRow>
             ))}
