@@ -6,11 +6,11 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/ingest/static/:path*",
+        source: "/posthog-relay-49qaj/static/:path*",
         destination: "https://us-assets.i.posthog.com/static/:path*",
       },
       {
-        source: "/ingest/:path*",
+        source: "/posthog-relay-49qaj/:path*",
         destination: "https://us.i.posthog.com/:path*",
       },
     ];
