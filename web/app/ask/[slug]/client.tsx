@@ -12,10 +12,10 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const [customRandomizedMessages, setCustomRandomizedMessages] = useState<[]>(
     [],
   );
-  const defultImage = "https://ngl.link/images/default_avatar.png";
+  const defultImage = "/assets/default.png";
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    setPlaceholder("Hello World!");
+    setPlaceholder("A frame! This is filtered btw");
   }, []);
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPtavalue(e.target.value);
@@ -49,7 +49,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
 
   return (
     <div className="justify-center m-auto flex flex-col w-full md:w-md">
-      <div className="flex flex-row pt-3 border border-b-0 mt-2 rounded-t-lg bg-gradient-to-br from-blue-600 to-pink-300 text-white">
+      <div className="flex flex-row pt-3 border border-b-0 mt-2 rounded-t-lg bg-gradient-to-br from-blue-600 to-pink-300 text-white ph-no-capture userdata">
         <img
           alt="Profile Picture"
           src={imageNotAvailable ? defultImage : thisUser.imageUrl}
