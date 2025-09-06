@@ -4,15 +4,21 @@ import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
 export default function Client({ slug, user }: { slug: string; user: any[] }) {
+  // Default
+  const defultImage = "/assets/default.png";
+  const defaultRandomizedMessages = ["Hello World", "This is really fun!"];
+  // Values
   const [placeholder, setPlaceholder] = useState<string>("");
   const [ptavalue, setPtavalue] = useState<string>("");
   const [loadingq, setLoadingq] = useState<string>("Submit");
   const [error, setError] = useState<string>("");
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
+  const [randomizedMesssages, setRandomizedMessages] = useState(
+    defaultRandomizedMessages,
+  );
   const [customRandomizedMessages, setCustomRandomizedMessages] = useState<[]>(
     [],
   );
-  const defultImage = "/assets/default.png";
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     setPlaceholder("A frame! This is filtered btw");
@@ -41,6 +47,8 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const changeImage = () => {
     setImageNotAvailable(true);
   };
+
+  const randomizeMessage = () => {};
 
   console.log(user);
   const thisUser = user[0];
@@ -72,6 +80,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
         <button
           className="absolute bottom-2 right-2 transform -translate-y-1/2 rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
           style={{ pointerEvents: "auto" }}
+          onClick={randomizeMessage}
         >
           🎲
         </button>
