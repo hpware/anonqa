@@ -2,7 +2,6 @@
 import { useEffect, useRef } from "react";
 
 interface TurnstileProps {
-  siteKey: string;
   onVerify: (token: string) => void;
 }
 
@@ -12,10 +11,12 @@ declare global {
   }
 }
 
-export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
+export function Turnstile({ onVerify }: TurnstileProps) {
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log(siteKey);
     if (containerRef.current && window.turnstile) {
       window.turnstile.render(containerRef.current, {
         sitekey: siteKey,

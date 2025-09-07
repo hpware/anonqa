@@ -7,7 +7,6 @@ import { Turnstile } from "@/components/turnstile";
 export default function Client({ slug, user }: { slug: string; user: any[] }) {
   // Default
   const defultImage = "/assets/default.png";
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
   const defaultRandomizedMessages = ["Hello World", "This is really fun!"];
   // Values
   const [placeholder, setPlaceholder] = useState<string>("");
@@ -89,7 +88,6 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
         </button>
       </div>
       <Turnstile
-        siteKey={siteKey}
         onVerify={(token) => {
           setTurnstileToken(token);
         }}
