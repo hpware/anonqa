@@ -2,16 +2,19 @@
 import { useState, useEffect, useRef } from "react";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
+import { Turnstile } from "@/components/turnstile";
 
 export default function Client({ slug, user }: { slug: string; user: any[] }) {
   // Default
   const defultImage = "/assets/default.png";
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
   const defaultRandomizedMessages = ["Hello World", "This is really fun!"];
   // Values
   const [placeholder, setPlaceholder] = useState<string>("");
   const [ptavalue, setPtavalue] = useState<string>("");
   const [loadingq, setLoadingq] = useState<string>("Submit");
   const [error, setError] = useState<string>("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
   const [randomizedMesssages, setRandomizedMessages] = useState(
     defaultRandomizedMessages,
@@ -85,11 +88,12 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
           🎲
         </button>
       </div>
-      <div
-        className="cf-turnstile"
-        data-sitekey={process.env.NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY}
-        data-callback="javascriptCallback"
-      ></div>
+      <Turnstile
+        siteKey={siteKey}
+        onVerify={(token) => {
+          setTurnstileToken(token);
+        }}
+      />
       {error.length > 0 && <span className="text-red-600">{error}</span>}
       <button
         className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed"
