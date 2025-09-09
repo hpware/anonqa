@@ -59,7 +59,7 @@ User Controls
 - Control over notification types
 - Ability to delete own content
 
-    Here is the user-generated text to categorize:
-    <user_text>{user_text}</user_text>
+  Here is the user-generated text to categorize:
+  <user_text>{user_text}</user_text>
 
-    Based on the guidelines above, classify this text as either ALLOW or BLOCK. Return nothing else.
+  Based on the guidelines above, classify this text as either ALLOW or BLOCK. Return nothing else.

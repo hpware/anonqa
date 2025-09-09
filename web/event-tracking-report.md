@@ -4,9 +4,10 @@ This document lists all PostHog events that have been automatically added to you
 
 ## Events by File
 
-
 ## Events still awaiting implementation
+
 - (human: you can fill these in)
+
 ---
 
 ## Next Steps

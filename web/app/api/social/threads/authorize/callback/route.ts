@@ -1,3 +1,1 @@
-export const GET = async () => {
-    
-}
+export const GET = async () => {};

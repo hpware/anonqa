@@ -17,7 +17,7 @@ export default defineSchema({
     toUser: v.string(), // userId
     msg: v.string(),
     answered: v.boolean(),
-    linkedPosts: v.optional(v.number())
+    linkedPosts: v.optional(v.number()),
   }).index("msgId", ["msgId"]),
   randomizer: defineTable({
     userId: v.string(),
