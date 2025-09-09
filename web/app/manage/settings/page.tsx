@@ -3,29 +3,30 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import { useQuery } from "convex/react";
+import { CheckCircle2Icon, XCircleIcon } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [userData, setUserData] = useState<string>("");
-  const [loginId, setLoginId] = useState<string>("");
-  const [answer, setAnswer] = useState<string>("");
-  const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    setUserData(user && user.length > 0 ? user : "");
-    setLoginId(token ?? "");
-  }, [router]);
-
-  const message = useQuery(api.qa.getViaId, { id: "myid" }) || [];
-
+  const getStatus = useQuery(api.users.getUserSocialLinkAccountStatus, {
+    userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
+  });
   return (
-    <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors">
+    <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       <div>
         <h2>Link your account(s)</h2>
-        <button>Threads</button>
-        <button>X</button>
+        <span>{JSON.stringify(getStatus)}</span>
+        <button
+          className={`p-2 m-2 rounded flex flex-row ${(getStatus?.threads?.length ?? 0) > 0 ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
+        >
+          {(getStatus?.threads?.length ?? 0) > 0 && <CheckCircle2Icon />}
+          <span>Threads</span>
+        </button>
+        <button
+          className={`p-2 m-2 rounded flex flex-row ${(getStatus?.x?.length ?? 0) > 0 ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
+        >
+          {(getStatus?.x?.length ?? 0) > 0 && <CheckCircle2Icon />}
+          <span>Twitter</span>
+        </button>
       </div>
     </div>
   );

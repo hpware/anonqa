@@ -9,6 +9,7 @@ import { Threads } from "./formats";
 interface selectionsInterface {
   text: string;
   slug: string;
+  changingDisplayText: string;
 }
 
 export default function Page() {
@@ -28,21 +29,43 @@ export default function Page() {
 
   const message = useQuery(api.qa.getViaId, { id: "myid" }) || [];
 
-  const changeSelectedPlatform = (platform: string) => {
+  const changeSelectedPlatform = (
+    platform: string,
+    changingDisplayText: string,
+  ) => {
     if (platform === selectedPlatform) {
       return;
     }
-    toast(`Changing Plaform to ${platform}...`);
+    toast(`Changing Plaform to ${changingDisplayText}...`);
     setSelectedPlatform(platform);
   };
 
   const selections: selectionsInterface[] = [
-    { text: "Post to threads", slug: "threads" },
-    { text: "Post to X", slug: "x" },
-    { text: "Post with pic (Stories)", slug: "pic-stories" },
-    { text: "Post with pic (Feed)", slug: "pic-feed" },
-    { text: "Post with pic (other)", slug: "pic-other" },
-    { text: "Post with text", slug: "text" },
+    {
+      text: "Post to threads",
+      slug: "threads",
+      changingDisplayText: "Threads",
+    },
+    {
+      text: "Post to Twitter",
+      slug: "twitter",
+      changingDisplayText: "Twitter",
+    },
+    {
+      text: "Post with pic (Stories)",
+      slug: "pic-stories",
+      changingDisplayText: "Stories Pic Mode",
+    },
+    {
+      text: "Post with pic (Feed)",
+      slug: "pic-feed",
+      changingDisplayText: "Feed Pic Mode",
+    },
+    {
+      text: "Post with text",
+      slug: "text",
+      changingDisplayText: "Text format",
+    },
   ];
 
   return (
@@ -71,7 +94,9 @@ export default function Page() {
           {selections.map((i) => (
             <button
               className={`px-4 py-2 rounded-lg transition-colors ${selectedPlatform === i.slug ? "bg-gray-100 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600" : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"}`}
-              onClick={() => changeSelectedPlatform(i.slug)}
+              onClick={() =>
+                changeSelectedPlatform(i.slug, i.changingDisplayText)
+              }
               disabled={selectedPlatform === i.slug}
             >
               {i.text}
@@ -86,8 +111,6 @@ export default function Page() {
           {answer || "Your answer preview will appear here"}
         </div>
         <Threads
-          responseText="Hi"
-          questionText="Hi"
           user={JSON.parse(
             JSON.stringify({
               id: "10098977380201680",
@@ -98,7 +121,10 @@ export default function Page() {
                 "https://scontent.cdninstagram.com/v/t51.82787-15/532339131_17922115800103188_3915658158039943772_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=1-7&_nc_sid=18de74&_nc_ohc=EY2SQcVZxi4Q7kNvwGHszZ5&_nc_oc=Adm0bN_USmZw09NE5keSmSR-o3-ZnDGz5YGcblQOMW1HzGAgRcccjo9iwHfnyfk9ff67k4zz4TmLWOUuZr7b8w_X&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AP4hL3IEAAAA&_nc_gid=hc_oGTJg5DL5itTZJz-8dg&oh=00_AfZSJA5iey0a9Fjn_cnTsMvrkScJBUloyPcGF3vQjMzwaQ&oe=68C56848",
             }),
           )}
-        />
+        >
+          <span>Q: Hi</span>
+          <span>A: Hi</span>
+        </Threads>
       </div>
       <div>
         <button className="px-4 py-2 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">

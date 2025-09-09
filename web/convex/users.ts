@@ -56,3 +56,14 @@ export const addUser = mutation({
     return newUser;
   },
 });
+
+export const getUserSocialLinkAccountStatus = query({
+  args: { userid: v.string() },
+  handler: async (ctx, args) => {
+    const data = await ctx.db
+      .query("linkAccountUsers")
+      .filter((q) => q.eq(q.field("userid"), args.userid))
+      .first();
+    return data;
+  },
+});
