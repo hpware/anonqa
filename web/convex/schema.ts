@@ -9,7 +9,7 @@ export default defineSchema({
     userId: v.string(),
     deleted: v.boolean(),
     handle: v.string(),
-    setCustomRandomMessages: v.boolean(),
+    setCustomRandomMessages: v.optional(v.boolean()),
     pageType: v.string(), // FOR ONLY 1. basic (as default) 2. Confess mode 3. idk
   }).index("userId", ["userId", "handle"]),
   qas: defineTable({
@@ -17,6 +17,7 @@ export default defineSchema({
     toUser: v.string(), // userId
     msg: v.string(),
     answered: v.boolean(),
+    linkedPosts: v.optional(v.number())
   }).index("msgId", ["msgId"]),
   randomizer: defineTable({
     userId: v.string(),
@@ -29,5 +30,10 @@ export default defineSchema({
   }),
   loggedInUsers: defineTable({
     // Fields are optional
+  }),
+  linkAccountUsers: defineTable({
+    userid: v.string(),
+    threads: v.string() || v.null(),
+    x: v.string() || v.null(),
   }),
 });

@@ -22,7 +22,11 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors">
-      <div>hi</div>
+      <div>
+        <h2>Link your account(s)</h2>
+        <button>Threads</button>
+        <button>X</button>
+      </div>
     </div>
   );
 }

@@ -87,11 +87,6 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
           🎲
         </button>
       </div>
-      <Turnstile
-        onVerify={(token) => {
-          setTurnstileToken(token);
-        }}
-      />
       {error.length > 0 && <span className="text-red-600">{error}</span>}
       <button
         className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed"
