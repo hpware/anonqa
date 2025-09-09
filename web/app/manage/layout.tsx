@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ThemeProvider } from "./themeProvider";
 import { useTheme } from "./themeProvider";
+import { Toaster } from "@/components/ui/sonner";
+import Link from "next/link";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -29,6 +31,7 @@ export default function ManagementPageLayout({
   const [userData, setUserData] = useState<string>("");
   const [loginId, setLoginId] = useState<string>("");
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -41,19 +44,34 @@ export default function ManagementPageLayout({
     }
   }, [router]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <ThemeProvider>
       <div className="min-h-screen transition-colors bg-white dark:bg-gray-900 text-black dark:text-white">
         <div className="flex flex-col">
-          <div className="flex justify-between items-center p-4">
-            <div>
-              <h2>This is a Proof of Concept.</h2>
-              <span>You are logged in as {userData}!</span>
+          <div
+            className={`min-h-12 fixed z-50 inset-x-0 flex flex-row justify-between text-center border transition-all duration-300 ${scrolled ? "mt-5 rounded-2xl mx-7 shadow border-gray-300/30 p-2 backdrop-blur-lg " : "mt-0 p-4 rounded-xl border-gray-300/0"}`}
+          >
+            <div className="flex flex-row items-center justify-center text-center px-2">
+              <Link href="/manage">
+                <span className="p-2">Home</span>
+              </Link>
+              <span className="font-bold">
+                You are logged in as {userData}!
+              </span>
             </div>
             <ThemeToggle />
           </div>
-          {children}
+          <div className="pt-12 mt-6">{children}</div>
         </div>
+        <Toaster />
       </div>
     </ThemeProvider>
   );
