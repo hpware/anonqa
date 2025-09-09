@@ -115,7 +115,7 @@ export default function Page() {
             JSON.stringify({
               id: "10098977380201680",
               name: "yh",
-              is_verified: false,
+              is_verified: true,
               username: "aixntw",
               threads_profile_picture_url:
                 "https://scontent.cdninstagram.com/v/t51.82787-15/532339131_17922115800103188_3915658158039943772_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=1-7&_nc_sid=18de74&_nc_ohc=EY2SQcVZxi4Q7kNvwGHszZ5&_nc_oc=Adm0bN_USmZw09NE5keSmSR-o3-ZnDGz5YGcblQOMW1HzGAgRcccjo9iwHfnyfk9ff67k4zz4TmLWOUuZr7b8w_X&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AP4hL3IEAAAA&_nc_gid=hc_oGTJg5DL5itTZJz-8dg&oh=00_AfZSJA5iey0a9Fjn_cnTsMvrkScJBUloyPcGF3vQjMzwaQ&oe=68C56848",

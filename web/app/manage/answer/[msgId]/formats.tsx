@@ -1,3 +1,4 @@
+import { BadgeCheck } from "lucide-react";
 export interface ThreadsUserData {
   id: string;
   name: string;
@@ -20,7 +21,12 @@ export function Threads({
           src={user.threads_profile_picture_url}
           className="rounded-full w-8 h-8"
         />
-        <span className="p-1 pl-2 text-bold text-lg">{user.username}</span>
+        <span className="p-1 pl-2 text-bold text-lg flex flex-row">
+          <span>{user.username}</span>
+          {user.is_verified && (
+            <BadgeCheck className="p-1 w-6 h-6 text-blue-600" />
+          )}
+        </span>
       </div>
       <div className="ml-10 flex flex-col">{children}</div>
       {/* Threads SVG */}

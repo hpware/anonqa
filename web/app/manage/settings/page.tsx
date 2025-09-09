@@ -28,6 +28,9 @@ export default function SettingsPage() {
           <span>Twitter</span>
         </button>
       </div>
+      <div>
+        <h2>Change account settings</h2>
+      </div>
     </div>
   );
 }

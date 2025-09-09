@@ -31,9 +31,17 @@ export default defineSchema({
   loggedInUsers: defineTable({
     // Fields are optional
   }),
+  //id,name,is_verified,username,threads_profile_picture_url",
   linkAccountUsers: defineTable({
     userid: v.string(),
-    threads: v.string() || v.null(),
+    threads:
+      v.object({
+        id: v.string(),
+        name: v.string(),
+        is_verified: v.boolean(),
+        username: v.string(),
+        threads_profile_picture_url: v.string(),
+      }) || v.null(),
     x: v.string() || v.null(),
   }),
 });
