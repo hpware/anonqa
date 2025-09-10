@@ -17,7 +17,7 @@ interface selectionsInterface {
   template?: React.ReactNode;
 }
 
-export default function Page() {
+export default function Page({ slug }: { slug: string }) {
   const router = useRouter();
   const [userData, setUserData] = useState<string>("");
   const [loginId, setLoginId] = useState<string>("");
@@ -25,6 +25,7 @@ export default function Page() {
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const selectionsPreviewInterfaceRef = useRef(null);
+  const getMessage = useQuery(api.qa.getViaId, { id: slug });
   useGSAP(
     () => {
       // gsap code here...
@@ -62,17 +63,17 @@ export default function Page() {
         <Threads
           user={JSON.parse(
             JSON.stringify({
-              id: "10098977380201680",
-              name: "yh",
+              id: "1",
+              name: "hpware",
               is_verified: true,
-              username: "aixntw",
+              username: "testing",
               threads_profile_picture_url:
-                "https://scontent.cdninstagram.com/v/t51.82787-15/532339131_17922115800103188_3915658158039943772_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=108&ccb=1-7&_nc_sid=18de74&_nc_ohc=EY2SQcVZxi4Q7kNvwGHszZ5&_nc_oc=Adm0bN_USmZw09NE5keSmSR-o3-ZnDGz5YGcblQOMW1HzGAgRcccjo9iwHfnyfk9ff67k4zz4TmLWOUuZr7b8w_X&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&edm=AP4hL3IEAAAA&_nc_gid=hc_oGTJg5DL5itTZJz-8dg&oh=00_AfZSJA5iey0a9Fjn_cnTsMvrkScJBUloyPcGF3vQjMzwaQ&oe=68C56848",
+                "https://avatars.githubusercontent.com/u/157942818?v=4",
             }),
           )}
         >
-          <span>Q: Hi</span>
-          <span>A: Hi</span>
+          <span className="break-words">Q: Hi</span>
+          <span className="break-words">A: {answer}</span>
         </Threads>
       ),
     },
@@ -85,16 +86,24 @@ export default function Page() {
       text: "Post with pic (Stories)",
       slug: "pic-stories",
       changingDisplayText: "Stories Pic Mode",
+      template: <canvas></canvas>,
     },
     {
       text: "Post with pic (Feed)",
       slug: "pic-feed",
       changingDisplayText: "Feed Pic Mode",
+      template: <canvas></canvas>,
     },
     {
       text: "Post with text",
       slug: "text",
       changingDisplayText: "Text format",
+      template: (
+        <div className="flex flex-col">
+          <span className="break-words">Q: Hi</span>
+          <span className="break-words">A: {answer}</span>
+        </div>
+      ),
     },
   ];
 
@@ -146,13 +155,14 @@ export default function Page() {
             if (i.slug === selectedPlatform) {
               return i.template ? <div key={i.slug}>{i.template}</div> : null;
             }
-            return <div>Please select a template.</div>;
+            return null;
           })}
+          {selectedPlatform.length == 0 && <div>Please select a template.</div>}
         </div>
       </div>
       <div>
         <button className="px-4 py-2 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
-          Generate
+          {selectedPlatform === "threads" ? "Post & Save" : "Generate & Save"}
         </button>
       </div>
     </div>
