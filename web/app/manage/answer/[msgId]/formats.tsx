@@ -24,7 +24,7 @@ export function Threads({
         <span className="p-1 pl-2 text-bold text-lg flex flex-row">
           <span>{user.username}</span>
           {user.is_verified && (
-            <BadgeCheck className="p-1 w-6 h-6 text-blue-600" />
+            <BadgeCheck className="p-1 w-7 h-7 text-blue-500 fill-blue-500 stroke-white" />
           )}
         </span>
       </div>

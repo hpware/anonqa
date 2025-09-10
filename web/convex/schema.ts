@@ -34,6 +34,7 @@ export default defineSchema({
   //id,name,is_verified,username,threads_profile_picture_url",
   linkAccountUsers: defineTable({
     userid: v.string(),
+    threads_auth_token: v.string(),
     threads:
       v.object({
         id: v.string(),
@@ -42,6 +43,5 @@ export default defineSchema({
         username: v.string(),
         threads_profile_picture_url: v.string(),
       }) || v.null(),
-    x: v.string() || v.null(),
   }),
 });

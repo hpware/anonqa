@@ -21,12 +21,6 @@ export default function SettingsPage() {
           {(getStatus?.threads?.length ?? 0) > 0 && <CheckCircle2Icon />}
           <span>Threads</span>
         </button>
-        <button
-          className={`p-2 m-2 rounded flex flex-row ${(getStatus?.x?.length ?? 0) > 0 ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
-        >
-          {(getStatus?.x?.length ?? 0) > 0 && <CheckCircle2Icon />}
-          <span>Twitter</span>
-        </button>
       </div>
       <div>
         <h2>Change account settings</h2>
