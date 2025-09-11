@@ -16,9 +16,9 @@ export default function SettingsPage() {
         <h2>Link your account(s)</h2>
         <span>{JSON.stringify(getStatus)}</span>
         <button
-          className={`p-2 m-2 rounded flex flex-row ${(getStatus?.threads?.length ?? 0) > 0 ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
+          className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
         >
-          {(getStatus?.threads?.length ?? 0) > 0 && <CheckCircle2Icon />}
+          {true && <CheckCircle2Icon />}
           <span>Threads</span>
         </button>
       </div>
