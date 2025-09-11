@@ -14,7 +14,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const [placeholder, setPlaceholder] = useState<string>("");
   const [ptavalue, setPtavalue] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [submitting, setSubmitting] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
   const [randomizedMesssages, setRandomizedMessages] = useState(
@@ -99,7 +99,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
             </div>
             {error.length > 0 && <span className="text-red-600">{error}</span>}
             <button
-              className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed"
+              className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
               onClick={submitForm}
               disabled={ptavalue.length == 0}
             >
@@ -108,7 +108,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
           </div>
         </div>
       ) : (
-        <div className="justify-center text-center items-center w-full h-screen absolute inset-0 flex flex-col">
+        <div className="justify-center text-center items-center w-full h-screen absolute inset-0 flex flex-col bitcount-grid-double">
           <SendIcon className="w-12 h-12 p-1" ref={sendIconRef} />
           <span>Data sending!</span>
         </div>

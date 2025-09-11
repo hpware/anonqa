@@ -37,7 +37,7 @@ export default function Page() {
   const messages = useQuery(api.qa.get, { user: userData }) || [];
 
   return (
-    <div className="transition-colors">
+    <div className={`transition-colors`}>
       <div className="flex flex-row w-fit m-auto gap-2">
         <button
           className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
@@ -55,7 +55,7 @@ export default function Page() {
         </Link>
       </div>
 
-      <div className="w-[80%] m-auto p-2">
+      <div className="w-[80%] m-auto p-2 geist-mono">
         <Table>
           <TableCaption>Messages</TableCaption>
           <TableHeader>

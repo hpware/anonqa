@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Bitcount_Grid_Double,
+  Barlow,
+} from "next/font/google";
 import { ConvexClientProvider } from "./ConvexProvider";
 import "./globals.css";
+const bitcountGridDouble = Bitcount_Grid_Double({
+  variable: "--font-bitcount-grid-double",
+  subsets: ["latin"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,6 +20,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const barlow = Barlow({
+  variable: "--font-barlow",
+  subsets: ["latin"],
+  weight: ["500"],
 });
 
 export const metadata: Metadata = {
@@ -33,7 +48,7 @@ export default function RootLayout({
         ></script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bitcountGridDouble.variable} ${barlow.variable} antialiased`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>

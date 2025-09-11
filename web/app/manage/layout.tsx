@@ -63,7 +63,7 @@ export default function ManagementPageLayout({
               <Link href="/manage">
                 <span className="p-2">Home</span>
               </Link>
-              <span className="font-bold">
+              <span className="geint-sans">
                 You are logged in as {userData}!
               </span>
             </div>

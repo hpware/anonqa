@@ -117,4 +117,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  .bitcount-grid-double {
+    font-family: var(--font-bitcount-grid-double);
+  }
+  .geist-mono {
+    font-family: var(--font-geist-mono);
+  }
+  .geint-sans {
+    font-family: var(--font-geist-sans);
+  }
+  .barlow {
+    font-family: var(--font-barlow);
+  }
 }
