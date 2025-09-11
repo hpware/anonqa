@@ -8,6 +8,9 @@ export const users = query({
       .query("users")
       .filter((q) => q.eq(q.field("handle"), args.slug))
       .collect();
+    if (result.length === 0) {
+      return [];
+    }
     return [
       {
         deleted: result[0].deleted,

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Threads } from "./formats";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { CanvasText } from "./canvasText";
 
 gsap.registerPlugin(useGSAP);
 
@@ -41,7 +42,11 @@ export default function Page({ slug }: { slug: string }) {
     setLoginId(token ?? "");
   }, [router]);
 
-  const message = useQuery(api.qa.getViaId, { id: "myid" }) || [];
+  const message = useQuery(api.qa.getViaId, { id: slug }) || [];
+
+  if (message.length === 0) {
+    return <div>Oops! this content cannot be fetched!</div>;
+  }
 
   const changeSelectedPlatform = (
     platform: string,
@@ -72,36 +77,50 @@ export default function Page({ slug }: { slug: string }) {
             }),
           )}
         >
-          <span className="break-words">Q: Hi</span>
-          <span className="break-words">A: {answer}</span>
+          <span className="break-all">Q: {message[0].msg}</span>
+          <span className="break-all">A: {answer}</span>
         </Threads>
       ),
     },
-    /*    {
-  text: "Post to Twitter",
-  slug: "twitter",
-  changingDisplayText: "Twitter",
-    }, */
     {
       text: "Post with pic (Stories)",
       slug: "pic-stories",
       changingDisplayText: "Stories Pic Mode",
-      template: <canvas></canvas>,
+      template: (
+        <CanvasText
+          text={`Q: ${message[0].msg}\n\nA: ${answer}`}
+          width={600}
+          height={800}
+          fontSize={28}
+          backgroundColor="#1a1a1a"
+          textColor="#ffffff"
+        />
+      ),
     },
     {
       text: "Post with pic (Feed)",
       slug: "pic-feed",
       changingDisplayText: "Feed Pic Mode",
-      template: <canvas></canvas>,
+      template: (
+        <CanvasText
+          text={`Q: ${message[0].msg}\n\nA: ${answer}`}
+          width={800}
+          height={600}
+          fontSize={24}
+          backgroundColor="#ffffff"
+          textColor="#000000"
+        />
+      ),
     },
+
     {
       text: "Post with text",
       slug: "text",
       changingDisplayText: "Text format",
       template: (
         <div className="flex flex-col">
-          <span className="break-words">Q: Hi</span>
-          <span className="break-words">A: {answer}</span>
+          <span className="break-all">Q: {message[0].msg}</span>
+          <span className="break-all">A: {answer}</span>
         </div>
       ),
     },
