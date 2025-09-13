@@ -192,7 +192,9 @@ export default function Page({ slug }: { slug: string }) {
           <div>
             <button
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors"
-              onClick={setSuccess(true)}
+              onClick={() => {
+                setSuccess(true);
+              }}
             >
               {selectedPlatform === "threads"
                 ? "Post & Save"
