@@ -8,7 +8,13 @@ export default function ErrorPage() {
           <span className="text-xl md:text-2xl mb-3">Aw snap!</span>
           <span>The user that you're looking for doesn't exist!</span>
           <span>
-            You can take this username <Link href={`/auth/signup`}>here</Link>{" "}
+            You can take this username{" "}
+            <Link
+              href={`/auth/signup`}
+              className="text-transparent bg-clip-text bg-gradient-to-br from-blue-800 to-green-800"
+            >
+              here
+            </Link>{" "}
             tho
           </span>
         </div>

@@ -58,12 +58,47 @@ export const addUser = mutation({
 });
 
 export const getUserSocialLinkAccountStatus = query({
-  args: { userid: v.string() },
+  args: { userid: v.string(), session: v.string() },
   handler: async (ctx, args) => {
     const data = await ctx.db
       .query("linkAccountUsers")
       .filter((q) => q.eq(q.field("userid"), args.userid))
       .first();
     return data;
+  },
+});
+
+export const data = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("handle"), args.slug))
+      .collect();
+    if (result.length === 0) {
+      return [];
+    }
+    return [
+      {
+        deleted: result[0].deleted,
+        displayName: result[0].displayName,
+        handle: result[0].handle,
+        imageUrl: result[0].imageUrl,
+        pageType: result[0].pageType,
+        setCustomRandomMessages: result[0].setCustomRandomMessages,
+        userId: result[0].userId,
+      },
+    ];
+  },
+});
+
+export const specialSelections = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("randomizer")
+      .filter((q) => q.eq(q.field("userId"), args.slug))
+      .collect();
+    return result;
   },
 });

@@ -8,7 +8,7 @@ export default async function Page(props: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await props.params;
-  const user = await fetchQuery(api.pages.users, { slug: slug });
+  const user = await fetchQuery(api.users.data, { slug: slug });
   if (user.length === 0) {
     notFound();
   }

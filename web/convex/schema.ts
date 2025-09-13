@@ -11,30 +11,7 @@ export default defineSchema({
     handle: v.string(),
     setCustomRandomMessages: v.optional(v.boolean()),
     pageType: v.string(), // FOR ONLY 1. basic (as default) 2. Confess mode 3. idk
-  }).index("userId", ["userId", "handle"]),
-  qas: defineTable({
-    msgId: v.string(),
-    toUser: v.string(), // userId
-    msg: v.string(),
-    answered: v.boolean(),
-    linkedPosts: v.optional(v.number()),
-  }).index("msgId", ["msgId"]),
-  randomizer: defineTable({
-    userId: v.string(),
-    messages: v.array(v.string()),
-  }),
-  urls: defineTable({
-    slug: v.string(),
-    toUser: v.string(),
-    deleted: v.string(),
-  }),
-  loggedInUsers: defineTable({
-    // Fields are optional
-  }),
-  //id,name,is_verified,username,threads_profile_picture_url",
-  linkAccountUsers: defineTable({
-    userid: v.string(),
-    threads_auth_token: v.string(),
+    threads_auth_token: v.string() || v.null(),
     threads:
       v.object({
         id: v.string(),
@@ -43,5 +20,19 @@ export default defineSchema({
         username: v.string(),
         threads_profile_picture_url: v.string(),
       }) || v.null(),
-  }),
+    defaultMessages: v.array(v.string()),
+    customShortUrlSlug: v.string(),
+  }).index("userId", ["userId", "handle"]),
+  qas: defineTable({
+    msgId: v.string(),
+    toUser: v.string(), // userId
+    msg: v.string(),
+    answered: v.boolean(),
+    linkedPosts: v.optional(v.number()),
+  }).index("msgId", ["msgId"]),
+  // legacy better auth stuff
+  //loggedInUsers: defineTable({
+  // Fields are optional
+  //}),
+  loginCreds: defineTable({}),
 });
