@@ -1,4 +1,4 @@
-import { Migrations } from "@convex-dev/migrations";
+/*import { Migrations } from "@convex-dev/migrations";
 import { components } from "./_generated/api.js";
 import { DataModel } from "./_generated/dataModel.js";
 
@@ -13,3 +13,4 @@ export const setDefaultValue = migrations.define({
     }
   },
 });
+ */

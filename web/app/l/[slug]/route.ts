@@ -12,9 +12,9 @@ type Props = {
 export const GET = async (request: NextRequest, context: Props) => {
   try {
     const { slug } = await context.params;
-    const fetchUrlStuff = await fetchQuery(api.shortlink.getTo, {
+    const fetchUrlStuff = null; /** await fetchQuery(api.shortlink.getTo, {
       slug: slug,
-    });
+    }); */
     if (fetchUrlStuff === null) {
       return Response.redirect("/404", 301);
     }

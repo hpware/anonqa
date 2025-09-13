@@ -38,33 +38,35 @@ export const doesUserNameExist = query({
 export const addUser = mutation({
   args: { username: v.string() },
   handler: async (ctx, args) => {
-    const newUser = ctx.db
-      .insert("users", {
-        imageUrl: "",
-        displayName: args.username,
-        controlableUsers: [args.username],
-        userId: uuidv4(),
-        deleted: false,
-        handle: args.username,
-        setCustomRandomMessages: false,
-        pageType: "basic",
-      })
-      .catch((err) => {
-        console.error("Error inserting user:", err);
-        throw new Error("Failed to create user");
-      });
-    return newUser;
+    /**    const newUser = ctx.db
+  .insert("users", {
+    imageUrl: "",
+    displayName: args.username,
+    controlableUsers: [args.username],
+    userId: uuidv4(),
+    deleted: false,
+    handle: args.username,
+    setCustomRandomMessages: false,
+    pageType: "basic",
+  })
+  .catch((err) => {
+    console.error("Error inserting user:", err);
+    throw new Error("Failed to create user");
+  });
+return newUser; */
+    return [];
   },
 });
 
 export const getUserSocialLinkAccountStatus = query({
   args: { userid: v.string(), session: v.string() },
   handler: async (ctx, args) => {
-    const data = await ctx.db
+    /**    const data = await ctx.db
       .query("linkAccountUsers")
       .filter((q) => q.eq(q.field("userid"), args.userid))
       .first();
-    return data;
+    return data; */
+    return [];
   },
 });
 
@@ -95,10 +97,26 @@ export const data = query({
 export const specialSelections = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
-    const result = await ctx.db
-      .query("randomizer")
-      .filter((q) => q.eq(q.field("userId"), args.slug))
-      .collect();
-    return result;
+    /**    const result = await ctx.db
+  .query("randomizer")
+  .filter((q) => q.eq(q.field("userId"), args.slug))
+  .collect();
+return result; */
+    return [];
+  },
+});
+
+export const getTo = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    /**    const queryquery = await ctx.db
+  .query("urls")
+  .filter((q) => q.eq(q.field("toUser"), args.slug))
+  .collect();
+if (queryquery.length === 0) {
+  return null;
+}
+return queryquery[0].toUser; */
+    return [];
   },
 });
