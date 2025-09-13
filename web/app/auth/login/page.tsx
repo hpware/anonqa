@@ -2,6 +2,6 @@
 "use server";
 import Client from "./client";
 
-export default function LoginPage() {
+export default async function LoginPage() {
   return <Client />;
 }
