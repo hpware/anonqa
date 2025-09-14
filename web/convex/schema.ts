@@ -11,17 +11,19 @@ export default defineSchema({
     handle: v.string(),
     setCustomRandomMessages: v.optional(v.boolean()),
     pageType: v.string(), // FOR ONLY 1. basic (as default) 2. Confess mode 3. idk
-    threads_auth_token: v.string() || v.null(),
-    threads:
+    threads_auth_token: v.optional(v.string()),
+    threads: v.optional(
       v.object({
         id: v.string(),
         name: v.string(),
         is_verified: v.boolean(),
         username: v.string(),
         threads_profile_picture_url: v.string(),
-      }) || v.null(),
+      }),
+    ),
     defaultMessages: v.array(v.string()),
     customShortUrlSlug: v.string(),
+    onBoarded: v.optional(v.boolean()), // roll out to users.
   }).index("userId", ["userId", "handle"]),
   qas: defineTable({
     msgId: v.string(),
@@ -29,6 +31,7 @@ export default defineSchema({
     msg: v.string(),
     answered: v.boolean(),
     linkedPosts: v.optional(v.number()),
+    quality: v.optional(v.string()), // "GOOD", "BAD", or undefined for unevaluated
   }).index("msgId", ["msgId"]),
   // legacy better auth stuff
   //loggedInUsers: defineTable({

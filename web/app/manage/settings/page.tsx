@@ -7,7 +7,8 @@ import { CheckCircle2Icon, XCircleIcon } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const getStatus = {}; /** useQuery(api.users.getUserSocialLinkAccountStatus, {
+  const getStatus =
+    {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
     userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
   }); */
   return (
