@@ -42,5 +42,6 @@ export const POST = async (response: NextRequest) => {
         status: 200,
         message: "ok",
       }),
+    );
   }
 };

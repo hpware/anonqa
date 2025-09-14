@@ -137,11 +137,11 @@ export default function ClientPage() {
                 <span className="text-white">Login</span>
               )}
             </button>
+            <span className="text-xs text-gray-600">
+              Don't have an account?{" "}
+              <Link href="/auth/signup">Sign up here!</Link>
+            </span>
           </div>
-          <span className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link href="/auth/signup">Sign up here!</Link>
-          </span>
         </form>
       </div>
     </div>
