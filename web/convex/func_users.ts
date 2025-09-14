@@ -2,6 +2,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
 
+// cron to remove users
 export const removedeleted = internalMutation({
   args: {},
   handler: async (ctx) => {
@@ -24,6 +25,7 @@ export const removedeleted = internalMutation({
   },
 });
 
+// internal check if the user exists.
 export const doesUserNameExist = query({
   args: { username: v.string() },
   handler: async (ctx, args) => {
@@ -35,7 +37,8 @@ export const doesUserNameExist = query({
   },
 });
 
-export const addUser = mutation({
+// for the registering endpoint
+export const addUser = internalMutation({
   args: { username: v.string() },
   handler: async (ctx, args) => {
     /**    const newUser = ctx.db

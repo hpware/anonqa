@@ -34,5 +34,11 @@ export default defineSchema({
   //loggedInUsers: defineTable({
   // Fields are optional
   //}),
-  loginCreds: defineTable({}),
+  login: defineTable({
+    email: v.string(),
+    userId: v.string(),
+    vuser: v.string(),
+    passwordHashed: v.string(),
+  }),
+  featuresOn: defineTable({}),
 });

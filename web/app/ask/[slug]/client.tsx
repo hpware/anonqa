@@ -50,7 +50,7 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const submitForm = async () => {
     setError("");
     setSubmitting(true);
-    await fetchMutation(api.qa.qa, { toUser: slug, msg: ptavalue });
+    await fetchMutation(api.func_qa.qa, { toUser: slug, msg: ptavalue });
   };
 
   const changeImage = () => {

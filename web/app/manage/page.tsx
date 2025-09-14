@@ -34,7 +34,7 @@ export default function Page() {
     router.push("/auth/login");
   };
 
-  const messages = useQuery(api.qa.get, { user: userData }) || [];
+  const messages = useQuery(api.func_qa.get, { user: userData }) || [];
 
   return (
     <div className={`transition-colors`}>

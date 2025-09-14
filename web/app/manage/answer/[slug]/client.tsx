@@ -26,7 +26,7 @@ export default function Page({ slug }: { slug: string }) {
   const [success, setSuccess] = useState<boolean>(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const selectionsPreviewInterfaceRef = useRef(null);
-  const getMessage = useQuery(api.qa.getViaId, { id: slug });
+  const getMessage = useQuery(api.func_qa.getViaId, { id: slug });
   useGSAP(
     () => {
       // gsap code here...
@@ -42,7 +42,7 @@ export default function Page({ slug }: { slug: string }) {
     setLoginId(token ?? "");
   }, [router]);
 
-  const message = useQuery(api.qa.getViaId, { id: slug }) || [];
+  const message = useQuery(api.func_qa.getViaId, { id: slug }) || [];
 
   if (message.length === 0) {
     return <div>Oops! this content cannot be fetched!</div>;

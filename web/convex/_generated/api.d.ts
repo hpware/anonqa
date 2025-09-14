@@ -9,12 +9,10 @@
  */
 
 import type * as cron from "../cron.js";
+import type * as func_qa from "../func_qa.js";
+import type * as func_users from "../func_users.js";
 import type * as http from "../http.js";
 import type * as migrations from "../migrations.js";
-import type * as pages from "../pages.js";
-import type * as qa from "../qa.js";
-import type * as shortlink from "../shortlink.js";
-import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -32,12 +30,10 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   cron: typeof cron;
+  func_qa: typeof func_qa;
+  func_users: typeof func_users;
   http: typeof http;
   migrations: typeof migrations;
-  pages: typeof pages;
-  qa: typeof qa;
-  shortlink: typeof shortlink;
-  users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
