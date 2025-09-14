@@ -186,7 +186,7 @@ export default function ClientPage({
               .
             </span>
           )}
-        </form>
+        </div>
       </div>
     </div>
   );
