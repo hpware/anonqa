@@ -34,14 +34,24 @@ export const POST = async (response: NextRequest) => {
         status: 200,
         message: "ok",
       }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
     );
   } catch (e) {
     return new Response(
       JSON.stringify({
-        error: false,
-        status: 200,
-        message: "ok",
+        error: true,
+        status: 500,
+        message: `Server Side Error: ${e.message}`,
       }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
     );
   }
 };

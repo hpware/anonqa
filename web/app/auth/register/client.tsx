@@ -2,15 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { KeySquareIcon } from "lucide-react";
+import { BadgePlusIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function ClientPage({
+  registerFeatOn,
   serverOwnerTerms,
 }: {
+  registerFeatOn: boolean;
   serverOwnerTerms: string;
 }) {
-  const [email, setemail] = useState("");
+  if (!registerFeatOn) {
+    return <div>Registering currently not allowed at the moment.</div>;
+  }
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,7 +35,7 @@ export default function ClientPage({
     setError("");
     setLoading(true);
 
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       setError("Please fill in both fields.");
       setLoading(false);
       return;
@@ -37,11 +43,11 @@ export default function ClientPage({
 
     try {
       const hashedPassword = await hashPassword(password);
-      const response = await fetch("/api/users/login", {
+      const response = await fetch("/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim(),
+          username: email,
           password: hashedPassword,
         }),
       });
@@ -64,16 +70,34 @@ export default function ClientPage({
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md mt-8  bg-white p-8 rounded-lg space-y-6 shadow-md geist-mono">
         <div className="flex flex-row justify-center align-middle text-center gap-2 m-auto barlow pb-8">
-          <KeySquareIcon className="h-12 w-12 stroke-white bg-blue-600 p-2 rounded-full text-white" />
+          <BadgePlusIcon className="h-12 w-12 stroke-white bg-blue-600 p-2 rounded-full text-white" />
           <h2 className="my-auto text-center justify-center py-1 text-3xl font-bold tracking-tight text-gray-900">
-            Login
+            Register
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
               <label
-                htmlFor="email"
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
+                First Name
+              </label>
+              <input
+                id="firstname"
+                name="firstname"
+                type="text"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
                 Email
@@ -84,7 +108,7 @@ export default function ClientPage({
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setemail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
                 disabled={loading}
               />
@@ -114,7 +138,7 @@ export default function ClientPage({
           <div>
             <button
               type="submit"
-              disabled={!(!loading && password && email)}
+              disabled={!(!loading && password && firstName && email)}
               className="disabled:opacity-50 disabled:cursor-not-allowed group relative flex w-full justify-center rounded-md bg-blue-600 py-2 px-4 text-sm text-white hover:cursor-pointer hover:border-white hover:bg-blue-700 transition-all duration-300"
             >
               {loading ? (
@@ -135,19 +159,19 @@ export default function ClientPage({
                       fill="currentFill"
                     />
                   </svg>
-                  <span className="text-white">Logging in...</span>
+                  <span className="text-white">Signing up...</span>
                 </span>
               ) : (
-                <span className="text-white">Login</span>
+                <span className="text-white">Signup</span>
               )}
             </button>
             <span className="text-xs text-gray-600">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <Link
-                href="/auth/register"
+                href="/auth/login"
                 className="text-blue-600 transition-all duration-300 hover:text-blue-700"
               >
-                Sign up here!
+                login here!
               </Link>
             </span>
           </div>

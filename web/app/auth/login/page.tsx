@@ -3,5 +3,7 @@
 import Client from "./client";
 
 export default async function LoginPage() {
-  return <Client />;
+  const serverOwnerTerms = process.env.NEXT_PUBLIC_SERVER_USER_TERMS || "";
+
+  return <Client serverOwnerTerms={serverOwnerTerms} />;
 }
