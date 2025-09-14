@@ -30,8 +30,7 @@ export default function ClientPage({
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError("");
     setLoading(true);
 
@@ -75,7 +74,7 @@ export default function ClientPage({
             Register
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
           <div className="space-y-4">
             <div>
               <label
@@ -137,7 +136,7 @@ export default function ClientPage({
           )}
           <div>
             <button
-              type="submit"
+              onClick={handleSubmit}
               disabled={!(!loading && password && firstName && email)}
               className="disabled:opacity-50 disabled:cursor-not-allowed group relative flex w-full justify-center rounded-md bg-blue-600 py-2 px-4 text-sm text-white hover:cursor-pointer hover:border-white hover:bg-blue-700 transition-all duration-300"
             >
