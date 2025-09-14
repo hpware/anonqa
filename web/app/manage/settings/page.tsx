@@ -56,7 +56,7 @@ export default function SettingsPage() {
                   </span>
                   <input
                     type="text"
-                    className="p-2 m-1 border border-gray-300"
+                    className="p-2 m-1 border border-gray-300 rouneded"
                     placeholder={`I want to delete my account please.`}
                     value={deleteAccountVerifyTextBox}
                     onChange={(e) =>

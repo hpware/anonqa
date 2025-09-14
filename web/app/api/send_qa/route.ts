@@ -9,7 +9,7 @@ interface bodyData {
 }
 
 export const POST = async (request: NextRequest) => {
-  const body: Promise<bodyData> = request.json();
+  const body: bodyData = await request.json();
   const completion = await openai.chat.completions.create({
     model: process.env.MOD_AI_MODEL || "openai/gpt-4o",
     messages: [
