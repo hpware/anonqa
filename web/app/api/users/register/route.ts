@@ -45,7 +45,7 @@ export const POST = async (response: NextRequest) => {
         },
       },
     );
-  } catch (e: any) {
+  } catch (e: any) { // yeah I have no choice.
     return new Response(
       JSON.stringify({
         error: true,

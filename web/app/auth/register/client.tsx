@@ -35,7 +35,7 @@ export default function ClientPage({
     setError("");
     setLoading(true);
 
-    if (!username.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim()) {
       setError("Please fill in both fields.");
       setLoading(false);
       return;
