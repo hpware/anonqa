@@ -24,7 +24,8 @@ export default function ClientPage({
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
     setLoading(true);
 
@@ -44,14 +45,13 @@ export default function ClientPage({
           password: hashedPassword,
         }),
       });
-
-      if (response.ok) {
-        // Assuming server returns auth data; for now, redirect on success
-        router.push("/manage");
-      } else {
-        const data = await response.json();
-        setError(data.error || "Login failed.");
+      const data = await response.json();
+      if (!(response.ok && !data.error && data.status === 200)) {
+        setError(data.message || "Login failed.");
       }
+      setError(
+        "Yeah soo the the dashboard is still incompelete, please check in later.",
+      );
     } catch (err) {
       setError("Network error. Please try again.");
     } finally {
@@ -60,7 +60,7 @@ export default function ClientPage({
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md mt-8  bg-white p-8 rounded-lg space-y-6 shadow-md geist-mono">
         <div className="flex flex-row justify-center align-middle text-center gap-2 m-auto barlow pb-8">
           <KeySquareIcon className="h-12 w-12 stroke-white bg-blue-600 p-2 rounded-full text-white" />
@@ -68,7 +68,7 @@ export default function ClientPage({
             Login
           </h2>
         </div>
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
               <label
@@ -81,6 +81,7 @@ export default function ClientPage({
                 id="email"
                 name="email"
                 type="email"
+                required
                 value={email}
                 onChange={(e) => setemail(e.target.value)}
                 className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
@@ -98,6 +99,7 @@ export default function ClientPage({
                 id="password"
                 name="password"
                 type="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
@@ -110,7 +112,7 @@ export default function ClientPage({
           )}
           <div>
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={!(!loading && password && email)}
               className="disabled:opacity-50 disabled:cursor-not-allowed group relative flex w-full justify-center rounded-md bg-blue-600 py-2 px-4 text-sm text-white hover:cursor-pointer hover:border-white hover:bg-blue-700 transition-all duration-300"
             >
@@ -160,7 +162,7 @@ export default function ClientPage({
               .
             </span>
           )}
-        </div>
+        </form>
       </div>
     </div>
   );

@@ -46,18 +46,17 @@ export default function ClientPage({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: email,
+          email: email.trim(),
           password: hashedPassword,
         }),
       });
-
-      if (response.ok) {
-        // Assuming server returns auth data; for now, redirect on success
-        router.push("/manage");
-      } else {
-        const data = await response.json();
-        setError(data.error || "Login failed.");
+      const data = await response.json();
+      if (!(response.ok && !data.error && data.status === 200)) {
+        setError(data.message || "Login failed.");
       }
+      setError(
+        "Yeah soo the the dashboard is still incompelete, please check in later.",
+      );
     } catch (err) {
       setError("Network error. Please try again.");
     } finally {
@@ -66,7 +65,7 @@ export default function ClientPage({
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md mt-8  bg-white p-8 rounded-lg space-y-6 shadow-md geist-mono">
         <div className="flex flex-row justify-center align-middle text-center gap-2 m-auto barlow pb-8">
           <BadgePlusIcon className="h-12 w-12 stroke-white bg-blue-600 p-2 rounded-full text-white" />
