@@ -49,7 +49,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col">
                   <span>
                     This action cannot be undone. This will permanently delete
-                    your account and remove your data from our servers.
+                    your account and remove data from our servers.
                   </span>
                   <span>
                     Please enter "{"I want to delete my account please."}"
