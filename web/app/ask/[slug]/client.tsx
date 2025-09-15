@@ -64,11 +64,19 @@ export default function Client({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user: "oackakcp",
-        message: "kaposkcpaso",
-        cf_turnstile: "apokscpoaskpc",
+        user: slug,
+        message: ptavalue,
+        cf_turnstile: turnstileToken,
       }),
     });
+    const res = await req.json();
+    if (!res.success) {
+      setError(res.fail_message);
+    } else {
+      setPtavalue("");
+      setTurnstileToken(null);
+    }
+    setSubmitting(false);
   };
 
   const changeImage = () => {
@@ -115,18 +123,21 @@ export default function Client({
                 <DicesIcon />
               </button>
             </div>
-            <div
-              className="cf-turnstile"
-              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-            ></div>
             {error.length > 0 && <span className="text-red-600">{error}</span>}
             <button
               className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
               onClick={submitForm}
-              disabled={ptavalue.length == 0}
+              disabled={
+                ptavalue.length == 0 || (captchaFeat && !turnstileToken)
+              }
             >
               Submit!
             </button>
+            {captchaFeat && (
+              <div className="!rounded w-full m-auto justify-center text-center">
+                <Turnstile onVerify={setTurnstileToken} />
+              </div>
+            )}
           </div>
         </div>
       ) : (

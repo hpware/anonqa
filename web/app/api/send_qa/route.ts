@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import openai from "@/lib/openai";
 import { safetyPrompt } from "@/lib/prompts";
-import { useMutation } from "convex/react";
+import { fetchMutation } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
 interface bodyData {
@@ -73,18 +73,33 @@ export const POST = async (request: NextRequest) => {
       },
     ],
   });
-  const status1 = String(completion.choices[0].message).replace(
+  const status = String(completion.choices[0].message).replace(
     /<think>.*<\/think>/,
     "",
   );
   console.log(completion.choices[0].message);
-  let status; // other models
-  if (status1 == "ALLOW" || status1 === "BLOCK") {
+  let safe = false; // other models
+  if (status == "ALLOW") {
     // this will all models like llama guard 4 to function correctly.
-    status = status1;
+    safe = true;
   } else {
-    status = "BLOCK"; // default block action if the AI does not behave.
+    safe = false; // default block action if the AI does not behave.
   }
   const { message, user } = body;
-  //await fetchMutation(api.func_qa.qa, { toUser: slug, msg: ptavalue });
+  try {
+    await fetchMutation(api.func_qa.qa, {
+      status: safe,
+      toUser: body.user,
+      msg: body.message,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+  return new Response(
+    JSON.stringify({
+      success: true,
+      message: "Message sent successfully",
+    }),
+    { status: 200 },
+  );
 };

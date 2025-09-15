@@ -5,6 +5,11 @@ A free and self hostable alternative to `ngl.link`, with no paid subscription, j
 
 The prod service is hosted on Vercel and Convex's Public Cloud infra. https://anonqa.pleaseuse.me
 
+## Safety!
+For exploits on the platform, please DO NOT USE ISSUES EVEN FOR EXISTING ISSUES, JUST DO NOT USE THEM, please contact: anonqa-exploits@yhw.tw with the starting title of `[EXPLOIT]`, so I can make them easier to publish in a report.
+
+Other than the email, you can also contact me on discord `hwtw` (you can maybe dm me?). If you are in the HC slack, please contact me there instead. All lines will be faster then contacting via emails (as I will get a jumpscare when I get messages from one of these platforms).
+
 ## Design Files
 
 Figma: [Figma Design](www.figma.com/design/Rc1A45MnZTXP4Yi4yYyhFP/anon-qa-app-design?node-id=0-1&p=f&t=lZvh4dZWD3jpLZCg-0)

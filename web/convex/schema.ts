@@ -31,7 +31,7 @@ export default defineSchema({
     msg: v.string(),
     answered: v.boolean(),
     linkedPosts: v.optional(v.number()),
-    quality: v.optional(v.string()), // "GOOD", "BAD", or undefined for unevaluated
+    moderation: v.optional(v.boolean()), // "GOOD", "BAD", or undefined for unevaluated
   }).index("msgId", ["msgId"]),
   // legacy better auth stuff
   //loggedInUsers: defineTable({
