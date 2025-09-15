@@ -9,12 +9,13 @@ export default async function Page(props: {
 }) {
   const { slug } = await props.params;
   const user = await fetchQuery(api.func_users.data, { slug: slug });
+  const captchaFeat = process.env.NEXT_PUBLIC_CAPTCHA_FEAT;
   if (user.length === 0) {
     notFound();
   }
   return (
     <div>
-      <Client slug={slug} user={user} />
+      <Client slug={slug} user={user} captchaFeat={Boolean(captchaFeat)} />
     </div>
   );
 }

@@ -11,6 +11,7 @@ const bitcountGridDouble = Bitcount_Grid_Double({
   variable: "--font-bitcount-grid-double",
   subsets: ["latin"],
 });
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,11 +42,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <script
+        <Script
           src="https://challenges.cloudflare.com/turnstile/v0/api.js"
           async
           defer
-        ></script>
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${bitcountGridDouble.variable} ${barlow.variable} antialiased`}

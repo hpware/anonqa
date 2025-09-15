@@ -6,7 +6,15 @@ import { Turnstile } from "@/components/turnstile";
 import { DicesIcon, SendIcon } from "lucide-react";
 import gsap from "gsap";
 
-export default function Client({ slug, user }: { slug: string; user: any[] }) {
+export default function Client({
+  slug,
+  user,
+  captchaFeat,
+}: {
+  slug: string;
+  user: any[];
+  captchaFeat: boolean;
+}) {
   // Default
   const defultImage = "/assets/default.png";
   const defaultRandomizedMessages = ["Hello World", "This is really fun!"];
@@ -50,7 +58,17 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
   const submitForm = async () => {
     setError("");
     setSubmitting(true);
-    await fetchMutation(api.func_qa.qa, { toUser: slug, msg: ptavalue });
+    const req = await fetch("/api/send_qa", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user: "oackakcp",
+        message: "kaposkcpaso",
+        cf_turnstile: "apokscpoaskpc",
+      }),
+    });
   };
 
   const changeImage = () => {
@@ -97,6 +115,10 @@ export default function Client({ slug, user }: { slug: string; user: any[] }) {
                 <DicesIcon />
               </button>
             </div>
+            <div
+              className="cf-turnstile"
+              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            ></div>
             {error.length > 0 && <span className="text-red-600">{error}</span>}
             <button
               className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
