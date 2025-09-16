@@ -22,6 +22,7 @@ export default function Page() {
   const [loginId, setLoginId] = useState<string>("");
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
   const [reportingData, setReportingData] = useState();
+  const [loading, setLoading] = useState();
 
   useEffect(() => {
     const user = localStorage.getItem("user");
