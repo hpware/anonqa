@@ -24,7 +24,7 @@ export default function Client({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(true);
   const [lastStatus, setLastStatus] = useState({
     text: "",
     randomizing: false,
@@ -99,6 +99,7 @@ export default function Client({
     } else {
       setPtavalue("");
       setTurnstileToken(null);
+      setSuccess(true);
     }
     setSubmitting(false);
   };
@@ -123,7 +124,19 @@ export default function Client({
 
   return (
     <div>
-      {!submitting ? (
+      {success ? (
+        <div className="flex flex-col justify-center text-center w-full md:w-md absolute inset-0 m-auto">
+          <div className="justify-center m-auto flex flex-col w-full md:w-md">
+            <span className="text-3xl text-bold">Success!!!!</span>
+            <button
+              className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
+              onClick={() => setSuccess(false)}
+            >
+              Send another one!
+            </button>
+          </div>
+        </div>
+      ) : !submitting ? (
         <div className="justify-center m-auto flex flex-col w-full md:w-md absolute inset-0">
           <div className="justify-center m-auto flex flex-col w-full md:w-md">
             <div className="flex flex-row">

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import openai from "@/lib/openai";
 import { safetyPrompt } from "@/lib/prompts";
-import { fetchMutation } from "convex/nextjs";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
 interface bodyData {
@@ -86,11 +86,12 @@ export const POST = async (request: NextRequest) => {
     safe = false; // default block action if the AI does not behave.
   }
   const { message, user } = body;
+  const getUserDetails = await fetchQuery(api.func_users.data, { slug: user });
   try {
     await fetchMutation(api.func_qa.qa, {
       status: safe,
-      toUser: body.user,
-      msg: body.message,
+      toUser: getUserDetails[0].userId,
+      msg: message,
     });
   } catch (e) {
     console.log(e);

@@ -15,7 +15,7 @@ export const qa = mutation({
   },
 });
 
-export const get = query({
+export const getAllToUser = query({
   args: { user: v.string() },
   handler: async (ctx, args) => {
     return ctx.db
