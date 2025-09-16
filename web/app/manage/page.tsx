@@ -106,7 +106,7 @@ export default function Page() {
           </TableBody>
         </Table>
       </div>
-      {<ReportMenu />}
+      {/**{<ReportMenu /> */}
 
       <div className="flex flex-col p-4">
         <span>Add your custom short link!</span>
