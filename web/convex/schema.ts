@@ -30,7 +30,12 @@ export default defineSchema({
     toUser: v.string(), // userId
     msg: v.string(),
     answered: v.boolean(),
-    linkedPosts: v.optional(v.number()),
+    linkedPosts: v.optional(
+      v.object({
+        platform: v.string(),
+        url: v.optional(v.string()),
+      }),
+    ),
     moderation: v.optional(v.boolean()), // "GOOD", "BAD", or undefined for unevaluated
   }).index("msgId", ["msgId"]),
   // legacy better auth stuff

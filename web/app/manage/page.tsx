@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { useQuery } from "convex/react";
 import { SendIcon } from "lucide-react";
 import Link from "next/link";
+import ReportMenu from "./reportMenu";
 import {
   Table,
   TableBody,
@@ -20,6 +21,7 @@ export default function Page() {
   const [userData, setUserData] = useState<string>("");
   const [loginId, setLoginId] = useState<string>("");
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
+  const [reportingData, setReportingData] = useState();
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -35,8 +37,13 @@ export default function Page() {
   };
   const getUserDetails = useQuery(api.func_users.data, { slug: userData });
   const messages =
-    useQuery(api.func_qa.getAllToUser, { user: getUserDetails[0].userId }) ||
-    [];
+    useQuery(api.func_qa.getAllToUser, {
+      user: getUserDetails?.[0]?.userId || "",
+    }) || [];
+
+  const reportWindow = (msgJson: any) => {
+    //setReportingData({});
+  };
 
   return (
     <div className={`transition-colors`}>
@@ -77,7 +84,12 @@ export default function Page() {
                 <TableCell>{i.answered ? "已回答" : "尚未回答"}</TableCell>
                 <TableCell>No</TableCell>
                 <TableCell className="flex flex-row gap-2">
-                  <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                  <button
+                    className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    onClick={() => {
+                      reportWindow(i);
+                    }}
+                  >
                     Report
                   </button>
                   <Link href={`/manage/answer/${i.msgId}`}>
@@ -94,6 +106,7 @@ export default function Page() {
           </TableBody>
         </Table>
       </div>
+      {<ReportMenu />}
 
       <div className="flex flex-col p-4">
         <span>Add your custom short link!</span>
