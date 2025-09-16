@@ -107,20 +107,6 @@ export default function Page() {
         </Table>
       </div>
       {/**{<ReportMenu /> */}
-
-      <div className="flex flex-col p-4">
-        <span>Add your custom short link!</span>
-        <div className="flex flex-row items-center gap-2">
-          <span>{`http://localhost:3000`}/l/</span>
-          <input
-            type="text"
-            className="bg-gray-100 dark:bg-gray-800 rounded p-2"
-          />
-          <button className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-            <SendIcon />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
