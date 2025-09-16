@@ -30,7 +30,6 @@ export default function ManagementPageLayout({
   const router = useRouter();
   const [userData, setUserData] = useState<string>("");
   const [loginId, setLoginId] = useState<string>("");
-  const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -59,9 +58,23 @@ export default function ManagementPageLayout({
           <div
             className={`min-h-12 fixed z-50 inset-x-0 flex flex-row justify-between text-center border transition-all duration-300 ${scrolled ? "mt-5 rounded-2xl mx-7 shadow border-gray-300/30 p-2 backdrop-blur-lg " : "mt-0 p-4 rounded-xl border-gray-300/0"}`}
           >
-            <div className="flex flex-row items-center justify-center text-center px-2">
-              <Link href="/manage">
-                <span className="p-2">Home</span>
+            <div className="flex flex-row items-center justify-center text-center px-2 gap-1">
+              <Link
+                href="/manage"
+                className="px-3 py-2 text-sm sm:text-base font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                Home
+              </Link>
+              <Link href="/auth/logout">
+                <button className="px-3 py-2 text-sm sm:text-base bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                  Logout
+                </button>
+              </Link>
+              <Link
+                href="/manage/settings"
+                className="px-3 py-2 text-sm sm:text-base bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Settings
               </Link>
               <span className="geint-sans">
                 You are logged in as {userData}!

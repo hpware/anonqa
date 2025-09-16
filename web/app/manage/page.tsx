@@ -30,11 +30,6 @@ export default function Page() {
     setLoginId(token ?? "");
   }, [router]);
 
-  const logoutAction = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    router.push("/auth/login");
-  };
   const getUserDetails = useQuery(api.func_users.data, { slug: userData });
   const messages =
     useQuery(api.func_qa.getAllToUser, {
@@ -47,22 +42,7 @@ export default function Page() {
 
   return (
     <div className={`transition-colors`}>
-      <div className="flex flex-row w-fit m-auto gap-2">
-        <button
-          className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-          onClick={logoutAction}
-        >
-          Logout
-        </button>
-        <button className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-          {flaggingFeat ? "Disable" : "Enable"} Flagging Messages
-        </button>
-        <Link href="/manage/settings">
-          <button className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-            Settings
-          </button>
-        </Link>
-      </div>
+      <div className="flex flex-row w-fit m-auto gap-2"></div>
 
       <div className="w-[80%] m-auto p-2 geist-mono">
         <Table>
