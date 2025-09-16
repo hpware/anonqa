@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Turnstile } from "@/components/turnstile";
-import { DicesIcon, SendIcon } from "lucide-react";
+import { ArrowBigLeftDashIcon, DicesIcon, SendIcon } from "lucide-react";
 import gsap from "gsap";
 
 export default function Client({
@@ -17,7 +17,6 @@ export default function Client({
 }) {
   // Default
   const defultImage = "/assets/default.png";
-  const defaultRandomizedMessages = ["Hello World", "This is really fun!"];
   // Values
   const [placeholder, setPlaceholder] = useState<string>("");
   const [ptavalue, setPtavalue] = useState<string>("");
@@ -25,12 +24,18 @@ export default function Client({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
-  const [randomizedMesssages, setRandomizedMessages] = useState(
-    defaultRandomizedMessages,
-  );
-  const [customRandomizedMessages, setCustomRandomizedMessages] = useState<[]>(
-    [],
-  );
+  const [success, setSuccess] = useState<boolean>(false);
+  const [lastStatus, setLastStatus] = useState({
+    text: "",
+    randomizing: false,
+  });
+  const [randomizedMesssages, setRandomizedMessages] = useState([
+    "Hello World",
+    "This is really fun!",
+    "This is really fun3!",
+    "This is really fun3!",
+    "This is really fu2n!",
+  ]);
   const sendIconRef = useRef(null);
   // this is just here for a shitty animation, please replace this later.
   useEffect(() => {
@@ -53,7 +58,26 @@ export default function Client({
     setPlaceholder("A frame! This is filtered btw");
   }, []);
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (lastStatus.randomizing) {
+      setLastStatus({
+        text: e.target.value,
+        randomizing: false,
+      });
+    } else {
+      setLastStatus({
+        text: lastStatus.text,
+        randomizing: false,
+      });
+    }
     setPtavalue(e.target.value);
+  };
+
+  const goBackToText = () => {
+    setPtavalue(lastStatus.text);
+    setLastStatus({
+      text: ptavalue,
+      randomizing: false,
+    });
   };
   const submitForm = async () => {
     setError("");
@@ -83,7 +107,14 @@ export default function Client({
     setImageNotAvailable(true);
   };
 
-  const randomizeMessage = () => {};
+  const randomizeMessage = () => {
+    setLastStatus({
+      text: ptavalue,
+      randomizing: true,
+    });
+    const randomIndex = Math.floor(Math.random() * randomizedMesssages.length);
+    setPtavalue(randomizedMesssages[randomIndex]);
+  };
 
   console.log(user);
   const thisUser = user[0];
@@ -115,13 +146,22 @@ export default function Client({
                 value={ptavalue}
                 onChange={handleTextareaChange}
               />
-              <button
-                className="absolute bottom-2 right-2 transform -translate-y-1/2 rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
-                style={{ pointerEvents: "auto" }}
-                onClick={randomizeMessage}
-              >
-                <DicesIcon />
-              </button>
+              <div className="absolute bottom-2 right-2 transform -translate-y-1/2 flex flex-row gap-1 ">
+                <button
+                  className="rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+                  style={{ pointerEvents: "auto" }}
+                  onClick={goBackToText}
+                >
+                  <ArrowBigLeftDashIcon />
+                </button>
+                <button
+                  className="rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+                  style={{ pointerEvents: "auto" }}
+                  onClick={randomizeMessage}
+                >
+                  <DicesIcon />
+                </button>
+              </div>
             </div>
             {error.length > 0 && <span className="text-red-600">{error}</span>}
             <button
