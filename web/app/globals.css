@@ -129,4 +129,7 @@
   .barlow {
     font-family: var(--font-barlow);
   }
+  .quicksand {
+    font-family: var(--font-quicksand);
+  }
 }

@@ -33,8 +33,10 @@ export default function Page() {
     localStorage.removeItem("token");
     router.push("/auth/login");
   };
-
-  const messages = useQuery(api.func_qa.getAllToUser, { user: userData }) || [];
+  const getUserDetails = useQuery(api.func_users.data, { slug: userData });
+  const messages =
+    useQuery(api.func_qa.getAllToUser, { user: getUserDetails[0].userId }) ||
+    [];
 
   return (
     <div className={`transition-colors`}>

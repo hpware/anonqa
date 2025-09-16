@@ -24,7 +24,7 @@ export default function Client({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [imageNotAvailable, setImageNotAvailable] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(true);
+  const [success, setSuccess] = useState<boolean>(false);
   const [lastStatus, setLastStatus] = useState({
     text: "",
     randomizing: false,
@@ -159,33 +159,33 @@ export default function Client({
                 value={ptavalue}
                 onChange={handleTextareaChange}
               />
-              <div className="absolute bottom-2 right-2 transform -translate-y-1/2 flex flex-row gap-1 ">
-                <button
-                  className="rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
-                  style={{ pointerEvents: "auto" }}
-                  onClick={goBackToText}
-                >
-                  <ArrowBigLeftDashIcon />
-                </button>
-                <button
-                  className="rounded-full p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
-                  style={{ pointerEvents: "auto" }}
-                  onClick={randomizeMessage}
-                >
-                  <DicesIcon />
-                </button>
-              </div>
             </div>
             {error.length > 0 && <span className="text-red-600">{error}</span>}
-            <button
-              className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
-              onClick={submitForm}
-              disabled={
-                ptavalue.length == 0 || (captchaFeat && !turnstileToken)
-              }
-            >
-              Submit!
-            </button>
+            <div className="text-center justify-center flex flex-row w-full mx-auto gap-1 rounded-lg my-3">
+              <button
+                className="rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+                style={{ pointerEvents: "auto" }}
+                onClick={goBackToText}
+              >
+                <ArrowBigLeftDashIcon />
+              </button>
+              <button
+                className="rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+                style={{ pointerEvents: "auto" }}
+                onClick={randomizeMessage}
+              >
+                <DicesIcon />
+              </button>
+              <button
+                className="w-full p-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-gray-700/80 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
+                onClick={submitForm}
+                disabled={
+                  ptavalue.length == 0 || (captchaFeat && !turnstileToken)
+                }
+              >
+                Submit!
+              </button>
+            </div>
             {captchaFeat && (
               <div className="!rounded w-full m-auto justify-center text-center">
                 <Turnstile onVerify={setTurnstileToken} />

@@ -17,3 +17,10 @@ Figma: [Figma Design](www.figma.com/design/Rc1A45MnZTXP4Yi4yYyhFP/anon-qa-app-de
 ## What?
 
 Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for their anon qa stuff, 2 years ago I tried doing this in linktree (for myself), but failed bacause of it's limited functionalty. Now I have learned some stacks, (the NTP stack (Nuxt, Tailwind, Postgres)), I will try to redo my attempts at doing so, with self hostable services (or something you can host it yourself on vercel or cloudflare).
+
+
+## Concerns & Problems
+## Sending speeds
+When Cloudflare Turnstil is on, the cloudflare turnstile function take a few seconds to verify the function, which is not ideal, so if you don't care about captchas, you can disable it. This will have two upsides.
+1. A better UI experence to the user
+2. The user submition is faster to submit.

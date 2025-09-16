@@ -1,4 +1,5 @@
-import { internal } from "@/convex/_generated/api";
+import { api } from "@/convex/_generated/api";
+import { fetchQuery, fetchMutation } from "convex/nextjs";
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
