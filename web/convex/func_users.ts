@@ -1,6 +1,8 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
+import { filter } from "convex-helpers/server/filter";
+import argon2 from "argon2";
 
 // cron to remove users
 export const removedeleted = internalMutation({
@@ -121,5 +123,62 @@ if (queryquery.length === 0) {
 }
 return queryquery[0].toUser; */
     return [];
+  },
+});
+
+export const getUserIdFromSession = query({
+  args: { session: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("session")
+      .filter((q) => q.eq(q.field("sessionId"), args.session))
+      .collect();
+    if (query.length === 0) {
+      return {
+        valid: false,
+        account: null,
+      };
+    }
+    return {
+      account: query[0].userAccount,
+      valid: true,
+    };
+  },
+});
+
+export const getTeams = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const data = filter(ctx.db.query("users"), (doc) =>
+      doc.controlableUsers.includes(args.userId),
+    ).collect();
+    return data;
+  },
+});
+
+export const checkAccountAndPassword = query({
+  args: { email: v.string(), password: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("login")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .collect();
+    if (query.length === 0) {
+      return {
+        valid: false,
+        user: null,
+        userId: null,
+      };
+    }
+    try {
+      const verifyPassword = await argon2.verify(
+        query[0].passwordHashed,
+        args.password,
+      );
+      if (verifyPassword) {
+      }
+    } catch (e) {
+      console.log(e);
+    }
   },
 });

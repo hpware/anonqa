@@ -27,6 +27,10 @@ export const POST = async (response: NextRequest) => {
     );
   }
   try {
+    const checkUserAccount = fetchQuery(
+      api.func_users.checkAccountAndPassword,
+      { email: body.email, password: body.password },
+    );
     const createSession = uuidv4();
     const oneDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
     cookieStore.set("session", createSession, {

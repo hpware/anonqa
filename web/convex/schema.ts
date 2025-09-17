@@ -27,7 +27,7 @@ export default defineSchema({
   }).index("userId", ["userId", "handle"]),
   qas: defineTable({
     msgId: v.string(),
-    toUser: v.string(), // userId
+    toUser: v.string(), // teamId
     msg: v.string(),
     answered: v.boolean(),
     linkedPosts: v.optional(
@@ -43,10 +43,16 @@ export default defineSchema({
   // Fields are optional
   //}),
   login: defineTable({
-    email: v.string(),
-    userId: v.string(),
-    vuser: v.string(),
-    passwordHashed: v.string(),
-  }),
+    email: v.string(), // email
+    userId: v.string(), // uuid
+    fname: v.string(), // first name
+
+    passwordHashed: v.string(), // argon2 + sha512'd password
+  }).index("userId", ["userId"]),
+  session: defineTable({
+    userAccount: v.string(),
+    sessionId: v.string(),
+    expires_at: v.string(),
+  }).index("sessionId", ["sessionId"]),
   featuresOn: defineTable({}),
 });

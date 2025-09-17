@@ -77,7 +77,6 @@ export const POST = async (request: NextRequest) => {
     /<think>.*<\/think>/,
     "",
   );
-  console.log(completion.choices[0].message);
   let safe = false; // other models
   if (status == "ALLOW") {
     // this will all models like llama guard 4 to function correctly.

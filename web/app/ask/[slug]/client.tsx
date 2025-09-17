@@ -161,7 +161,7 @@ export default function Client({
               />
             </div>
             {error.length > 0 && <span className="text-red-600">{error}</span>}
-            <div className="text-center justify-center flex flex-row w-full mx-auto gap-1 rounded-lg my-3">
+            <div className="text-center justify-center flex flex-row w-full mx-auto gap-1 rounded-lg my-3 px-1">
               <button
                 className="rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
                 style={{ pointerEvents: "auto" }}
