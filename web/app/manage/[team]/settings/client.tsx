@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { CheckCircle2Icon, SquirrelIcon } from "lucide-react";
 import {
