@@ -9,6 +9,7 @@
  */
 
 import type * as cron from "../cron.js";
+import type * as func_feat_manage from "../func_feat_manage.js";
 import type * as func_qa from "../func_qa.js";
 import type * as func_users from "../func_users.js";
 import type * as http from "../http.js";
@@ -30,6 +31,7 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   cron: typeof cron;
+  func_feat_manage: typeof func_feat_manage;
   func_qa: typeof func_qa;
   func_users: typeof func_users;
   http: typeof http;

@@ -20,7 +20,7 @@ Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for
 
 
 ## Concerns & Problems
-## Sending speeds
+### Sending speeds
 When Cloudflare Turnstil is on, the cloudflare turnstile function take a few seconds to verify the function, which is not ideal, so if you don't care about captchas, you can disable it. This will have two upsides.
 1. A better UI experence to the user
 2. The user submition is faster to submit.
