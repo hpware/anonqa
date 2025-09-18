@@ -46,13 +46,16 @@ export default defineSchema({
     email: v.string(), // email
     userId: v.string(), // uuid
     fname: v.string(), // first name
-
     passwordHashed: v.string(), // argon2 + sha512'd password
-  }).index("userId", ["userId"]),
+  })
+    .index("by_id", ["userId"])
+    .index("by_email", ["email"]),
   session: defineTable({
     userAccount: v.string(),
     sessionId: v.string(),
-    expires_at: v.string(),
-  }).index("sessionId", ["sessionId"]),
+    expires_at: v.number(),
+  })
+    .index("by_session", ["sessionId"])
+    .index("by_account", ["userAccount"]),
   featuresOn: defineTable({}),
 });

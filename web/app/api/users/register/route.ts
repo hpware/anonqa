@@ -3,11 +3,13 @@ import { fetchQuery, fetchMutation } from "convex/nextjs";
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
+import argon2 from "argon2";
 
 // interfaces
 interface bodyData {
   email: string;
   password: string;
+  fname: string;
 }
 
 export const POST = async (response: NextRequest) => {
@@ -15,7 +17,7 @@ export const POST = async (response: NextRequest) => {
   const body: bodyData = await response.json();
   const cookieStore = await cookies();
   // content
-  if (!(body && body.email && body.password)) {
+  if (!(body && body.email && body.password && body.fname)) {
     return new Response(
       JSON.stringify({
         error: true,
@@ -27,11 +29,66 @@ export const POST = async (response: NextRequest) => {
     );
   }
   try {
-    const createSession = uuidv4();
-    const oneDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    cookieStore.set("session", createSession, {
+    const checkIfEmailIsLinkedToAccount = await fetchQuery(
+      api.func_users.lookUpAccountsByEmail,
+      { email: body.email },
+    );
+    if (checkIfEmailIsLinkedToAccount.length !== 0) {
+      return new Response(
+        JSON.stringify({
+          error: true,
+          status: 200,
+          message: "This email is linked to an account.",
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+    const hashedPassword = await argon2.hash(body.password);
+    const checkUserAccount = await fetchMutation(
+      api.func_users.createLoginAccount,
+      { email: body.email, password: hashedPassword, fname: body.fname },
+    );
+    if (!checkUserAccount.success) {
+      return new Response(
+        JSON.stringify({
+          error: true,
+          status: 500,
+          message: "Failed to create account in db!",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+    const saveAndGetQuery = await fetchMutation(api.func_users.createSession, {
+      userId: String(checkUserAccount.userId),
+    });
+    if (!saveAndGetQuery.success) {
+      return new Response(
+        JSON.stringify({
+          error: true,
+          status: 500,
+          message: "Failed to create session in db!",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+    cookieStore.set("session", saveAndGetQuery.session, {
       httpOnly: true,
-      expires: oneDayFromNow,
+      expires: saveAndGetQuery.expiresAt,
     });
 
     return new Response(

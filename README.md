@@ -11,8 +11,7 @@ For exploits on the platform, please DO NOT USE ISSUES EVEN FOR EXISTING ISSUES,
 Other than the email, you can also contact me on discord `hwtw` (you can maybe dm me?). If you are in the HC slack, please contact me there instead. All lines will be faster then contacting via emails (as I will get a jumpscare when I get messages from one of these platforms).
 
 ## Design Files
-
-Figma: [Figma Design](www.figma.com/design/Rc1A45MnZTXP4Yi4yYyhFP/anon-qa-app-design?node-id=0-1&p=f&t=lZvh4dZWD3jpLZCg-0)
+after the figma removal of the education plan, I now use penpot. The designs are in /design/.
 
 ## What?
 

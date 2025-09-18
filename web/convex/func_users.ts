@@ -2,7 +2,6 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
 import { filter } from "convex-helpers/server/filter";
-import argon2 from "argon2";
 
 // cron to remove users
 export const removedeleted = internalMutation({
@@ -156,8 +155,8 @@ export const getTeams = query({
   },
 });
 
-export const checkAccountAndPassword = query({
-  args: { email: v.string(), password: v.string() },
+export const checkAccountAndReturnPassword = query({
+  args: { email: v.string() },
   handler: async (ctx, args) => {
     const query = await ctx.db
       .query("login")
@@ -166,19 +165,87 @@ export const checkAccountAndPassword = query({
     if (query.length === 0) {
       return {
         valid: false,
-        user: null,
+        fname: null,
+        userId: null,
+        passwordHash: null,
+      };
+    }
+    return {
+      valid: true,
+      fname: query[0].fname,
+      userId: query[0].userId,
+      passwordHash: query[0].passwordHashed,
+    };
+  },
+});
+
+export const lookUpAccountsByEmail = query({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("login")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
+  },
+});
+
+export const createLoginAccount = mutation({
+  args: { email: v.string(), password: v.string(), fname: v.string() },
+  handler: async (ctx, args) => {
+    try {
+      const generateUserID = uuidv4();
+      await ctx.db.insert("login", {
+        email: args.email,
+        userId: generateUserID,
+        fname: args.fname, // first name btw
+        passwordHashed: args.password,
+      });
+      return {
+        success: true,
+        userId: generateUserID,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        success: false,
         userId: null,
       };
     }
-    try {
-      const verifyPassword = await argon2.verify(
-        query[0].passwordHashed,
-        args.password,
-      );
-      if (verifyPassword) {
-      }
-    } catch (e) {
-      console.log(e);
+  },
+});
+
+// todo
+export const createTeamAccount = mutation({
+  handler: async (ctx, args) => {},
+});
+
+export const createSession = mutation({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const sessionUuid = uuidv4();
+    const oneDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await ctx.db.insert("session", {
+      userAccount: args.userId,
+      sessionId: sessionUuid,
+      expires_at: Number(oneDayFromNow),
+    });
+    return {
+      success: true,
+      session: sessionUuid,
+      expiresAt: oneDayFromNow.getTime(),
+    };
+  },
+});
+
+export const deleteExpiredSessions = internalMutation({
+  handler: async (ctx, args) => {
+    const sessionsToDelete = await ctx.db
+      .query("session")
+      .filter((q) => q.lte(q.field("expires_at"), Date.now())) // less than or equal
+      .collect();
+    for (const session of sessionsToDelete) {
+      await ctx.db.delete(session._id);
     }
+    return;
   },
 });

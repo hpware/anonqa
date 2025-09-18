@@ -6,14 +6,42 @@ import { BadgePlusIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function ClientPage({
-  registerFeatOn,
+  disableRegister,
   serverOwnerTerms,
 }: {
-  registerFeatOn: boolean;
+  disableRegister: boolean;
   serverOwnerTerms: string;
 }) {
-  if (!registerFeatOn) {
-    return <div>Registering currently not allowed at the moment.</div>;
+  console.log(disableRegister);
+  if (disableRegister) {
+    return (
+      <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md mt-8  bg-white p-8 rounded-lg space-y-6 shadow-md geist-mono">
+          <div className="flex flex-row justify-center align-middle text-center gap-2 m-auto barlow pb-8">
+            <BadgePlusIcon className="h-12 w-12 stroke-white bg-blue-600 p-2 rounded-full text-white" />
+            <h2 className="my-auto text-center justify-center py-1 text-3xl font-bold tracking-tight text-gray-900">
+              Register
+            </h2>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm">
+              Registering currently not allowed on this server. If you are the
+              server owner and want to enable registering, please set{" "}
+              <code>NEXT_PUBLIC_DISABLE_REGISTER=false</code> in your env.
+            </span>
+            <span className="text-xs text-gray-600">
+              Already have an account?{" "}
+              <Link
+                href="/auth/login"
+                className="text-blue-600 transition-all duration-300 hover:text-blue-700"
+              >
+                login here!
+              </Link>
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   }
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -48,6 +76,7 @@ export default function ClientPage({
         body: JSON.stringify({
           email: email.trim(),
           password: hashedPassword,
+          fname: firstName,
         }),
       });
       const data = await response.json();
