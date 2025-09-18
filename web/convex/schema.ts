@@ -48,7 +48,7 @@ export default defineSchema({
     fname: v.string(), // first name
     passwordHashed: v.string(), // argon2 + sha512'd password
   })
-    .index("by_id", ["userId"])
+    .index("userId", ["userId"])
     .index("by_email", ["email"]),
   session: defineTable({
     userAccount: v.string(),
