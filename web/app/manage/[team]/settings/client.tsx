@@ -37,13 +37,13 @@ export default function SettingsPage({
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       <div>
         <h2 className="text-2xl">Change team settings</h2>
-        <h2>Link your account(s)</h2>
+        {/*<h2>Link your account(s)</h2>
         <button
           className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
         >
           {true && <CheckCircle2Icon />}
           <span>Threads</span>
-        </button>
+        </button>*/}
         <h3 className="text-xl">Important settings</h3>
         <button
           className="bg-blue-500 p-2 rounded hover:bg-blue-500/70 transition-all duration-300 cursor-pointer text-white m-1"

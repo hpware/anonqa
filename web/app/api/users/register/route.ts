@@ -33,7 +33,7 @@ export const POST = async (response: NextRequest) => {
       api.func_users.lookUpAccountsByEmail,
       { email: body.email },
     );
-    if (checkIfEmailIsLinkedToAccount.length !== 0) {
+    if (checkIfEmailIsLinkedToAccount !== null) {
       return new Response(
         JSON.stringify({
           error: true,

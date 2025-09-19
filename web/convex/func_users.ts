@@ -125,26 +125,6 @@ return queryquery[0].toUser; */
   },
 });
 
-export const getUserIdFromSession = query({
-  args: { session: v.string() },
-  handler: async (ctx, args) => {
-    const query = await ctx.db
-      .query("session")
-      .filter((q) => q.eq(q.field("sessionId"), args.session))
-      .collect();
-    if (query.length === 0) {
-      return {
-        valid: false,
-        account: null,
-      };
-    }
-    return {
-      account: query[0].userAccount,
-      valid: true,
-    };
-  },
-});
-
 export const getTeams = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
@@ -251,19 +231,21 @@ export const deleteExpiredSessions = internalMutation({
 });
 
 export const verifySession = query({
-	args: { currentSession: v.string() }
-	handler: async (ctx, args) => {
-		const checkSession = await ctx.db
-		.query("session")
-		.withIndex("by_session", (q) => q.eq("sessionId", args.currentSession))
-		.unique();
-		
-		if (session === null) {
-			return { linked: false, userid: null };
-		} 
-		if (session.expires_at <= Date.now() {
-			return { linked: false, userid: null }
-		}
-		return { linked: session.userId != null,  userid: session.userid ?? null }
-	}
-})
+  args: { currentSession: v.string() },
+  handler: async (ctx, args) => {
+    const checkSession = await ctx.db
+      .query("session")
+      .withIndex("by_session", (q) => q.eq("sessionId", args.currentSession))
+      .unique();
+    if (checkSession === null) {
+      return { linked: false, userid: null };
+    }
+    if (checkSession.expires_at <= Date.now()) {
+      return { linked: false, userid: null };
+    }
+    return {
+      linked: checkSession.userAccount != null,
+      userid: checkSession.userAccount ?? null,
+    };
+  },
+});

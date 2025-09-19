@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { BadgePlusIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -12,7 +12,6 @@ export default function ClientPage({
   disableRegister: boolean;
   serverOwnerTerms: string;
 }) {
-  console.log(disableRegister);
   if (disableRegister) {
     return (
       <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -80,14 +79,13 @@ export default function ClientPage({
         }),
       });
       const data = await response.json();
-      if (!(response.ok && !data.error && data.status === 200)) {
+      if (!response.ok || data.error === true) {
         setError(data.message || "Login failed.");
       }
-      setError(
-        "Yeah soo the the dashboard is still incompelete, please check in later.",
-      );
+      router.push("/manage/selectTeams");
     } catch (err) {
-      setError("Network error. Please try again.");
+      console.error(err);
+      setError(`Client Side Error: ${err.message}`);
     } finally {
       setLoading(false);
     }

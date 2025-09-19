@@ -1,0 +1,13 @@
+Context:
+X and Threads are both awful apis to work with. So please no, this feature is not working.
+
+All of the current endpoints are commented out and replaced with
+
+```
+export const GET = async () => {
+  return Response.redirect("/");
+};
+
+```
+
+this code block.

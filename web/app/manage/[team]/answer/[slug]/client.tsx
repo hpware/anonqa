@@ -60,28 +60,28 @@ export default function Page({ slug }: { slug: string }) {
   };
 
   const selections: selectionsInterface[] = [
-    {
-      text: "Post to threads",
-      slug: "threads",
-      changingDisplayText: "Threads",
-      template: (
-        <Threads
-          user={JSON.parse(
-            JSON.stringify({
-              id: "1",
-              name: "hpware",
-              is_verified: true,
-              username: "testing",
-              threads_profile_picture_url:
-                "https://avatars.githubusercontent.com/u/157942818?v=4",
-            }),
-          )}
-        >
-          <span className="break-all">Q: {message[0].msg}</span>
-          <span className="break-all">A: {answer}</span>
-        </Threads>
-      ),
-    },
+    /**    {
+  text: "Post to threads",
+  slug: "threads",
+  changingDisplayText: "Threads",
+  template: (
+    <Threads
+      user={JSON.parse(
+        JSON.stringify({
+          id: "1",
+          name: "hpware",
+          is_verified: true,
+          username: "testing",
+          threads_profile_picture_url:
+            "https://avatars.githubusercontent.com/u/157942818?v=4",
+        }),
+      )}
+    >
+      <span className="break-all">Q: {message[0].msg}</span>
+      <span className="break-all">A: {answer}</span>
+    </Threads>
+  ),
+},  */
     {
       text: "Post with pic (Stories)",
       slug: "pic-stories",
