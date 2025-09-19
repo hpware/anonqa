@@ -82,11 +82,27 @@ export const POST = async (response: NextRequest) => {
         },
       );
     }
-    const createSession = uuidv4();
-    const oneDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    cookieStore.set("session", createSession, {
+    const saveAndGetQuery = await fetchMutation(api.func_users.createSession, {
+      userId: String(checkUserAccount.userId),
+    });
+    if (!saveAndGetQuery.success) {
+      return new Response(
+        JSON.stringify({
+          error: true,
+          status: 500,
+          message: "Failed to create session in db!",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+    cookieStore.set("session", saveAndGetQuery.session, {
       httpOnly: true,
-      expires: oneDayFromNow,
+      expires: saveAndGetQuery.expiresAt,
     });
 
     return new Response(

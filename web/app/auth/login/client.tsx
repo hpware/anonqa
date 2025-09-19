@@ -46,14 +46,14 @@ export default function ClientPage({
         }),
       });
       const data = await response.json();
-      if (!(response.ok && !data.error && data.status === 200)) {
+      if (!response.ok || data.error === true) {
         setError(data.message || "Login failed.");
+        return;
       }
-      setError(
-        "Yeah soo the the dashboard is still incompelete, please check in later.",
-      );
+      router.push("/manage/selectTeams");
     } catch (err) {
-      setError("Network error. Please try again.");
+      console.error(err);
+      setError(`Client Side Error: ${err.message}`);
     } finally {
       setLoading(false);
     }

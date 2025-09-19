@@ -81,6 +81,7 @@ export default function ClientPage({
       const data = await response.json();
       if (!response.ok || data.error === true) {
         setError(data.message || "Login failed.");
+        return;
       }
       router.push("/manage/selectTeams");
     } catch (err) {
