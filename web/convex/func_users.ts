@@ -249,3 +249,21 @@ export const deleteExpiredSessions = internalMutation({
     return;
   },
 });
+
+export const verifySession = query({
+	args: { currentSession: v.string() }
+	handler: async (ctx, args) => {
+		const checkSession = await ctx.db
+		.query("session")
+		.withIndex("by_session", (q) => q.eq("sessionId", args.currentSession))
+		.unique();
+		
+		if (session === null) {
+			return { linked: false, userid: null };
+		} 
+		if (session.expires_at <= Date.now() {
+			return { linked: false, userid: null }
+		}
+		return { linked: session.userId != null,  userid: session.userid ?? null }
+	}
+})
