@@ -27,6 +27,9 @@ export default function SettingsPage({
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
     useState("");
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
+  const [customMessages, setCustomMessages] = useState([]);
+  const [enableCustomMessagesPopup, setEnableCustomMessagesPopup] =
+    useState<boolean>(false);
 
   const getStatus =
     {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
@@ -37,6 +40,24 @@ export default function SettingsPage({
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       <div>
         <h2 className="text-2xl">Change team settings</h2>
+        <button
+          onClick={() =>
+            setEnableCustomMessagesPopup(!enableCustomMessagesPopup)
+          }
+        >
+          Custom Messages
+        </button>
+        {enableCustomMessagesPopup && (
+          <div>
+            <span>Please set your custom message!</span>
+            {customMessages.map((i) => (
+              <div></div>
+            ))}
+            <div>
+              <button>Add a new message!</button>
+            </div>
+          </div>
+        )}
         {/*<h2>Link your account(s)</h2>
         <button
           className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}

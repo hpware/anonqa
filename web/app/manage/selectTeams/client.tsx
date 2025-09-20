@@ -2,6 +2,7 @@
 import { Doc } from "@/convex/_generated/dataModel";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { LogOutIcon } from "lucide-react";
 
 export default function Page({ teams }: { teams: Doc<"users">[] }) {
   return (
@@ -22,11 +23,19 @@ export default function Page({ teams }: { teams: Doc<"users">[] }) {
             </Link>
           ))}
         </div>
-        <Link href="/auth/logout">
+        <div>
           <button className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg">
-            Logout
+            Create
           </button>
-        </Link>
+          <button className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg">
+            Join
+          </button>
+          <Link href="/auth/logout">
+            <button className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg">
+              <LogOutIcon />
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );
