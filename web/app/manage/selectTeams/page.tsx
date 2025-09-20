@@ -19,5 +19,6 @@ export default async function Page() {
     userId: String(getUser.userid),
   });
   console.log(teams);
-  return <Client teams={["teams"]} />;
+
+  return <Client teams={teams} />;
 }

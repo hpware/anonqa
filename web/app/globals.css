@@ -132,4 +132,10 @@
   .quicksand {
     font-family: var(--font-quicksand);
   }
+  .noscrollbar {
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    scrollbar-width: none;
+  }
 }
