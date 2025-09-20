@@ -51,7 +51,7 @@ export default function ClientPage({
         return;
       }
       router.push("/manage/selectTeams");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setError(`Client Side Error: ${err.message}`);
     } finally {
