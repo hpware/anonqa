@@ -249,3 +249,17 @@ export const verifySession = query({
     };
   },
 });
+
+export const getFname = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("login")
+      .withIndex("userId", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (query === null) {
+      return null;
+    }
+    return query?.fname;
+  },
+});

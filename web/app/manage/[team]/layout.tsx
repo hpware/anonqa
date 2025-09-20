@@ -12,7 +12,7 @@ export default async function AnonQAManagementLayout({
 }>) {
   // server side checks
   const cookie = await cookies();
-  const session = String(cookie.get("session")) || "";
+  const session = String(cookie.get("session")?.value) || "";
   const getUser = await fetchQuery(api.func_users.verifySession, {
     currentSession: session,
   });
@@ -20,5 +20,12 @@ export default async function AnonQAManagementLayout({
     // force to logout action to clear session
     redirect("/auth/logout");
   }
-  return <Client>{children}</Client>;
+  const getFname = await fetchQuery(api.func_users.getFname, {
+    userId: String(getUser.userid),
+  });
+  return (
+    <Client userId={String(getUser.userid)} fname={String(getFname)}>
+      {children}
+    </Client>
+  );
 }

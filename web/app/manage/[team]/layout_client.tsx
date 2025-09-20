@@ -24,10 +24,13 @@ function ThemeToggle() {
 
 export default function ManagementPageLayout({
   children,
+  userId,
+  fname,
 }: Readonly<{
   children: React.ReactNode;
+  userId: string;
+  fname: string;
 }>) {
-  const [userData, setUserData] = useState<string>("");
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -63,9 +66,7 @@ export default function ManagementPageLayout({
               >
                 Settings
               </Link>
-              <span className="geint-sans">
-                You are logged in as {userData}!
-              </span>
+              <span className="geint-sans">You are logged in as {fname}!</span>
             </div>
             <ThemeToggle />
           </div>
