@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ThemeProvider } from "../themeProvider";
-import { useTheme } from "../themeProvider";
+import { ThemeProvider } from "../[team]/themeProvider";
+import { useTheme } from "../[team]/themeProvider";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
