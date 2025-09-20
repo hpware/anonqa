@@ -28,7 +28,6 @@ export function Turnstile({ onVerify }: TurnstileProps) {
   }, []);
 
   useEffect(() => {
-    console.log(siteKey);
     if (loaded && containerRef.current && window.turnstile) {
       window.turnstile.render(containerRef.current, {
         sitekey: siteKey,

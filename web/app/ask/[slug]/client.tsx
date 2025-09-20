@@ -117,7 +117,6 @@ export default function Client({
     setPtavalue(randomizedMesssages[randomIndex]);
   };
 
-  console.log(user);
   const thisUser = user[0];
   if (thisUser.setCustomRandomMessages) {
   }

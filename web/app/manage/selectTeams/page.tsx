@@ -11,8 +11,6 @@ export default async function Page() {
   const getUser = await fetchQuery(api.func_users.verifySession, {
     currentSession: session,
   });
-  console.log(session);
-  console.log(getUser);
   if (!getUser.linked) {
     // force to logout action to clear session
     redirect("/auth/logout");

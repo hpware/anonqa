@@ -14,7 +14,6 @@ export const POST = async (request: NextRequest) => {
   const body: bodyData = await request.json();
   //
   var captchaSuccess = false;
-  console.log(Boolean(process.env.NEXT_PUBLIC_CAPTCHA_FEAT));
   if (Boolean(process.env.NEXT_PUBLIC_CAPTCHA_FEAT)) {
     // if there is no turnstile data.
     if (!body.cf_turnstile) {
@@ -28,7 +27,6 @@ export const POST = async (request: NextRequest) => {
       );
     }
     const CF_SECRET_KEY = process.env.CF_TURNSTILE_PRIVATE_KEY;
-    console.log(CF_SECRET_KEY);
     const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
     const result = await fetch(url, {
       body: JSON.stringify({
