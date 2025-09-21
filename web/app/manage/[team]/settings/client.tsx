@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 export default function SettingsPage({
   host,
@@ -58,6 +59,46 @@ export default function SettingsPage({
             </div>
           </div>
         )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button>Create Join Code</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Your new join code!</AlertDialogTitle>
+              <AlertDialogDescription>
+                <div className="flex flex-col">
+                  <span>
+                    Please note that this code can only be used once! And if
+                    this code is ever leaked, someone with this code can add
+                    into your team!
+                  </span>
+                  <div>
+                    <code className="overflow-x-scroll noscrollbar w-[80%]">
+                      Code block!
+                    </code>
+                    <button>Copy!</button>
+                  </div>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="cursor-pointer">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                disabled={
+                  deleteAccountVerifyTextBox !==
+                  "I authorize the deletion of the account."
+                }
+                className="bg-red-500 hover:bg-red-700 transition-all duration-300 cursor-pointer"
+                onClick={submitDeletionOfAccount}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         {/*<h2>Link your account(s)</h2>
         <button
           className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}

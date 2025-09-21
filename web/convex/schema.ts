@@ -57,5 +57,12 @@ export default defineSchema({
   })
     .index("by_session", ["sessionId"])
     .index("by_account", ["userAccount"]),
-  featuresOn: defineTable({}),
+  //featuresOn: defineTable({}),
+  joinCodes: defineTable({
+    code: v.string(),
+    teamId: v.string(),
+    used: v.boolean(),
+  })
+    .index("code", ["code"])
+    .index("teamId", ["teamId"]),
 });

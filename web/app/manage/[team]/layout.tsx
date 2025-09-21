@@ -7,9 +7,11 @@ import { redirect } from "next/navigation";
 
 export default async function AnonQAManagementLayout({
   children,
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-}>) {
+  params: Promise<{ team: string }>;
+}) {
   // server side checks
   const cookie = await cookies();
   const session = String(cookie.get("session")?.value) || "";
@@ -23,9 +25,15 @@ export default async function AnonQAManagementLayout({
   const getFname = await fetchQuery(api.func_users.getFname, {
     userId: String(getUser.userid),
   });
+  const { team } = await params;
   return (
-    <Client userId={String(getUser.userid)} fname={String(getFname)}>
+    <Client
+      userId={String(getUser.userid)}
+      fname={String(getFname)}
+      slug={team}
+    >
       {children}
     </Client>
   );
 }
+//createJoinCode
