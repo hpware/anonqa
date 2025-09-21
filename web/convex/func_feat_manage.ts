@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
+import generateRandomString from "@/lib/randomGenString";
 
 export const getTeams = query({
   args: { userId: v.string() },
@@ -50,12 +51,23 @@ export const getTeams = query({
 export const createJoinCode = mutation({
   args: { teamId: v.string() },
   handler: async (ctx, args) => {
-    const code = crypto.randomUUID();
+    const code = `skin_d_${generateRandomString(10)}`;
     await ctx.db.insert("joinCodes", {
       code,
       teamId: args.teamId,
       used: false,
     });
     return code;
+  },
+});
+
+export const checkAbleToBeAccessed = query({
+  args: { teamId: v.string(), userId: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    return query[0].controlableUsers.includes(args.userId);
   },
 });

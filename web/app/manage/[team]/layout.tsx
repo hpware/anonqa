@@ -26,6 +26,10 @@ export default async function AnonQAManagementLayout({
     userId: String(getUser.userid),
   });
   const { team } = await params;
+  const checkAbleToBeAccessed = await fetchQuery(
+    api.func_feat_manage.checkAbleToBeAccessed,
+    { teamId: team, userId: String(getUser.userid) },
+  );
   return (
     <Client
       userId={String(getUser.userid)}

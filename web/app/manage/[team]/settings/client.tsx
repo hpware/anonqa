@@ -3,7 +3,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
-import { CheckCircle2Icon, SquirrelIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  CircleUserIcon,
+  CircleXIcon,
+  ClipboardCopyIcon,
+  ClipboardIcon,
+  SquirrelIcon,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +22,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import generateRandomString from "@/lib/randomGenString";
+import { v4 as uuidv4 } from "uuid";
 
 export default function SettingsPage({
   host,
@@ -36,18 +50,44 @@ export default function SettingsPage({
     {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
     userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
   }); */
+
+  const revokeJoinCode = async (joinCode: string) => {
+    const req = await fetch("/api/teams/joincode/revoke", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: joinCode,
+      }),
+    });
+  };
+
+  const revokeAccountAccess = async (accountId: string) => {
+    const req = await fetch("/api/teams/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accountId: accountId,
+        teamId: "ccs",
+      }),
+    });
+  };
   const submitDeletionOfAccount = async () => {};
   return (
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       <div>
         <h2 className="text-2xl">Change team settings</h2>
-        <button
+        <Button
           onClick={() =>
             setEnableCustomMessagesPopup(!enableCustomMessagesPopup)
           }
+          className="mr-2"
         >
           Custom Messages
-        </button>
+        </Button>
         {enableCustomMessagesPopup && (
           <div>
             <span>Please set your custom message!</span>
@@ -73,32 +113,175 @@ export default function SettingsPage({
                     this code is ever leaked, someone with this code can add
                     into your team!
                   </span>
-                  <div>
-                    <code className="overflow-x-scroll noscrollbar w-[80%]">
-                      Code block!
-                    </code>
-                    <button>Copy!</button>
-                  </div>
+                  <code className="mx-0 my-auto overflow-x-scroll whitespace-nowrap py-2 px-1 -translate-x-5">
+                    {`sinv_d_${generateRandomString(40, "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")}`}
+                  </code>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="cursor-pointer">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                disabled={
-                  deleteAccountVerifyTextBox !==
-                  "I authorize the deletion of the account."
-                }
-                className="bg-red-500 hover:bg-red-700 transition-all duration-300 cursor-pointer"
-                onClick={submitDeletionOfAccount}
-              >
-                Continue
-              </AlertDialogAction>
+            <AlertDialogFooter className="flex justify-end sm:justify-end">
+              <AlertDialogAction className="ml-auto">Ok</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        <div className="">
+          <h2>Currently active join codes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1 max-h-1/2 overflow-y-scroll">
+            {[
+              "wewf",
+              "2r",
+              "weww",
+              "2q",
+              "wqew",
+              "23",
+              "1wew",
+              "2f",
+              "wfew",
+              "w2",
+              "wew",
+              "2",
+            ].map((i) => (
+              <div
+                className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
+                key={i}
+              >
+                <span>JoinID: sinv_d_fw0***siF9</span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <CircleXIcon />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <span>Revoke this joinID</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Revoke join code</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        <div>
+                          <div className="flex flex-col">
+                            <span>
+                              This action cannot be undone. This will
+                              permanently deactivate this join code.
+                            </span>
+                            <span>
+                              Please enter "
+                              <b>{`I authorize the deletion of this join code`}</b>
+                              "
+                            </span>
+                            <input
+                              type="text"
+                              className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                              placeholder={`I authorize the deletion of this join code`}
+                              value={deleteAccountVerifyTextBox}
+                              onChange={(e) =>
+                                setDeleteAccountVerifyTextBox(e.target.value)
+                              }
+                            />
+                          </div>
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="cursor-pointer">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="ml-auto"
+                        onClick={() => revokeJoinCode("d")}
+                      >
+                        Ok
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="content-center justify-center items-center">
+          <h2 className="text-lg p-2">Users in this team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center">
+            {[
+              "wew",
+              "2",
+              "wew",
+              "2",
+              "wew",
+              "2",
+              "wew",
+              "2",
+              "wew",
+              "2",
+              "wew",
+              "2",
+            ].map((i) => (
+              <div className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2">
+                <CircleUserIcon />
+                <div className="flex flex-col">
+                  <span>Howard</span>
+                  <span>howard@me.com</span>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <CircleXIcon />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <span>Remove access to this account</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Revoke join code</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        <div>
+                          <div className="flex flex-col">
+                            <span>This will remove acccess to this user!</span>
+                            <span>
+                              Please enter "
+                              <b>{`I authorize the deletion of this account`}</b>
+                              "
+                            </span>
+                            <input
+                              type="text"
+                              className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                              placeholder={`I authorize the deletion of this account`}
+                              value={deleteAccountVerifyTextBox}
+                              onChange={(e) =>
+                                setDeleteAccountVerifyTextBox(e.target.value)
+                              }
+                            />
+                          </div>
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="cursor-pointer">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="ml-auto"
+                        onClick={() => revokeAccountAccess("dd")}
+                      >
+                        Ok
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            ))}
+          </div>
+        </div>
         {/*<h2>Link your account(s)</h2>
         <button
           className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
