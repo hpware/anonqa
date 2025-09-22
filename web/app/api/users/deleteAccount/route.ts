@@ -29,5 +29,5 @@ export const DELETE = async (request: NextRequest) => {
       },
     );
   }
-  useMutation(api.func_users.setUserAsDeleted);
+  //useMutation(api.func_users.setUserAsDeleted);
 };

@@ -1,6 +1,10 @@
 import { headers } from "next/headers";
 import Client from "./client";
-export default async function Page(params: Promise<{ team: string }>) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ team: string }>;
+}) {
   const headersList = await headers();
   const url =
     headersList.get("referer") || headersList.get("x-forwarded-proto") + "://";
