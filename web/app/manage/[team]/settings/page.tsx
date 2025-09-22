@@ -6,5 +6,6 @@ export default async function Page(params: Promise<{ team: string }>) {
     headersList.get("referer") || headersList.get("x-forwarded-proto") + "://";
   const protocol = url.split("://")[0] + ":";
   const host = headersList.get("host") || "localhost:3000";
-  return <Client host={host} protocol={protocol} teamId={params.team} />;
+  const { team } = await params;
+  return <Client host={host} protocol={protocol} teamId={team} />;
 }

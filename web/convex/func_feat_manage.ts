@@ -64,11 +64,13 @@ export const createJoinCode = mutation({
 export const checkAbleToBeAccessed = query({
   args: { teamId: v.string(), userId: v.string() },
   handler: async (ctx, args) => {
-    const query = await ctx.db
+    const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("userId"), args.teamId))
-      .collect();
-    return query[0].controlableUsers.includes(args.userId);
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    if (!user) return false; // or throw if this should never happen
+    const controlable = user.controlableUsers ?? [];
+    return controlable.includes(args.userId);
   },
 });
 

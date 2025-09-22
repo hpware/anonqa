@@ -24,7 +24,9 @@ export default defineSchema({
     defaultMessages: v.array(v.string()),
     customShortUrlSlug: v.string(),
     onBoarded: v.optional(v.boolean()), // roll out to users.
-  }).index("userId", ["userId", "handle"]),
+  })
+    .index("userId", ["userId", "handle"])
+    .index("by_userId", ["userId"]),
   qas: defineTable({
     msgId: v.string(),
     toUser: v.string(), // teamId

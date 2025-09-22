@@ -46,6 +46,9 @@ export default function SettingsPage({
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
   const [customMessages, setCustomMessages] = useState([]);
   const [joinCodes, setJoinCodes] = useState([]);
+  const [revokeJoinCodeTextBox, setRevokeJoinCodeTextBox] = useState("");
+  const [revokeUserAccessTextBox, setRevokeUserAccessTextBox] = useState("");
+  const [deleteTeamTextBox, setDeleteTeamTextBox] = useState("");
   const [enableCustomMessagesPopup, setEnableCustomMessagesPopup] =
     useState<boolean>(false);
 
@@ -80,7 +83,7 @@ export default function SettingsPage({
   };
 
   const revokeAccountAccess = async (accountId: string) => {
-    const req = await fetch("/api/teams/", {
+    const req = await fetch("/api/teams/account/revoke", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,8 +93,27 @@ export default function SettingsPage({
         teamId: "ccs",
       }),
     });
+    const res = await req.json();
   };
-  const submitDeletionOfAccount = async () => {};
+  const submitDeletionOfAccount = async () => {
+    const req = await fetch("/api/users/deleteAccount", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        areyousure: "YES, IM SURE I WANT TO DELETE MY ACCOUNT VIA THE API",
+        reallyq: "ABSOLUTELY YES! I WANT MY ACCOUNT GONE NOW!",
+        captcha: "NO THANKS!",
+      }),
+    });
+  };
+
+  const clearTextBoxState = () => {
+    setRevokeUserAccessTextBox("");
+    setRevokeJoinCodeTextBox("");
+    setDeleteAccountVerifyTextBox("");
+  };
   return (
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       <div>
@@ -162,7 +184,7 @@ export default function SettingsPage({
                 key={i}
               >
                 <span>JoinID: sinv_d_fw0***siF9</span>
-                <AlertDialog>
+                <AlertDialog onOpenChange={clearTextBoxState}>
                   <AlertDialogTrigger asChild>
                     <button>
                       <Tooltip>
@@ -194,9 +216,9 @@ export default function SettingsPage({
                               type="text"
                               className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
                               placeholder={`I authorize the deletion of this join code`}
-                              value={deleteAccountVerifyTextBox}
+                              value={revokeJoinCodeTextBox}
                               onChange={(e) =>
-                                setDeleteAccountVerifyTextBox(e.target.value)
+                                setRevokeJoinCodeTextBox(e.target.value)
                               }
                             />
                           </div>
@@ -243,7 +265,7 @@ export default function SettingsPage({
                   <span>Howard</span>
                   <span>howard@me.com</span>
                 </div>
-                <AlertDialog>
+                <AlertDialog onOpenChange={clearTextBoxState}>
                   <AlertDialogTrigger asChild>
                     <button>
                       <Tooltip>
@@ -272,9 +294,9 @@ export default function SettingsPage({
                               type="text"
                               className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
                               placeholder={`I authorize the deletion of this account`}
-                              value={deleteAccountVerifyTextBox}
+                              value={revokeUserAccessTextBox}
                               onChange={(e) =>
-                                setDeleteAccountVerifyTextBox(e.target.value)
+                                setRevokeUserAccessTextBox(e.target.value)
                               }
                             />
                           </div>
@@ -311,7 +333,7 @@ export default function SettingsPage({
         >
           {flaggingFeat ? "Disable" : "Enable"} Flagging
         </button>
-        <AlertDialog>
+        <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
             <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
               Delete your team
@@ -334,10 +356,8 @@ export default function SettingsPage({
                     type="text"
                     className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
                     placeholder={`I authorize the deletion of the account.`}
-                    value={deleteAccountVerifyTextBox}
-                    onChange={(e) =>
-                      setDeleteAccountVerifyTextBox(e.target.value)
-                    }
+                    value={deleteTeamTextBox}
+                    onChange={(e) => setDeleteTeamTextBox(e.target.value)}
                   />
                 </div>
               </AlertDialogDescription>
@@ -375,7 +395,7 @@ export default function SettingsPage({
       </div>
       <div>
         <h2 className="text-2xl">Change account settings</h2>
-        <AlertDialog>
+        <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
             <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
               Delete your account

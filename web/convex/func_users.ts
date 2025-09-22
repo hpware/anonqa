@@ -263,3 +263,8 @@ export const getFname = query({
     return query?.fname;
   },
 });
+
+export const setUserAsDeleted = mutation({
+  args: {},
+  handler: async (ctx, args) => {},
+});

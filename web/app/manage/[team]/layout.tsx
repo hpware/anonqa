@@ -3,7 +3,8 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import Client from "./layout_client";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function AnonQAManagementLayout({
   children,
@@ -30,6 +31,27 @@ export default async function AnonQAManagementLayout({
     api.func_feat_manage.checkAbleToBeAccessed,
     { teamId: team, userId: String(getUser.userid) },
   );
+  if (!checkAbleToBeAccessed) {
+    return (
+      <div className="flex flex-col justify-center abesolute inset-0 text-center h-screen w-full">
+        <div className="flex flex-col justify-center text-center">
+          <span className="text-3xl md:text-5xl lg:text-7xl">⊙⁠﹏⁠⊙</span>
+          <span className="text-xl md:text-2xl mb-3">Aw snap!</span>
+          <span>You don't have access to this team!</span>
+          <span>
+            Click{" "}
+            <Link
+              href="/manage/selectTeams"
+              className="text-blue-600 hover:text-blue-600/70 transition-all duration-300"
+            >
+              here
+            </Link>{" "}
+            to select your team org.
+          </span>
+        </div>
+      </div>
+    );
+  }
   return (
     <Client
       userId={String(getUser.userid)}
