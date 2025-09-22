@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const GET = async () => {
-  const cookie = await cookies();
+  const cookie = cookies();
   cookie.delete("session");
-  return Response.redirect("/auth/login", 302);
+  redirect("/auth/login");
 };
