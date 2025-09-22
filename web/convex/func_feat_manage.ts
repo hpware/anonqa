@@ -71,3 +71,17 @@ export const checkAbleToBeAccessed = query({
     return query[0].controlableUsers.includes(args.userId);
   },
 });
+
+export const getJoinCodeData = query({
+  args: {
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query("joinCodes")
+      .withIndex("teamId", (q) => q.eq("teamId", args.teamId))
+      .collect();
+
+    return rows.map((row) => row.code);
+  },
+});

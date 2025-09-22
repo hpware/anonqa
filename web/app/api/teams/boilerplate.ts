@@ -1,3 +1,4 @@
+// DO NOT USE (THIS IS A BOILERPLATE!)
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { fetchQuery } from "convex/nextjs";

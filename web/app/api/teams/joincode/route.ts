@@ -73,4 +73,21 @@ export const POST = async (request: NextRequest) => {
       },
     );
   }
+  const query = await fetchQuery(api.func_feat_manage.getJoinCodeData, {
+    teamId: body.teamId,
+  });
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data: query,
+      status: 200,
+      message: "",
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
 };

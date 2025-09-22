@@ -34,15 +34,18 @@ import { v4 as uuidv4 } from "uuid";
 export default function SettingsPage({
   host,
   protocol,
+  teamId,
 }: {
   host: string;
   protocol: string;
+  teamId: string;
 }) {
   const router = useRouter();
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
     useState("");
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
   const [customMessages, setCustomMessages] = useState([]);
+  const [joinCodes, setJoinCodes] = useState([]);
   const [enableCustomMessagesPopup, setEnableCustomMessagesPopup] =
     useState<boolean>(false);
 
@@ -50,6 +53,19 @@ export default function SettingsPage({
     {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
     userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
   }); */
+
+  const getJoinCodes = async () => {
+    const req = await fetch("/api/teams/joincode", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        teamId: teamId,
+      }),
+    });
+  };
+  useEffect(() => {});
 
   const revokeJoinCode = async (joinCode: string) => {
     const req = await fetch("/api/teams/joincode/revoke", {
@@ -92,7 +108,7 @@ export default function SettingsPage({
           <div>
             <span>Please set your custom message!</span>
             {customMessages.map((i) => (
-              <div></div>
+              <div key={i}></div>
             ))}
             <div>
               <button>Add a new message!</button>
@@ -191,10 +207,7 @@ export default function SettingsPage({
                       <AlertDialogCancel className="cursor-pointer">
                         Cancel
                       </AlertDialogCancel>
-                      <AlertDialogAction
-                        className="ml-auto"
-                        onClick={() => revokeJoinCode("d")}
-                      >
+                      <AlertDialogAction onClick={() => revokeJoinCode("d")}>
                         Ok
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -208,20 +221,23 @@ export default function SettingsPage({
           <h2 className="text-lg p-2">Users in this team</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center">
             {[
-              "wew",
-              "2",
-              "wew",
-              "2",
-              "wew",
-              "2",
-              "wew",
-              "2",
-              "wew",
-              "2",
+              "wewf",
+              "2r",
+              "weww",
+              "2q",
+              "wqew",
+              "23",
+              "1wew",
+              "2f",
+              "wfew",
+              "w2",
               "wew",
               "2",
             ].map((i) => (
-              <div className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2">
+              <div
+                className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
+                key={i}
+              >
                 <CircleUserIcon />
                 <div className="flex flex-col">
                   <span>Howard</span>
@@ -270,7 +286,6 @@ export default function SettingsPage({
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        className="ml-auto"
                         onClick={() => revokeAccountAccess("dd")}
                       >
                         Ok

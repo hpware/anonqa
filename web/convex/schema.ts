@@ -36,12 +36,8 @@ export default defineSchema({
         url: v.optional(v.string()),
       }),
     ),
-    moderation: v.optional(v.boolean()), // "GOOD", "BAD", or undefined for unevaluated
+    moderation: v.optional(v.boolean()),
   }).index("msgId", ["msgId"]),
-  // legacy better auth stuff
-  //loggedInUsers: defineTable({
-  // Fields are optional
-  //}),
   login: defineTable({
     email: v.string(), // email
     userId: v.string(), // uuid
@@ -57,7 +53,7 @@ export default defineSchema({
   })
     .index("by_session", ["sessionId"])
     .index("by_account", ["userAccount"]),
-  //featuresOn: defineTable({}),
+  //featuresOn: defineTable({}), // beta?
   joinCodes: defineTable({
     code: v.string(),
     teamId: v.string(),
