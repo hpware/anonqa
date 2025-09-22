@@ -22,14 +22,6 @@ export default function Page({ slug }: { slug: string }) {
   const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
   const [reportingData, setReportingData] = useState();
   const [loading, setLoading] = useState();
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    setUserData(user && user.length > 0 ? user : "");
-    setLoginId(token ?? "");
-  }, [router]);
-
   const getUserDetails = useQuery(api.func_users.data, { slug: userData });
   const messages =
     useQuery(api.func_qa.getAllToUser, {
@@ -43,7 +35,7 @@ export default function Page({ slug }: { slug: string }) {
   return (
     <div className={`transition-colors`}>
       <div className="flex flex-row w-fit m-auto gap-2"></div>
-
+      <div></div>
       <div className="w-[80%] m-auto p-2 geist-mono">
         <Table>
           <TableCaption>Messages</TableCaption>

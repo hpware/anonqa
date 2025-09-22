@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
 import generateRandomString from "@/lib/randomGenString";
+import { v4 as uuidv4 } from "uuid";
 
 export const getTeams = query({
   args: { userId: v.string() },
@@ -85,5 +86,26 @@ export const getJoinCodeData = query({
       .collect();
 
     return rows.map((row) => row.code);
+  },
+});
+
+export const createNewTeam = mutation({
+  args: { team_handle: v.string(), team_name: v.string() },
+  handler: async (ctx, args) => {
+    const teamId = uuidv4();
+    await ctx.db.insert("users", {
+      imageUrl: "/assets/default.png",
+      displayName: args.team_name,
+      controlableUsers: [],
+      userId: teamId,
+      deleted: false,
+      handle: args.team_handle,
+      setCustomRandomMessages: false,
+      pageType: "1",
+      defaultMessages: [],
+      customShortUrlSlug: "",
+      onBoarded: true,
+    });
+    return teamId;
   },
 });

@@ -17,8 +17,29 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function Page({ teams }: { teams: Doc<"users">[] }) {
+  // dialog
   const [openCreationDialog, setOpenCreationDialog] = useState<boolean>(false);
   const [openJoinDialog, setOpenJoinDialog] = useState<boolean>(false);
+  const [createNewTeamTextBoxes, setCreateNewTeamTextBoxes] = useState({
+    team_handle: "",
+    team_name: "",
+  });
+  const [joinCodeTextBox, setJoinCodeTextBox] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const sendCreateRequest = async () => {
+    setLoading(true);
+    const req = await fetch("/api/teams/createTeam", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(createNewTeamTextBoxes),
+    });
+    if (!req.ok) {
+    }
+    setCreateNewTeamTextBoxes({ team_handle: "", team_name: "" });
+  };
+  const sendJoinRequest = async () => {};
   return (
     <>
       <div>
@@ -78,11 +99,25 @@ export default function Page({ teams }: { teams: Doc<"users">[] }) {
                   <input
                     type="text"
                     className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                    value={createNewTeamTextBoxes.team_name}
+                    onChange={(e) =>
+                      setCreateNewTeamTextBoxes({
+                        team_handle: createNewTeamTextBoxes.team_handle,
+                        team_name: e.target.value,
+                      })
+                    }
                   />
                   <span>Please enter your team handle!</span>
                   <input
                     type="text"
                     className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                    value={createNewTeamTextBoxes.team_handle}
+                    onChange={(e) =>
+                      setCreateNewTeamTextBoxes({
+                        team_handle: e.target.value,
+                        team_name: createNewTeamTextBoxes.team_name,
+                      })
+                    }
                   />
                 </div>
               </AlertDialogDescription>
@@ -91,7 +126,10 @@ export default function Page({ teams }: { teams: Doc<"users">[] }) {
               <AlertDialogCancel className="cursor-pointer">
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction className="transition-all duration-300 cursor-pointer">
+              <AlertDialogAction
+                className="transition-all duration-300 cursor-pointer"
+                onClick={sendCreateRequest}
+              >
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -107,6 +145,8 @@ export default function Page({ teams }: { teams: Doc<"users">[] }) {
                   <input
                     type="text"
                     className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                    value={joinCodeTextBox}
+                    onChange={(e) => setJoinCodeTextBox(e.target.value)}
                   />
                 </div>
               </AlertDialogDescription>
@@ -115,7 +155,10 @@ export default function Page({ teams }: { teams: Doc<"users">[] }) {
               <AlertDialogCancel className="cursor-pointer">
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction className="transition-all duration-300 cursor-pointer">
+              <AlertDialogAction
+                className="transition-all duration-300 cursor-pointer"
+                onClick={sendJoinRequest}
+              >
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>

@@ -38,7 +38,7 @@ export const POST = async (response: NextRequest) => {
         JSON.stringify({
           error: true,
           status: 200,
-          message: "This email is linked to an account.",
+          message: "This email is already linked to an account.",
         }),
         {
           status: 200,

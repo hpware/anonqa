@@ -24,6 +24,9 @@ When Cloudflare Turnstil is on, the cloudflare turnstile function take a few sec
 1. A better UI experence to the user
 2. The user submition is faster to submit.
 
+### Selecting teams panel
+This is only a UI issue. It does not affect the use of the dashboard. (yes im writing this like pretty late sooo i have no time to polish :\
+
 
 ## PRIOTIZE!
 1. the manage panel!
