@@ -101,7 +101,7 @@ export const POST = async (response: NextRequest) => {
       );
     }
     cookieStore.set("session", saveAndGetQuery.session, {
-      httpOnly: true,
+      //httpOnly: true,
       expires: saveAndGetQuery.expiresAt,
     });
 
