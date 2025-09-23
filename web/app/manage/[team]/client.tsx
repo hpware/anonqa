@@ -27,7 +27,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-export default function Page({ slug }: { slug: string }) {
+export default function Page({
+  slug,
+  host,
+  protocol,
+}: {
+  slug: string;
+  host: string;
+  protocol: string;
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<string>("unanswered");
 
@@ -41,22 +49,49 @@ export default function Page({ slug }: { slug: string }) {
     teamId: slug,
   });
 
+  const ignoreTextAction = async (id: string) => {
+    const req = await fetch("/api/team/submit_qa", {
+      method: "POST",
+      headers: {
+        "Content-Type": "applications/json",
+      },
+      body: JSON.stringify({ type: "none", q_id: id, ans: "" }),
+    });
+  };
+  const unansweredMessages = messages.filter(
+    (i) => !i.answered && i.moderation,
+  );
+  const answeredMessages = messages.filter((i) => i.answered && i.moderation);
+  const filteredMessages = messages.filter((i) => !i.moderation);
+
   return (
     <div className={`transition-colors`}>
       <div className="flex flex-row w-fit m-auto gap-2"></div>
       <div className="justify-center text-center flex flex-col items-center [&_a]:text-blue-500 [&_a]:hover:text-blue-500/70">
         <span>Share your link to the world!</span>
-        <span className="ph-no-capture">
-          http://localhost:3000/ask/{getTeamSlugData}
-        </span>
+        <code className="ph-no-capture p-2 bg-gray-300 rounded">
+          {protocol}//{host}/ask/{getTeamSlugData}
+        </code>
       </div>
       <div className="flex fle-row justify-center text-center gap-2 pt-2">
         {/**tabs*/}
-        <Button onClick={() => setMode("unanswered")}>Unanswered</Button>
-        <Button onClick={() => setMode("answered")}>Answered</Button>
+        <Button
+          onClick={() => setMode("unanswered")}
+          className={`${mode === "unanswered" && "bg-gray-700"}`}
+        >
+          Unanswered
+        </Button>
+        <Button
+          onClick={() => setMode("answered")}
+          className={`${mode === "answered" && "bg-gray-700"}`}
+        >
+          Answered
+        </Button>
         <AlertDialog>
           <AlertDialogTrigger>
-            <Button>Filtered</Button>
+            <Button className={`${mode === "filtered" && "bg-gray-700"}`}>
+              Filtered
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -87,53 +122,147 @@ export default function Page({ slug }: { slug: string }) {
           <TableCaption>Messages</TableCaption>
           <TableHeader>
             <TableRow className="border-b dark:border-gray-700">
-              <TableHead className="w-[100px]">MsgID</TableHead>
               <TableHead>Question</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           {messages.length !== 0 && (
             <TableBody>
-              {messages.map((i: any, index: number) => (
-                <TableRow key={index} className="border-b dark:border-gray-700">
-                  <TableCell className="font-medium">{i.msgId}</TableCell>
-                  <TableCell>{i.msg}</TableCell>
-                  <TableCell className="flex flex-row gap-2">
-                    <Link href={`/manage/${slug}/answer/${i.msgId}`}>
-                      <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                        Answer
-                      </button>
-                    </Link>
-
-                    <AlertDialog>
-                      <AlertDialogTrigger>
+              {mode === "unanswered" &&
+                unansweredMessages.map((i: any, index: number) => (
+                  <TableRow
+                    key={index}
+                    className="border-b dark:border-gray-700"
+                  >
+                    <TableCell className="font-medium">{i.msg}</TableCell>
+                    <TableCell className="flex flex-row gap-2">
+                      <Link href={`/manage/${slug}/answer/${i.msgId}`}>
                         <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                          Ignore
+                          Answer
                         </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Ignore message</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            <div className="flex flex-col">
-                              Note that you will not be able to view this
-                              message again!
-                            </div>
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="cursor-pointer">
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction className="transition-all duration-300 cursor-pointer">
-                            Ok
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger>
+                          <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                            Ignore
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Ignore message</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              <div className="flex flex-col">
+                                Note that you will not be able to view this
+                                message again!
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="cursor-pointer">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              className="transition-all duration-300 cursor-pointer"
+                              onClick={() => ignoreTextAction(i.msgId)}
+                            >
+                              Ok
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {mode === "answered" &&
+                answeredMessages.map((i: any, index: number) => (
+                  <TableRow
+                    key={index}
+                    className="border-b dark:border-gray-700"
+                  >
+                    <TableCell className="font-medium">{i.msg}</TableCell>
+                    <TableCell className="flex flex-row gap-2">
+                      <Link href={`/manage/${slug}/answer/${i.msgId}`}>
+                        <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                          Answer
+                        </button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger>
+                          <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                            Ignore
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Ignore message</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              <div className="flex flex-col">
+                                Note that you will not be able to view this
+                                message again!
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="cursor-pointer">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              className="transition-all duration-300 cursor-pointer"
+                              onClick={() => ignoreTextAction(i.msgId)}
+                            >
+                              Ok
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {mode === "filtered" &&
+                filteredMessages.map((i: any, index: number) => (
+                  <TableRow
+                    key={index}
+                    className="border-b dark:border-gray-700"
+                  >
+                    <TableCell className="font-medium">{i.msg}</TableCell>
+                    <TableCell className="flex flex-row gap-2">
+                      <Link href={`/manage/${slug}/answer/${i.msgId}`}>
+                        <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                          Answer
+                        </button>
+                      </Link>
+                      <AlertDialog>
+                        <AlertDialogTrigger>
+                          <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+                            Ignore
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Ignore message</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              <div className="flex flex-col">
+                                Note that you will not be able to view this
+                                message again!
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="cursor-pointer">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              className="transition-all duration-300 cursor-pointer"
+                              onClick={() => ignoreTextAction(i.msgId)}
+                            >
+                              Ok
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           )}
         </Table>

@@ -9,9 +9,6 @@ export const POST = async (request: NextRequest) => {
     const body: any = await request.json();
     const cookie = await cookies();
     const session = cookie.get("session")?.value;
-    console.log(body.team_handle);
-    console.log(body.team_name);
-    console.log(session);
     if (!(body.team_handle && body.team_name && session)) {
       return new Response(
         JSON.stringify({

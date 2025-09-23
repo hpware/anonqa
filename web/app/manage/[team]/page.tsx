@@ -1,5 +1,6 @@
 import Client from "./client";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 export default async function Page(props: {
   params: Promise<{ team: string }>;
 }) {
@@ -10,5 +11,10 @@ export default async function Page(props: {
   if (!uuidRegex.test(team)) {
     redirect("/auth/logout");
   }
-  return <Client slug={team} />;
+  const headersList = await headers();
+  const url =
+    headersList.get("referer") || headersList.get("x-forwarded-proto") + "://";
+  const protocol = url.split("://")[0] + ":";
+  const host = headersList.get("host") || "localhost:3000";
+  return <Client slug={team} protocol={protocol} host={host} />;
 }

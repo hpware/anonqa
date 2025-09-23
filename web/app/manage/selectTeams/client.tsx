@@ -24,7 +24,6 @@ export default function Page({ userid }: { userid: string }) {
     useQuery(api.func_feat_manage.getTeams, {
       userId: String(userid),
     }) || [];
-  console.log(teams);
   // dialog
   const [openCreationDialog, setOpenCreationDialog] = useState<boolean>(false);
   const [openJoinDialog, setOpenJoinDialog] = useState<boolean>(false);
