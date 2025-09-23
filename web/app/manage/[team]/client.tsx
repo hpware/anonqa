@@ -50,19 +50,26 @@ export default function Page({
   });
 
   const ignoreTextAction = async (id: string) => {
-    const req = await fetch("/api/team/submit_qa", {
+    await fetch("/api/teams/submit_qa", {
       method: "POST",
       headers: {
         "Content-Type": "applications/json",
       },
-      body: JSON.stringify({ type: "none", q_id: id, ans: "" }),
+      body: JSON.stringify({
+        type: "ignore",
+        q_id: id,
+        ans: "filler",
+        team_id: slug,
+      }),
     });
   };
   const unansweredMessages = messages.filter(
-    (i) => !i.answered && i.moderation,
+    (i) => !i.answered && i.moderation && !i.ignore,
   );
-  const answeredMessages = messages.filter((i) => i.answered && i.moderation);
-  const filteredMessages = messages.filter((i) => !i.moderation);
+  const answeredMessages = messages.filter(
+    (i) => i.answered && i.moderation && !i.ignore,
+  );
+  const filteredMessages = messages.filter((i) => !i.moderation && !i.ignore);
 
   return (
     <div className={`transition-colors`}>

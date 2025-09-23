@@ -43,27 +43,4 @@ export const POST = async (request: NextRequest) => {
       },
     );
   }
-  const checkteamaccess = await fetchQuery(
-    api.func_feat_manage.checkAbleToBeAccessed,
-    {
-      userId: String(checkSession.userid),
-      teamId: body.teamId,
-    },
-  );
-  if (!checkteamaccess) {
-    return new Response(
-      JSON.stringify({
-        success: false,
-        data: [],
-        status: 403,
-        message: "You don't have access to this team!",
-      }),
-      {
-        status: 403,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-  }
 };

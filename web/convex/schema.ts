@@ -33,6 +33,7 @@ export default defineSchema({
     msg: v.string(),
     answered: v.boolean(),
     answer: v.optional(v.string()),
+    ignore: v.optional(v.boolean()),
     linkedPosts: v.optional(
       v.object({
         platform: v.string(),

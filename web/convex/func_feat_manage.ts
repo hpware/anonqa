@@ -26,28 +26,27 @@ export const getTeams = query({
 });
  */
 
-/*export const addUserIntoTeam = mutation({
+export const addUserIntoTeam = mutation({
   args: {
     userId: v.string(),
     teamId: v.string(),
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
+    const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
-    if (existing[0].controlableUsers.includes(args.teamId)) {
-      return {
-        success: false,
-        message: "User exists.",
-      };
+    if (!user) {
+      return { success: false, message: "User not found." };
     }
-    const newUserList = [...existing[0].controlableUsers, args.userId];
-    await ctx.db.replace("users", {
-      controlableUsers: newUserList,
-    });
+    if (user[0].controlableUsers?.includes(args.userId)) {
+      return { success: false, message: "User already in team." };
+    }
+    const newUserList = [...(user[0].controlableUsers || []), args.userId];
+    await ctx.db.patch(user[0]._id, { controlableUsers: newUserList });
+    return { success: true };
   },
-}); */
+});
 
 export const createJoinCode = mutation({
   args: { teamId: v.string() },
@@ -107,5 +106,22 @@ export const createNewTeam = mutation({
       onBoarded: true,
     });
     return teamId;
+  },
+});
+
+export const setDataAsIgnored = mutation({
+  args: { msgId: v.string() },
+  handler: async (ctx, args) => {
+    const data = await ctx.db
+      .query("qas")
+      .filter((q) => q.eq(q.field("msgId"), args.msgId))
+      .collect();
+    console.log(data);
+    if (!data[0]) {
+      throw new Error("id not found");
+    }
+    await ctx.db.patch(data[0]._id, {
+      ignore: true,
+    });
   },
 });

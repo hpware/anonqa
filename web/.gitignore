@@ -42,3 +42,4 @@ next-env.d.ts
 *.old
 
 .env.local
+!.env.example
