@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 
 export default function Page({ teams }: { teams: Doc<"users">[] }) {
   // dialog
@@ -77,11 +78,11 @@ export default function Page({ teams }: { teams: Doc<"users">[] }) {
             >
               Join
             </Button>
-            <Link href="/auth/logout">
+            <a href="/auth/logout">
               <Button className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg">
                 <LogOutIcon />
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>

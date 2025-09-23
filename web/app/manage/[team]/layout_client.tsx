@@ -114,10 +114,6 @@ export default function ManagementPageLayout({
       text: "Settings",
       link: `/manage/${slug}/settings`,
     },
-    {
-      text: "Logout",
-      link: `/auth/logout`,
-    },
   ];
 
   return (
@@ -162,6 +158,11 @@ export default function ManagementPageLayout({
                 </button>
               </Link>
             ))}
+            <a href="/auth/logout" onClick={() => setOpenMobileMenu(false)}>
+              <button className="w-48 px-6 py-4 text-lg bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                Logout
+              </button>
+            </a>
           </div>
         </div>
         <div

@@ -8,9 +8,11 @@ import { redirect } from "next/navigation";
 export default async function Page() {
   const cookie = await cookies();
   const session = String(cookie.get("session")?.value) || "";
+  console.log(session);
   const getUser = await fetchQuery(api.func_users.verifySession, {
     currentSession: session,
   });
+  console.log(getUser);
   if (!getUser.linked) {
     // force to logout action to clear session
     redirect("/auth/logout");
