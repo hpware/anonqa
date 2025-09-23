@@ -8,14 +8,7 @@ export const POST = async (request: NextRequest) => {
   const body: any = await request.json();
   const cookie = await cookies();
   const session = cookie.get("session")?.value;
-  if (
-    !(
-      body.teamId &&
-      session &&
-      isValidUUID(body.teamId) &&
-      isValidUUID(session)
-    )
-  ) {
+  if (!(body.teamId && session)) {
     return new Response(
       JSON.stringify({
         success: false,

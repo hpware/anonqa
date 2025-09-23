@@ -33,3 +33,6 @@ This is only a UI issue. It does not affect the use of the dashboard. (yes im wr
 2. LOGIN SYSTEM (SUPER IMPORTANT!!!)
 3. the safety system (done)
 4. polish the UI
+
+## NOTES!
+DO NOT USE THE NATIVE `<Link>` component, this componenet will PRELOAD the page (which if its a FUCKING LOGOUT ROUTE) it will break, (i spent too much time debugging this garbage)

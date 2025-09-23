@@ -9,9 +9,10 @@ export const POST = async (request: NextRequest) => {
     const body: any = await request.json();
     const cookie = await cookies();
     const session = cookie.get("session")?.value;
-    if (
-      !(body.team_handle && body.team_name && session && isValidUUID(session))
-    ) {
+    console.log(body.team_handle);
+    console.log(body.team_name);
+    console.log(session);
+    if (!(body.team_handle && body.team_name && session)) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -46,11 +47,31 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
+    const checkIfHandleIsUsed = await fetchQuery(api.func_users.data, {
+      slug: body.team_handle,
+    });
+    if (checkIfHandleIsUsed !== null) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          teamId: null,
+          status: 200,
+          message: "This handle has been used before!",
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
     const createNewTeamAction = await fetchMutation(
       api.func_feat_manage.createNewTeam,
       {
         team_handle: body.team_handle,
         team_name: body.team_name,
+        user_id: String(checkSession.userid),
       },
     );
     return new Response(

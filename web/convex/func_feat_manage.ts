@@ -90,13 +90,13 @@ export const getJoinCodeData = query({
 });
 
 export const createNewTeam = mutation({
-  args: { team_handle: v.string(), team_name: v.string() },
+  args: { team_handle: v.string(), team_name: v.string(), user_id: v.string() },
   handler: async (ctx, args) => {
     const teamId = uuidv4();
     await ctx.db.insert("users", {
       imageUrl: "/assets/default.png",
       displayName: args.team_name,
-      controlableUsers: [],
+      controlableUsers: [args.user_id],
       userId: teamId,
       deleted: false,
       handle: args.team_handle,
