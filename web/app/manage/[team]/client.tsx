@@ -130,7 +130,9 @@ export default function Page({
           <TableHeader>
             <TableRow className="border-b dark:border-gray-700">
               <TableHead>Question</TableHead>
-              <TableHead>Actions</TableHead>
+              {mode === "answered" && <TableHead>Type</TableHead>}
+              {mode === "answered" && <TableHead>Answer</TableHead>}
+              <TableHead className="align-left">Actions</TableHead>
             </TableRow>
           </TableHeader>
           {messages.length !== 0 && (

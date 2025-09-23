@@ -45,6 +45,7 @@ export default function Page({ slug }: { slug: string }) {
         type: selectedPlatform,
         q_id: slug,
         ans: answer,
+        team_id: slug,
       }),
     });
     setSuccess(true);
