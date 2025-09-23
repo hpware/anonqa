@@ -50,7 +50,7 @@ export const POST = async (request: NextRequest) => {
     const checkIfHandleIsUsed = await fetchQuery(api.func_users.data, {
       slug: body.team_handle,
     });
-    if (checkIfHandleIsUsed === []) {
+    if (JSON.stringify(checkIfHandleIsUsed) === "[]") {
       return new Response(
         JSON.stringify({
           success: false,
