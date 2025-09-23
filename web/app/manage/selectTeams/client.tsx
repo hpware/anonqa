@@ -16,8 +16,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-export default function Page({ teams }: { teams: Doc<"users">[] }) {
+export default function Page({ userid }: { userid: string }) {
+  const teams: Doc<"users">[] =
+    useQuery(api.func_feat_manage.getTeams, {
+      userId: String(userid),
+    }) || [];
+  console.log(teams);
   // dialog
   const [openCreationDialog, setOpenCreationDialog] = useState<boolean>(false);
   const [openJoinDialog, setOpenJoinDialog] = useState<boolean>(false);

@@ -17,10 +17,6 @@ export default async function Page() {
     // force to logout action to clear session
     redirect("/auth/logout");
   }
-  const teams = await fetchQuery(api.func_feat_manage.getTeams, {
-    userId: String(getUser.userid),
-  });
-  console.log(teams);
 
-  return <Client teams={teams} />;
+  return <Client userid={String(getUser.userid)} />;
 }

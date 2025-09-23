@@ -176,6 +176,11 @@ export default function ManagementPageLayout({
                 </button>
               </Link>
             ))}
+            <a href="/auth/logout">
+              <button className="px-3 py-2 text-sm sm:text-base bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                Logout
+              </button>
+            </a>
             <span className="geint-sans">You are logged in as {fname}!</span>
           </div>
           <div></div>
