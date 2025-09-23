@@ -106,7 +106,7 @@ export default function ClientPage({
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 ph-no-capture"
               >
                 First Name
               </label>
@@ -117,7 +117,7 @@ export default function ClientPage({
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm ph-no-capture"
                 disabled={loading}
               />
             </div>
@@ -135,7 +135,7 @@ export default function ClientPage({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm ph-no-capture"
                 disabled={loading}
               />
             </div>

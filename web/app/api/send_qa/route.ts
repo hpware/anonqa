@@ -72,7 +72,7 @@ export const POST = async (request: NextRequest) => {
     ],
   });
   const status = String(completion.choices[0].message);
-  console.log(completion);
+  console.dir(status, { depth: null });
   console.log(status);
   let safe = false; // other models
   if (status == "ALLOW") {

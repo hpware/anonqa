@@ -45,6 +45,7 @@ export default defineSchema({
     userId: v.string(), // uuid
     fname: v.string(), // first name
     passwordHashed: v.string(), // argon2 + sha512'd password
+    deleted: v.optional(v.boolean()),
   })
     .index("userId", ["userId"])
     .index("by_email", ["email"]),

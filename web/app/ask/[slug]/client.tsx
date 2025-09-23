@@ -137,7 +137,7 @@ export default function Client({
         </div>
       ) : !submitting ? (
         <div className="justify-center m-auto flex flex-col w-full md:w-md absolute inset-0">
-          <div className="justify-center m-auto flex flex-col w-full md:w-md">
+          <div className="justify-center m-auto flex flex-col w-full md:w-md ph-no-capture">
             <div className="flex flex-row">
               <img
                 alt="Profile Picture"
@@ -150,7 +150,7 @@ export default function Client({
                 <span>@{thisUser.handle}</span>
               </div>
             </div>
-            <div className="relative md:m-0 m-2">
+            <div className="relative md:m-0 m-2 ph-no-capture">
               <textarea
                 required
                 className="rounded p-1 mt-1 h-[150px] border w-full pr-14 resize-none"

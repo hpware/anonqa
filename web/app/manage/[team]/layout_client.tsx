@@ -148,7 +148,7 @@ export default function ManagementPageLayout({
             </button>
           </div>
           <div className="flex flex-col items-center justify-center gap-6 h-full pb-20">
-            <span className="text-lg font-medium mb-4">
+            <span className="text-lg font-medium mb-4 ph-no-capture">
               You are logged in as {fname}!
             </span>
             {links.map((i) => (

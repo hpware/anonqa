@@ -84,7 +84,7 @@ export default function ClientPage({
                 required
                 value={email}
                 onChange={(e) => setemail(e.target.value)}
-                className="mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
+                className="ph-no-capture mt-1 block w-full rounded-md border px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
                 disabled={loading}
               />
             </div>
@@ -102,7 +102,7 @@ export default function ClientPage({
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
+                className="ph-no-capture mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-gray-500 focus:outline-none focus:ring-gray-500 sm:text-sm"
                 disabled={loading}
               />
             </div>

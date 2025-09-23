@@ -98,6 +98,30 @@ export const data = query({
   },
 });
 
+export const data_dash = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.slug))
+      .collect();
+    if (result.length === 0) {
+      return [];
+    }
+    return [
+      {
+        deleted: result[0].deleted,
+        displayName: result[0].displayName,
+        handle: result[0].handle,
+        imageUrl: result[0].imageUrl,
+        pageType: result[0].pageType,
+        setCustomRandomMessages: result[0].setCustomRandomMessages,
+        userId: result[0].userId,
+      },
+    ];
+  },
+});
+
 export const specialSelections = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -179,6 +203,7 @@ export const createLoginAccount = mutation({
         userId: generateUserID,
         fname: args.fname, // first name btw
         passwordHashed: args.password,
+        deleted: false,
       });
       return {
         success: true,
@@ -264,7 +289,14 @@ export const getFname = query({
   },
 });
 
-export const setUserAsDeleted = mutation({
-  args: {},
-  handler: async (ctx, args) => {},
+export const getTeamSlugViaTeamId = query({
+  args: { teamId: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    if (!query) return null;
+    return query[0].handle;
+  },
 });

@@ -151,7 +151,7 @@ export default function SettingsPage({
                     this code is ever leaked, someone with this code can add
                     into your team!
                   </span>
-                  <code className="mx-0 my-auto overflow-x-scroll whitespace-nowrap py-2 px-1 -translate-x-5">
+                  <code className="mx-0 my-auto overflow-x-scroll whitespace-nowrap py-2 px-1 -translate-x-5 ph-no-capture">
                     {`sinv_d_${generateRandomString(40, "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")}`}
                   </code>
                 </div>
@@ -164,7 +164,7 @@ export default function SettingsPage({
         </AlertDialog>
         <div className="">
           <h2>Currently active join codes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-1 max-h-1/2 overflow-y-scroll">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-1 max-h-1/2 overflow-y-scroll ph-no-capture">
             {[
               "wewf",
               "2r",
@@ -241,7 +241,7 @@ export default function SettingsPage({
         </div>
         <div className="content-center justify-center items-center">
           <h2 className="text-lg p-2">Users in this team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center ph-no-capture">
             {[
               "wewf",
               "2r",
@@ -395,7 +395,7 @@ export default function SettingsPage({
       </div>
       <div>
         <h2 className="text-2xl">Change account settings</h2>
-        <AlertDialog onOpenChange={clearTextBoxState}>
+        {/**<AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
             <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
               Delete your account
@@ -442,7 +442,7 @@ export default function SettingsPage({
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
       </div>
     </div>
   );

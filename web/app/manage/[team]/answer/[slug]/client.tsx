@@ -35,12 +35,19 @@ export default function Page({ slug }: { slug: string }) {
     { scope: selectionsPreviewInterfaceRef },
   );
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    setUserData(user && user.length > 0 ? user : "");
-    setLoginId(token ?? "");
-  }, [router]);
+  const sendUpdateToCloud = async () => {
+    const req = await fetch("/api/teams/submit_qa", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: selectedPlatform,
+        q_id: slug,
+      }),
+    });
+    setSuccess(true);
+  };
 
   const message = useQuery(api.func_qa.getViaId, { id: slug }) || [];
 
@@ -127,7 +134,7 @@ export default function Page({ slug }: { slug: string }) {
   ];
 
   return (
-    <div>
+    <div className="ph-no-capture">
       {false ? (
         <div className="flex flex-col justify-center text-center absolute inset-0">
           <span className="text-xl">Success!!!! (test only)</span>
@@ -192,9 +199,7 @@ export default function Page({ slug }: { slug: string }) {
           <div>
             <button
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors"
-              onClick={() => {
-                setSuccess(true);
-              }}
+              onClick={sendUpdateToCloud}
             >
               {selectedPlatform === "threads"
                 ? "Post & Save"
