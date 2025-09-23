@@ -32,6 +32,7 @@ export default defineSchema({
     toUser: v.string(), // teamId
     msg: v.string(),
     answered: v.boolean(),
+    answer: v.optional(v.string()),
     linkedPosts: v.optional(
       v.object({
         platform: v.string(),

@@ -29,11 +29,8 @@ import { Button } from "@/components/ui/button";
 
 export default function Page({ slug }: { slug: string }) {
   const router = useRouter();
-  const [userData, setUserData] = useState<string>("");
-  const [loginId, setLoginId] = useState<string>("");
-  const [flaggingFeat, setFlaggingFeat] = useState<boolean>(false);
-  const [reportingData, setReportingData] = useState();
-  const [loading, setLoading] = useState();
+  const [mode, setMode] = useState<string>("unanswered");
+
   const getUserDetails = useQuery(api.func_users.data_dash, { slug: slug });
   const messages =
     useQuery(api.func_qa.getAllToUser, {
@@ -55,8 +52,8 @@ export default function Page({ slug }: { slug: string }) {
       </div>
       <div className="flex fle-row justify-center text-center gap-2 pt-2">
         {/**tabs*/}
-        <Button>Unanswered</Button>
-        <Button>Answered</Button>
+        <Button onClick={() => setMode("unanswered")}>Unanswered</Button>
+        <Button onClick={() => setMode("answered")}>Answered</Button>
         <AlertDialog>
           <AlertDialogTrigger>
             <Button>Filtered</Button>
@@ -75,7 +72,10 @@ export default function Page({ slug }: { slug: string }) {
               <AlertDialogCancel className="cursor-pointer">
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction className="bg-red-500 hover:bg-red-600/70 transition-all duration-300 cursor-pointer">
+              <AlertDialogAction
+                className="bg-red-500 hover:bg-red-600/70 transition-all duration-300 cursor-pointer"
+                onClick={() => setMode("filtered")}
+              >
                 Ok
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -89,8 +89,6 @@ export default function Page({ slug }: { slug: string }) {
             <TableRow className="border-b dark:border-gray-700">
               <TableHead className="w-[100px]">MsgID</TableHead>
               <TableHead>Question</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Flagged?</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -100,8 +98,6 @@ export default function Page({ slug }: { slug: string }) {
                 <TableRow key={index} className="border-b dark:border-gray-700">
                   <TableCell className="font-medium">{i.msgId}</TableCell>
                   <TableCell>{i.msg}</TableCell>
-                  <TableCell>{i.answered ? "已回答" : "尚未回答"}</TableCell>
-                  <TableCell>No</TableCell>
                   <TableCell className="flex flex-row gap-2">
                     <Link href={`/manage/${slug}/answer/${i.msgId}`}>
                       <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">

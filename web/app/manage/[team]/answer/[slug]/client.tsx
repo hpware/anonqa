@@ -44,6 +44,7 @@ export default function Page({ slug }: { slug: string }) {
       body: JSON.stringify({
         type: selectedPlatform,
         q_id: slug,
+        ans: answer,
       }),
     });
     setSuccess(true);

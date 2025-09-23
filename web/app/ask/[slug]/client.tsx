@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Turnstile } from "@/components/turnstile";
 import { ArrowBigLeftDashIcon, DicesIcon, SendIcon } from "lucide-react";
 import gsap from "gsap";
+import { Metadata } from "next";
 
 export default function Client({
   slug,
@@ -15,8 +16,6 @@ export default function Client({
   user: any[];
   captchaFeat: boolean;
 }) {
-  // Default
-  const defultImage = "/assets/default.png";
   // Values
   const [placeholder, setPlaceholder] = useState<string>("");
   const [ptavalue, setPtavalue] = useState<string>("");
@@ -29,6 +28,7 @@ export default function Client({
     text: "",
     randomizing: false,
   });
+
   const [randomizedMesssages, setRandomizedMessages] = useState([
     "Hello World",
     "This is really fun!",
@@ -55,8 +55,32 @@ export default function Client({
     });
   }, []);
   useEffect(() => {
-    setPlaceholder("A frame! This is filtered btw");
+    setPlaceholder("unknown placeholder");
   }, []);
+  useEffect(() => {
+    // Find existing favicon or create new link element
+    let link: HTMLLinkElement | null =
+      document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    // Update favicon
+    link.href = thisUser.imageUrl;
+
+    // Optional: Add apple touch icon
+    let appleIcon: HTMLLinkElement | null = document.querySelector(
+      "link[rel='apple-touch-icon']",
+    );
+    if (!appleIcon) {
+      appleIcon = document.createElement("link");
+      appleIcon.rel = "apple-touch-icon";
+      document.head.appendChild(appleIcon);
+    }
+    appleIcon.href = thisUser.imageUrl;
+  }, []);
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (lastStatus.randomizing) {
       setLastStatus({
@@ -141,7 +165,7 @@ export default function Client({
             <div className="flex flex-row">
               <img
                 alt="Profile Picture"
-                src={imageNotAvailable ? defultImage : thisUser.imageUrl}
+                src={thisUser.imageUrl}
                 className="w-12 h-12 rounded-full p-1"
                 onError={changeImage}
               />
