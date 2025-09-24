@@ -35,6 +35,7 @@ export default defineSchema({
     answered: v.boolean(),
     answer: v.optional(v.string()),
     ignore: v.optional(v.boolean()),
+    type: v.optional(v.string()),
     linkedPosts: v.optional(
       v.object({
         platform: v.string(),

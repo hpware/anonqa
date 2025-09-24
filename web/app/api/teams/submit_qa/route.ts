@@ -42,6 +42,7 @@ export const POST = async (request: NextRequest) => {
         teamId: body.team_id,
       },
     );
+    console.log(checkteamaccess);
     if (!checkteamaccess) {
       return new Response(
         JSON.stringify({
@@ -76,7 +77,40 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
-    //const updateData = await fetchMutation(api.func_feat_manage.)
+    const updateData = await fetchMutation(api.func_qa.saveQAFinalAnswer, {
+      type: body.type,
+      msgId: body.q_id,
+      answer: body.ans,
+      teamId: body.team_id,
+    });
+    if (!updateData.success) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          status: 500,
+          message: updateData.msg,
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        success: true,
+        status: 200,
+        message: "",
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
   } catch (e: any) {
     console.error(e);
     return new Response(
@@ -94,6 +128,3 @@ export const POST = async (request: NextRequest) => {
     );
   }
 };
-
-/**{"type":"text","q_id":"52c0f207-8d0f-4884-a8c4-5e7d4118589e"}
- */

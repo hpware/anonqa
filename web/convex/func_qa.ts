@@ -34,3 +34,39 @@ export const getViaId = query({
       .collect();
   },
 });
+
+export const saveQAFinalAnswer = mutation({
+  args: {
+    msgId: v.string(),
+    teamId: v.string(),
+    answer: v.string(),
+    type: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("qas")
+      .filter((q) => q.eq(q.field("msgId"), args.msgId))
+      .collect();
+    if (query.length === 0) {
+      return {
+        success: false,
+        msg: "MSGID does not exist",
+      };
+    }
+    if (query[0].toUser !== args.teamId) {
+      return {
+        success: false,
+        msg: "MSG does not match to this TEAMID",
+      };
+    }
+    await ctx.db.patch(query[0]._id, {
+      answered: true,
+      answer: args.answer,
+      type: args.type,
+    });
+    return {
+      success: true,
+      msg: "",
+    };
+  },
+});
