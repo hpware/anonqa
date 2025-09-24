@@ -49,15 +49,13 @@ export const addUserIntoTeam = mutation({
 });
 
 export const createJoinCode = mutation({
-  args: { teamId: v.string() },
+  args: { teamId: v.string(), joinId: v.string() },
   handler: async (ctx, args) => {
-    const code = `skin_d_${generateRandomString(10)}`;
     await ctx.db.insert("joinCodes", {
-      code,
+      code: args.joinId,
       teamId: args.teamId,
       used: false,
     });
-    return code;
   },
 });
 
@@ -123,43 +121,6 @@ export const setDataAsIgnored = mutation({
     await ctx.db.patch(data[0]._id, {
       ignore: true,
     });
-  },
-});
-
-function maskJoinCode(code: string): string {
-  // Handle different formats
-  if (!code.includes("_")) {
-    // If no underscore, just mask middle
-    return code.slice(0, 4) + "***" + code.slice(-4);
-  }
-
-  // Split by underscore
-  const parts = code.split("_");
-
-  // Keep prefix intact (sinv_d_)
-  const prefix = parts.slice(0, -1).join("_") + "_";
-
-  // Mask the last part
-  const lastPart = parts[parts.length - 1];
-  const maskedLastPart = lastPart.slice(0, 2) + "***" + lastPart.slice(-2);
-
-  return prefix + maskedLastPart;
-}
-
-export const getAllJoinIdsToATeam = query({
-  args: { teamId: v.string() },
-  handler: async (ctx, args) => {
-    const getTeamViaId = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("userId"), args.teamId))
-      .collect();
-    const getAllJoinIds = await ctx.db
-      .query("joinCodes")
-      .filter((q) => q.eq(q.field("teamId"), getTeamViaId[0].userId))
-      .collect();
-    return getAllJoinIds
-      .filter((i) => !i.used)
-      .map((i) => maskJoinCode(i.code));
   },
 });
 

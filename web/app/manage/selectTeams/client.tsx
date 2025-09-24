@@ -55,7 +55,7 @@ export default function Page({ userid }: { userid: string }) {
           {/* team component */}
           <div className="flex flex-col gap-2 max-h-1/2 overflow-y-scroll noscrollbar ph-no-capture">
             {teams.map((i) => (
-              <Link href={`/manage/${i.userId}/`}>
+              <Link href={`/manage/${i.userId}/`} key={i.userId}>
                 <button className="flex flex-row justify-center text-center align-middle bg-gray-300 hover:bg-gray-300/70 p-3 mx-auto w-fit rounded gap-5 px-12 cursor-pointer duration-300 transition-all border border-black">
                   <img
                     src={i.imageUrl}

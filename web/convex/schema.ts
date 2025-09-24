@@ -10,7 +10,7 @@ export default defineSchema({
     deleted: v.boolean(),
     handle: v.string(),
     setCustomRandomMessages: v.optional(v.boolean()),
-    customRandomMessages: v.optional(v.string),
+    customRandomMessages: v.optional(v.string()),
     pageType: v.string(), // FOR ONLY 1. basic (as default) 2. Confess mode 3. idk
     threads_auth_token: v.optional(v.string()),
     threads: v.optional(

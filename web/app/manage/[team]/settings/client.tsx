@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import generateRandomString from "@/lib/randomGenString";
 import { v4 as uuidv4 } from "uuid";
+import hideJoinCodeOnClientSide from "@/lib/hideJoinCodeOnClentSide";
 
 export default function SettingsPage({
   host,
@@ -61,32 +62,33 @@ export default function SettingsPage({
   const [revokeUserAccessTextBox, setRevokeUserAccessTextBox] = useState("");
   const [customPFPTextBox, setCustomPFPTextBox] = useState("");
   const [deleteTeamTextBox, setDeleteTeamTextBox] = useState("");
+  const [joinCodePlainTextBox, setJoinCodePlainTextBox] = useState("");
   const [teamData2, setTeamData2] = useState(teamData);
   const [enableCustomMessagesPopup, setEnableCustomMessagesPopup] =
     useState<boolean>(false);
-  console.log(teamData);
 
   const getStatus =
     {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
     userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
   }); */
   const getAllJoinIds =
-    useQuery(api.func_feat_manage.getAllJoinIdsToATeam, {
+    useQuery(api.func_feat_manage.getJoinCodeData, {
       teamId: teamId,
     }) || [];
 
-  const getJoinCodes = async () => {
-    const req = await fetch("/api/teams/joincode", {
+  const createJoinCode = async () => {
+    const req = await fetch("/api/teams/joincode/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        teamId: teamId,
+        team_id: teamId,
       }),
     });
+    const res = await req.json();
+    setJoinCodePlainTextBox(res.joinId);
   };
-  useEffect(() => {});
 
   const revokeJoinCode = async (joinCode: string) => {
     const req = await fetch("/api/teams/joincode/revoke", {
@@ -137,6 +139,7 @@ export default function SettingsPage({
       <div>
         <h2 className="text-2xl">Change team settings</h2>
         <div>
+          <span className="text-lg">Update Profile!</span>
           <div>
             <div className="flex flex-row">
               <img
@@ -204,53 +207,48 @@ export default function SettingsPage({
             </div>
           </div>
         )}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button>Create Join Code</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Your new join code!</AlertDialogTitle>
-              <AlertDialogDescription>
-                <div className="flex flex-col">
-                  <span>
-                    Please note that this code can only be used once! And if
-                    this code is ever leaked, someone with this code can add
-                    into your team!
-                  </span>
-                  <code className="mx-0 my-auto overflow-x-scroll whitespace-nowrap py-2 px-1 -translate-x-5 ph-no-capture">
-                    {`sinv_d_${generateRandomString(40, "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890")}`}
-                  </code>
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex justify-end sm:justify-end">
-              <AlertDialogAction className="ml-auto">Ok</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
         <div className="">
-          <h2>Currently active join codes</h2>
+          <h2 className="text-lg">Manage Join Codes!</h2>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button onClick={createJoinCode}>Create Join Code</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Your new join code!</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <div className="flex flex-col">
+                    <span>
+                      Please note that this code can only be used once! And if
+                      this code is ever leaked, someone with this code can add
+                      into your team!
+                    </span>
+                    <code className="mx-0 my-auto overflow-x-scroll whitespace-nowrap py-2 px-1 -translate-x-5 ph-no-capture">
+                      {joinCodePlainTextBox}
+                    </code>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex justify-end sm:justify-end">
+                <AlertDialogAction className="ml-auto">Ok</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <h2 className="text-md">Currently active</h2>
+          {JSON.stringify(getAllJoinIds) === "[]" && (
+            <div>
+              <span className="p-2">
+                🤔 Hmm, don't seem like this team has any join codes rn!
+              </span>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1 max-h-1/2 overflow-y-scroll ph-no-capture">
-            {[
-              "wewf",
-              "2r",
-              "weww",
-              "2q",
-              "wqew",
-              "23",
-              "1wew",
-              "2f",
-              "wfew",
-              "w2",
-              "wew",
-              "2",
-            ].map((i) => (
+            {getAllJoinIds.map((i: any) => (
               <div
                 className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
                 key={i}
               >
-                <span>JoinID: sinv_d_fw0***siF9</span>
+                <span>JoinID: {hideJoinCodeOnClientSide(i)}</span>
                 <AlertDialog onOpenChange={clearTextBoxState}>
                   <AlertDialogTrigger asChild>
                     <button>
@@ -296,7 +294,7 @@ export default function SettingsPage({
                       <AlertDialogCancel className="cursor-pointer">
                         Cancel
                       </AlertDialogCancel>
-                      <AlertDialogAction onClick={() => revokeJoinCode("d")}>
+                      <AlertDialogAction onClick={() => revokeJoinCode(i)}>
                         Ok
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -309,7 +307,7 @@ export default function SettingsPage({
         <div className="content-center justify-center items-center">
           <h2 className="text-lg p-2">Users in this team</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center ph-no-capture">
-            {getAllJoinIds.map((i) => (
+            {["s"].map((i) => (
               <div
                 className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
                 key={i}
@@ -383,9 +381,9 @@ export default function SettingsPage({
         <h3 className="text-xl">Important settings</h3>
         <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
-            <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
+            <Button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
               Delete your team
-            </button>
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>

@@ -47,12 +47,8 @@ When Cloudflare Turnstil is on, the cloudflare turnstile function take a few sec
 ### Selecting teams panel
 This is only a UI issue. It does not affect the use of the dashboard. (yes im writing this like pretty late sooo i have no time to polish :\
 
-
-## PRIOTIZE!
-1. the manage panel!
-2. LOGIN SYSTEM (SUPER IMPORTANT!!!)
-3. the safety system (done)
-4. polish the UI
+## GOALS FOR 2025/09/25
+SHIP! AND FIX ISSUES!
 
 ## NOTES!
 DO NOT USE THE NATIVE `<Link>` component, this componenet will PRELOAD the page (which if its a FUCKING LOGOUT ROUTE) it will break, (i spent too much time debugging this garbage)
