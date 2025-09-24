@@ -35,11 +35,22 @@ export default function SettingsPage({
   host,
   protocol,
   teamId,
+  teamData,
 }: {
   host: string;
   protocol: string;
   teamId: string;
+  teamData: {
+    deleted: boolean;
+    displayName: string;
+    handle: string;
+    imageUrl: string;
+    pageType: string;
+    setCustomRandomMessages: string[];
+    userId: string;
+  };
 }) {
+  /** */
   const router = useRouter();
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
     useState("");
@@ -48,14 +59,21 @@ export default function SettingsPage({
   const [joinCodes, setJoinCodes] = useState([]);
   const [revokeJoinCodeTextBox, setRevokeJoinCodeTextBox] = useState("");
   const [revokeUserAccessTextBox, setRevokeUserAccessTextBox] = useState("");
+  const [customPFPTextBox, setCustomPFPTextBox] = useState("");
   const [deleteTeamTextBox, setDeleteTeamTextBox] = useState("");
+  const [teamData2, setTeamData2] = useState(teamData);
   const [enableCustomMessagesPopup, setEnableCustomMessagesPopup] =
     useState<boolean>(false);
+  console.log(teamData);
 
   const getStatus =
     {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
     userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
   }); */
+  const getAllJoinIds =
+    useQuery(api.func_feat_manage.getAllJoinIdsToATeam, {
+      teamId: teamId,
+    }) || [];
 
   const getJoinCodes = async () => {
     const req = await fetch("/api/teams/joincode", {
@@ -118,6 +136,55 @@ export default function SettingsPage({
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       <div>
         <h2 className="text-2xl">Change team settings</h2>
+        <div>
+          <div>
+            <div className="flex flex-row">
+              <img
+                alt="Profile Picture"
+                src={teamData2.imageUrl}
+                className="w-12 h-12 rounded-full p-1"
+              />
+              <div className="flex flex-col ml-2">
+                <input
+                  type="text"
+                  value={teamData2.displayName}
+                  onChange={(e) =>
+                    setTeamData2({
+                      deleted: teamData2.deleted,
+                      displayName: e.target.value,
+                      handle: teamData2.handle,
+                      imageUrl: teamData2.imageUrl,
+                      pageType: teamData2.pageType,
+                      setCustomRandomMessages:
+                        teamData2.setCustomRandomMessages,
+                      userId: teamData2.userId,
+                    })
+                  }
+                />{" "}
+                <div className="flex flex-row">
+                  <span>@</span>
+                  <input
+                    type="text"
+                    value={teamData2.handle}
+                    onChange={(e) =>
+                      setTeamData2({
+                        deleted: teamData2.deleted,
+                        displayName: teamData2.displayName,
+                        handle: e.target.value,
+                        imageUrl: teamData2.imageUrl,
+                        pageType: teamData2.pageType,
+                        setCustomRandomMessages:
+                          teamData2.setCustomRandomMessages,
+                        userId: teamData2.userId,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <Button>Submit!</Button>
+        </div>
         <Button
           onClick={() =>
             setEnableCustomMessagesPopup(!enableCustomMessagesPopup)
@@ -152,7 +219,7 @@ export default function SettingsPage({
                     into your team!
                   </span>
                   <code className="mx-0 my-auto overflow-x-scroll whitespace-nowrap py-2 px-1 -translate-x-5 ph-no-capture">
-                    {`sinv_d_${generateRandomString(40, "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")}`}
+                    {`sinv_d_${generateRandomString(40, "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890")}`}
                   </code>
                 </div>
               </AlertDialogDescription>
@@ -242,20 +309,7 @@ export default function SettingsPage({
         <div className="content-center justify-center items-center">
           <h2 className="text-lg p-2">Users in this team</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center ph-no-capture">
-            {[
-              "wewf",
-              "2r",
-              "weww",
-              "2q",
-              "wqew",
-              "23",
-              "1wew",
-              "2f",
-              "wfew",
-              "w2",
-              "wew",
-              "2",
-            ].map((i) => (
+            {getAllJoinIds.map((i) => (
               <div
                 className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
                 key={i}
@@ -327,12 +381,6 @@ export default function SettingsPage({
           <span>Threads</span>
         </button>*/}
         <h3 className="text-xl">Important settings</h3>
-        <button
-          className="bg-blue-500 p-2 rounded hover:bg-blue-500/70 transition-all duration-300 cursor-pointer text-white m-1"
-          onClick={() => setFlaggingFeat(!flaggingFeat)}
-        >
-          {flaggingFeat ? "Disable" : "Enable"} Flagging
-        </button>
         <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
             <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">

@@ -80,7 +80,7 @@ export default function ManagementPageLayout({
       });
 
       // Animate out menu items first
-      tl.to(".menu-item", {
+      tl.to(".menu-items", {
         opacity: 0,
         y: 20,
         duration: 0.1,
@@ -153,7 +153,7 @@ export default function ManagementPageLayout({
                 key={i.text}
                 onClick={() => setOpenMobileMenu(false)}
               >
-                <button className="w-48 px-6 py-4 text-lg bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                <button className=" w-48 px-6 py-4 text-lg bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                   {i.text}
                 </button>
               </Link>

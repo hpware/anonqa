@@ -10,13 +10,33 @@ For exploits on the platform, please DO NOT USE ISSUES EVEN FOR EXISTING ISSUES,
 
 Other than the email, you can also contact me on discord `hwtw` (you can maybe dm me?). If you are in the HC slack, please contact me there instead. All lines will be faster then contacting via emails (as I will get a jumpscare when I get messages from one of these platforms).
 
-## Design Files
-after the figma removal of the education plan, I now use penpot. The designs are in /design/.
+## What is made by AI?
+Most of the code is writen by myself. However, I sometimes do ask an AI (Claude Sonnet 3.5 or Grok Code Fast 1) or enable to AI auto compelete functions from Zed.
+
+The code fully writien by AI is the ~/web/manage/[team]/answer/[slug]/canvasText.tsx, canvasText component, as I'm incaptiable working with canvases.
+
+The login/registering pages's base is writen by an AI, and changed by me (some styles and fonts) and the main function as well.
+
+And some convex functions are assisted by the AI on convex's docs website! https://docs.convex.dev
+
+
+## Designs
+Figma!: https://www.figma.com/design/Rc1A45MnZTXP4Yi4yYyhFP/anon-qa-app-design?node-id=14-23&t=C91bU8Bd40tcVmDe-1
+
+## How can I self host?
+TBD
 
 ## What?
 
 Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for their anon qa stuff, 2 years ago I tried doing this in linktree (for myself), but failed bacause of it's limited functionalty. Now I have learned some stacks, (the NTP stack (Nuxt, Tailwind, Postgres)), I will try to redo my attempts at doing so, with self hostable services (or something you can host it yourself on vercel or cloudflare).
 
+## Features
+- AI Message flagging
+- Team Management.
+- Customizable random messages
+- Customizable Placeholders
+- LIVE updates (from the dashboard)
+- LIVE updates to the Teams page.
 
 ## Concerns & Problems
 ### Sending speeds
@@ -36,3 +56,7 @@ This is only a UI issue. It does not affect the use of the dashboard. (yes im wr
 
 ## NOTES!
 DO NOT USE THE NATIVE `<Link>` component, this componenet will PRELOAD the page (which if its a FUCKING LOGOUT ROUTE) it will break, (i spent too much time debugging this garbage)
+
+
+# Credits!
+Thanks to [lucide](https://lucide.dev) for all of the SVGs and Icons used for this project!

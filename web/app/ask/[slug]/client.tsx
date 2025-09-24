@@ -219,7 +219,7 @@ export default function Client({
       ) : (
         <div className="justify-center text-center items-center w-full h-screen absolute inset-0 flex flex-col bitcount-grid-double">
           <SendIcon className="w-12 h-12 p-1" ref={sendIconRef} />
-          <span>Data sending!</span>
+          <span>Sending your message!</span>
         </div>
       )}
     </div>

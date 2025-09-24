@@ -303,15 +303,18 @@ export const getTeamSlugViaTeamId = query({
 });
 
 export const getDefaultPlaceholderAndDiceThingy = query({
-  args:{ slug: v.string()},
-  handler: async (ctx, args ) => {
-    const query = await ctx.db.query("users").filter((q) => q.eq(q.field("handle", args.slug))).collect();
-    if (!query) return { diceMode: false, dice: [], default: [], user: ""}
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("handle"), args.slug))
+      .collect();
+    if (!query) return { diceMode: false, dice: [], default: [], user: "" };
     return {
       diceMode: query[0].setCustomRandomMessages || false,
-      dice: query[0].customRamdomMessages || [],
+      dice: query[0].customRandomMessages || [],
       default: query[0].defaultMessages || [],
       user: query[0].handle,
-    }
-  }
-})
+    };
+  },
+});
