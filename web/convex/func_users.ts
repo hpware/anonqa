@@ -2,6 +2,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
 import { filter } from "convex-helpers/server/filter";
+import { CanvasText } from "@/app/manage/[team]/answer/[slug]/canvasText";
 
 // cron to remove users
 export const removedeleted = internalMutation({
@@ -300,3 +301,17 @@ export const getTeamSlugViaTeamId = query({
     return query[0].handle;
   },
 });
+
+export const getDefaultPlaceholderAndDiceThingy = query({
+  args:{ slug: v.string()},
+  handler: async (ctx, args ) => {
+    const query = await ctx.db.query("users").filter((q) => q.eq(q.field("handle", args.slug))).collect();
+    if (!query) return { diceMode: false, dice: [], default: [], user: ""}
+    return {
+      diceMode: query[0].setCustomRandomMessages || false,
+      dice: query[0].customRamdomMessages || [],
+      default: query[0].defaultMessages || [],
+      user: query[0].handle,
+    }
+  }
+})
