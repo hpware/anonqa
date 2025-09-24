@@ -2,18 +2,20 @@ import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
-
+import isValidUUID from "@/lib/checkValidUUID";
+import generateRandomString from "@/lib/randomGenString";
 export const POST = async (request: NextRequest) => {
   try {
     const body: any = await request.json();
     const cookie = await cookies();
-    const session = cookie.get("session")?.value;
-    if (!(body.team_id && body.code && session)) {
+    const session = cookie.get("session")?.value || "";
+    if (!(session && body.team_id && body.updatedInfo)) {
       return new Response(
         JSON.stringify({
           success: false,
+          joinId: "",
           status: 400,
-          message: "Wrong params!",
+          message: "Invalid params",
         }),
         {
           status: 400,
@@ -30,6 +32,7 @@ export const POST = async (request: NextRequest) => {
       return new Response(
         JSON.stringify({
           success: false,
+          joinId: "",
           status: 403,
           message: "You are not logged in!",
         }),
@@ -52,6 +55,7 @@ export const POST = async (request: NextRequest) => {
       return new Response(
         JSON.stringify({
           success: false,
+          joinId: "",
           status: 403,
           message: "You don't have access to this team!",
         }),
@@ -63,28 +67,12 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
-    fetchMutation(api.func_feat_manage.setJoinCodeAsInvalid, {
-      joinCode: body.code,
-      team_id: body.team_id,
-    });
-    return new Response(
-      JSON.stringify({
-        success: true,
-        status: 200,
-        message: "",
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
   } catch (e: any) {
     console.error(e);
     return new Response(
       JSON.stringify({
         success: false,
+        joinId: "",
         status: 500,
         message: "Server side error",
       }),

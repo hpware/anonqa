@@ -117,7 +117,9 @@ export const data_dash = query({
         imageUrl: result[0].imageUrl,
         pageType: result[0].pageType,
         setCustomRandomMessages: result[0].setCustomRandomMessages,
+        customRandomMessages: result[0].customRandomMessages,
         userId: result[0].userId,
+        defaultMessages: result[0].defaultMessages,
       },
     ];
   },

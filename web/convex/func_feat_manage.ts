@@ -82,7 +82,7 @@ export const getJoinCodeData = query({
       .withIndex("teamId", (q) => q.eq("teamId", args.teamId))
       .collect();
 
-    return rows.map((row) => row.code);
+    return rows.map((row) => !row.used && row.code);
   },
 });
 
@@ -132,5 +132,24 @@ export const getAllUserInfoInATeam = query({
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
     const getControllerableUsers = getTeamViaId[0].controlableUsers;
+  },
+});
+
+export const setJoinCodeAsInvalid = mutation({
+  args: { joinCode: v.string(), team_id: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("joinCodes")
+      .filter((q) => q.eq(q.field("code"), args.joinCode))
+      .collect();
+    if (query.length === 0) {
+      return;
+    }
+    if (query[0].teamId !== args.team_id) {
+      return;
+    }
+    await ctx.db.patch(query[0]._id, {
+      used: true,
+    });
   },
 });

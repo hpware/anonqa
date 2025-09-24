@@ -41,15 +41,7 @@ export default function SettingsPage({
   host: string;
   protocol: string;
   teamId: string;
-  teamData: {
-    deleted: boolean;
-    displayName: string;
-    handle: string;
-    imageUrl: string;
-    pageType: string;
-    setCustomRandomMessages: string[];
-    userId: string;
-  };
+  teamData: any;
 }) {
   /** */
   const router = useRouter();
@@ -64,6 +56,14 @@ export default function SettingsPage({
   const [deleteTeamTextBox, setDeleteTeamTextBox] = useState("");
   const [joinCodePlainTextBox, setJoinCodePlainTextBox] = useState("");
   const [teamData2, setTeamData2] = useState(teamData);
+  const [openShadCnPopUp, setOpenShadCnPopUp] = useState({
+    revokeId: false,
+    revokeAccount: false,
+  });
+  const [imageUrlChangeTextBox, setImageUrlChangeTextBox] = useState({
+    status: false,
+    text: teamData2.imageUrl,
+  });
   const [enableCustomMessagesPopup, setEnableCustomMessagesPopup] =
     useState<boolean>(false);
 
@@ -98,6 +98,7 @@ export default function SettingsPage({
       },
       body: JSON.stringify({
         code: joinCode,
+        team_id: teamId,
       }),
     });
   };
@@ -110,7 +111,7 @@ export default function SettingsPage({
       },
       body: JSON.stringify({
         accountId: accountId,
-        teamId: "ccs",
+        teamId: teamId,
       }),
     });
     const res = await req.json();
@@ -129,10 +130,43 @@ export default function SettingsPage({
     });
   };
 
+  const submitUpdatesToTheServer = async () => {
+    if (
+      imageUrlChangeTextBox.text !== teamData2.imageUrl &&
+      imageUrlChangeTextBox.text.includes("://")
+    ) {
+      setTeamData2({
+        deleted: teamData2.deleted,
+        displayName: teamData2.displayName,
+        handle: teamData2.handle,
+        imageUrl: imageUrlChangeTextBox.text,
+        pageType: teamData2.pageType,
+        setCustomRandomMessages: teamData2.setCustomRandomMessages,
+        customRandomMessages: teamData2.customRandomMessages,
+        userId: teamData2.userId,
+        defaultMessages: teamData2.defaultMessages,
+      });
+    }
+    const req = await fetch("/api/teams/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        team_id: teamId,
+        updatedInfo: teamData2,
+      }),
+    });
+  };
+
   const clearTextBoxState = () => {
     setRevokeUserAccessTextBox("");
     setRevokeJoinCodeTextBox("");
     setDeleteAccountVerifyTextBox("");
+    setOpenShadCnPopUp({
+      revokeId: false,
+      revokeAccount: false,
+    });
   };
   return (
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
@@ -142,15 +176,38 @@ export default function SettingsPage({
           <span className="text-lg">Update Profile!</span>
           <div>
             <div className="flex flex-row">
-              <img
-                alt="Profile Picture"
-                src={teamData2.imageUrl}
-                className="w-12 h-12 rounded-full p-1"
-              />
+              <button
+                onClick={() =>
+                  setImageUrlChangeTextBox({
+                    status: !imageUrlChangeTextBox.status,
+                    text: imageUrlChangeTextBox.text,
+                  })
+                }
+              >
+                <img
+                  alt="Profile Picture"
+                  src={teamData2.imageUrl}
+                  className="w-12 h-12 rounded-full p-1"
+                />
+              </button>
               <div className="flex flex-col ml-2">
+                {imageUrlChangeTextBox.status && (
+                  <input
+                    type="text"
+                    value={imageUrlChangeTextBox.text}
+                    placeholder="Paste your image url!"
+                    onChange={(e) =>
+                      setImageUrlChangeTextBox({
+                        status: imageUrlChangeTextBox.status,
+                        text: e.target.value,
+                      })
+                    }
+                  />
+                )}
                 <input
                   type="text"
                   value={teamData2.displayName}
+                  placeholder="Your display name!"
                   onChange={(e) =>
                     setTeamData2({
                       deleted: teamData2.deleted,
@@ -160,15 +217,18 @@ export default function SettingsPage({
                       pageType: teamData2.pageType,
                       setCustomRandomMessages:
                         teamData2.setCustomRandomMessages,
+                      customRandomMessages: teamData2.customRandomMessages,
                       userId: teamData2.userId,
+                      defaultMessages: teamData2.defaultMessages,
                     })
                   }
-                />{" "}
+                />
                 <div className="flex flex-row">
                   <span>@</span>
                   <input
                     type="text"
                     value={teamData2.handle}
+                    placeholder="Your account handle!"
                     onChange={(e) =>
                       setTeamData2({
                         deleted: teamData2.deleted,
@@ -178,35 +238,54 @@ export default function SettingsPage({
                         pageType: teamData2.pageType,
                         setCustomRandomMessages:
                           teamData2.setCustomRandomMessages,
+                        customRandomMessages: teamData2.customRandomMessages,
                         userId: teamData2.userId,
+                        defaultMessages: teamData2.defaultMessages,
                       })
                     }
                   />
                 </div>
+                <input
+                  type="text"
+                  value={teamData2.defaultMessages[0]}
+                  placeholder="Your page's placeholder!"
+                  onChange={(e) =>
+                    setTeamData2({
+                      deleted: teamData2.deleted,
+                      displayName: e.target.value,
+                      handle: teamData2.handle,
+                      imageUrl: teamData2.imageUrl,
+                      pageType: teamData2.pageType,
+                      setCustomRandomMessages:
+                        teamData2.setCustomRandomMessages,
+                      customRandomMessages: teamData2.customRandomMessages,
+                      userId: teamData2.userId,
+                      defaultMessages: [e.target.value],
+                    })
+                  }
+                />
               </div>
             </div>
+            <Button onClick={submitUpdatesToTheServer}>Submit!</Button>
           </div>
-          <Button>Submit!</Button>
         </div>
-        <Button
-          onClick={() =>
-            setEnableCustomMessagesPopup(!enableCustomMessagesPopup)
-          }
-          className="mr-2"
-        >
-          Custom Messages
-        </Button>
-        {enableCustomMessagesPopup && (
+        <div>
+          <h2 className="text-lg">Manage Custom Messages!</h2>
+          <Button className="mr-2">Add a Custom Message</Button>
+          {JSON.stringify(customMessages) === "[]" && (
+            <div>
+              <span>
+                🤔 Hmm, you don't seem like have any custom messages setted up
+                yet.
+              </span>
+            </div>
+          )}
           <div>
-            <span>Please set your custom message!</span>
             {customMessages.map((i) => (
               <div key={i}></div>
             ))}
-            <div>
-              <button>Add a new message!</button>
-            </div>
           </div>
-        )}
+        </div>
         <div className="">
           <h2 className="text-lg">Manage Join Codes!</h2>
           <AlertDialog>
@@ -249,19 +328,27 @@ export default function SettingsPage({
                 key={i}
               >
                 <span>JoinID: {hideJoinCodeOnClientSide(i)}</span>
-                <AlertDialog onOpenChange={clearTextBoxState}>
-                  <AlertDialogTrigger asChild>
-                    <button>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <CircleXIcon />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <span>Revoke this joinID</span>
-                        </TooltipContent>
-                      </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <button
+                      onClick={() =>
+                        setOpenShadCnPopUp({
+                          revokeId: true,
+                          revokeAccount: false,
+                        })
+                      }
+                    >
+                      <CircleXIcon />
                     </button>
-                  </AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <span>Revoke this joinID</span>
+                  </TooltipContent>
+                </Tooltip>
+                <AlertDialog
+                  open={openShadCnPopUp.revokeId}
+                  onOpenChange={clearTextBoxState}
+                >
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Revoke join code</AlertDialogTitle>
@@ -294,7 +381,13 @@ export default function SettingsPage({
                       <AlertDialogCancel className="cursor-pointer">
                         Cancel
                       </AlertDialogCancel>
-                      <AlertDialogAction onClick={() => revokeJoinCode(i)}>
+                      <AlertDialogAction
+                        onClick={() => revokeJoinCode(i)}
+                        disabled={
+                          revokeJoinCodeTextBox !==
+                          "I authorize the deletion of this join code"
+                        }
+                      >
                         Ok
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -319,16 +412,16 @@ export default function SettingsPage({
                 </div>
                 <AlertDialog onOpenChange={clearTextBoxState}>
                   <AlertDialogTrigger asChild>
-                    <button>
-                      <Tooltip>
-                        <TooltipTrigger>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <button>
                           <CircleXIcon />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <span>Remove access to this account</span>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <span>Remove access to this account</span>
+                      </TooltipContent>
+                    </Tooltip>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -361,6 +454,10 @@ export default function SettingsPage({
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => revokeAccountAccess("dd")}
+                        disabled={
+                          revokeUserAccessTextBox ===
+                          "I authorize the deletion of this account"
+                        }
                       >
                         Ok
                       </AlertDialogAction>

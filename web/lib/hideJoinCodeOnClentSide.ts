@@ -1,13 +1,18 @@
 /**YES I KNOW THIS IS INSECURE AS HELL (THIS WILL BE FIXED WITH A NEW UPDATE THAT USES CONVEX _IDS INSTEAD OF JOINIDS) */
-function maskJoinCode(code: string): string {
+function maskJoinCode(code: string | unknown): string {
+  // Ensure code is a string
+  const codeStr = String(code || "");
+  if (codeStr.length === 0) {
+    return "";
+  }
   // Handle different formats
-  if (!code.includes("_")) {
+  if (!codeStr.includes("_")) {
     // If no underscore, just mask middle
-    return code.slice(0, 4) + "***" + code.slice(-4);
+    return codeStr.slice(0, 4) + "***" + codeStr.slice(-4);
   }
 
   // Split by underscore
-  const parts = code.split("_");
+  const parts = codeStr.split("_");
 
   // Keep prefix intact (sinv_d_)
   const prefix = parts.slice(0, -1).join("_") + "_";
