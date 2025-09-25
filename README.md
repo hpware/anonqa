@@ -47,8 +47,8 @@ When Cloudflare Turnstil is on, the cloudflare turnstile function take a few sec
 ### Selecting teams panel
 This is only a UI issue. It does not affect the use of the dashboard. (yes im writing this like pretty late sooo i have no time to polish :\
 
-## GOALS FOR 2025/09/25
-SHIP! AND FIX ISSUES!
+## goals
+ship and add error handling. the current systems does not error handle like at all and the settings page is still missing a few settings. like reseting passwords & delete team & login accounts.
 
 ## NOTES!
 DO NOT USE THE NATIVE `<Link>` component, this componenet will PRELOAD the page (which if its a FUCKING LOGOUT ROUTE) it will break, (i spent too much time debugging this garbage)

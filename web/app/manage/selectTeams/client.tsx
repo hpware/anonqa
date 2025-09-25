@@ -46,7 +46,26 @@ export default function Page({ userid }: { userid: string }) {
     }
     setCreateNewTeamTextBoxes({ team_handle: "", team_name: "" });
   };
-  const sendJoinRequest = async () => {};
+  const sendJoinRequest = async () => {
+    setJoinCodeTextBox("");
+    try {
+      const req = await fetch("/api/teams/joincode/join", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: joinCodeTextBox,
+        }),
+      });
+      if (!req.ok) {
+        // put join fail message
+      }
+      const res = await req.json();
+      if (!res.success) {
+      }
+    } catch (e) {}
+  };
   return (
     <>
       <div>

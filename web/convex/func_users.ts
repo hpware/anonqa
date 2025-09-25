@@ -320,3 +320,64 @@ export const getDefaultPlaceholderAndDiceThingy = query({
     };
   },
 });
+
+export const checkIfJoinCodeIsValidAndIfItIsValidThenRevokeAkaInvlidsIt =
+  mutation({
+    args: { joinCode: v.string(), userId: v.string() },
+    handler: async (ctx, args) => {
+      const fetchJoinCode = await ctx.db
+        .query("joinCodes")
+        .filter((q) => q.eq(q.field("code"), args.joinCode))
+        .collect();
+      if (fetchJoinCode.length === 0) {
+        return {
+          success: false,
+          msg: "This code does not exist.",
+          teamId: "",
+        };
+      }
+      if (fetchJoinCode[0].used) {
+        return {
+          success: false,
+          msg: "This code bas already been used.",
+          teamId: "",
+        };
+      }
+      const fetchCurrentTeamJoinedUsers = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("userId"), fetchJoinCode[0].teamId))
+        .collect();
+      if (fetchCurrentTeamJoinedUsers.length === 0) {
+        return {
+          success: false,
+          msg: "Cannot find team that is connected with this join code.",
+          teamId: "",
+        };
+      }
+      if (
+        fetchCurrentTeamJoinedUsers[0].controlableUsers.includes(args.userId)
+      ) {
+        return {
+          success: false,
+          msg: "You are already in this team! :?",
+          teamId: fetchCurrentTeamJoinedUsers[0].userId,
+        };
+      }
+      // then redeem the join code ig.
+      ctx.db.patch(fetchJoinCode[0]._id, {
+        used: true,
+      });
+      const newControlableUsers = [
+        ...fetchCurrentTeamJoinedUsers[0].controlableUsers,
+        args.userId,
+      ];
+      ctx.db.patch(fetchCurrentTeamJoinedUsers[0]._id, {
+        controlableUsers: newControlableUsers,
+      });
+      return {
+        success: true,
+        msg: "Success",
+        teamId: fetchCurrentTeamJoinedUsers[0].userId,
+      };
+    },
+  });
