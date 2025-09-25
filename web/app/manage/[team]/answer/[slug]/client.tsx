@@ -30,7 +30,6 @@ export default function Page({
   teamId: string;
   message: Doc<"qas">[];
 }) {
-  console.log("rerender check");
   const router = useRouter();
   const [answer, setAnswer] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
@@ -151,40 +150,42 @@ export default function Page({
       ),
     },
   ];
-  if (message[0].answered) {
-    if (message && message[0]?.answered) {
+
+  useEffect(() => {
+    if (message[0].answered) {
       setAnswer(String(message[0].answer));
-    } 
-    return (
-      <div>
-        <span className="text-lg text-bold justify-center text-center italic">
-          Revisit your answer!
-        </span>
-        <div className="space-y-2">
-          <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 min-h-[100px]">
-            {selections.map((i) => {
-              if (i.slug === message[0].type) {
-                return i.template ? <div key={i.slug}>{i.template}</div> : null;
-              }
-              return null;
-            })}
-          </div>
-        </div>
-        <Link
-          href={`/manage/${teamId}/`}
-          className="text-center justify-center items-center p-2 m-auto w-full"
-        >
-          <Button>
-            <span>Go back and answer more questions!</span>
-          </Button>
-        </Link>
-      </div>
-    );
-  }
+    }
+  }, []);
 
   return (
     <div className="ph-no-capture">
-      {success ? (
+      {message[0].answered ? (
+        <div>
+          <span className="text-lg text-bold justify-center text-center italic">
+            Revisit your answer!
+          </span>
+          <div className="space-y-2">
+            <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 min-h-[100px]">
+              {selections.map((i) => {
+                if (i.slug === message[0].type) {
+                  return i.template ? (
+                    <div key={i.slug}>{i.template}</div>
+                  ) : null;
+                }
+                return null;
+              })}
+            </div>
+          </div>
+          <Link
+            href={`/manage/${teamId}/`}
+            className="text-center justify-center items-center p-2 m-auto w-full"
+          >
+            <Button>
+              <span>Go back and answer more questions!</span>
+            </Button>
+          </Link>
+        </div>
+      ) : success ? (
         <div>
           <span className="text-lg text-bold justify-center text-center italic">
             Success!
