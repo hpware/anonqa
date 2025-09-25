@@ -10,6 +10,7 @@ import { useGSAP } from "@gsap/react";
 import { CanvasText } from "./canvasText";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Doc } from "@/convex/_generated/dataModel";
 
 gsap.registerPlugin(useGSAP);
 
@@ -23,10 +24,13 @@ interface selectionsInterface {
 export default function Page({
   slug,
   teamId,
+  message,
 }: {
   slug: string;
   teamId: string;
+  message: Doc<"qas">[];
 }) {
+  console.log("rerender check");
   const router = useRouter();
   const [answer, setAnswer] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
@@ -65,8 +69,6 @@ export default function Page({
       toast(`Cannot send data to db, error: ${e.msg}`);
     }
   };
-
-  const message = useQuery(api.func_qa.getViaId, { id: slug }) || [];
 
   if (message.length === 0) {
     return <div>Oops! this content cannot be fetched!</div>;
@@ -150,6 +152,9 @@ export default function Page({
     },
   ];
   if (message[0].answered) {
+    if (message && message[0]?.answered) {
+      setAnswer(String(message[0].answer));
+    } 
     return (
       <div>
         <span className="text-lg text-bold justify-center text-center italic">
@@ -169,7 +174,9 @@ export default function Page({
           href={`/manage/${teamId}/`}
           className="text-center justify-center items-center p-2 m-auto w-full"
         >
-          <Button>Go back and answer more questions!</Button>
+          <Button>
+            <span>Go back and answer more questions!</span>
+          </Button>
         </Link>
       </div>
     );
@@ -201,7 +208,9 @@ export default function Page({
             href={`/manage/${teamId}/`}
             className="text-center justify-center items-center p-2 m-auto w-full"
           >
-            <Button>Go back and answer more questions!</Button>
+            <Button>
+              <span>Go back and answer more questions!</span>
+            </Button>
           </Link>
         </div>
       ) : (

@@ -9,6 +9,7 @@ export default async function LoginPage() {
     redirect("/manage/");
   }
   const serverOwnerTerms = process.env.NEXT_PUBLIC_SERVER_USER_TERMS || "";
+  const adminEmail = process.env.NEXT_PUBLIC_ADMINISTRATOR_EMAIL || "";
 
-  return <Client serverOwnerTerms={serverOwnerTerms} />;
+  return <Client serverOwnerTerms={serverOwnerTerms} adminEmail={adminEmail} />;
 }

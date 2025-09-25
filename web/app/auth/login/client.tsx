@@ -7,8 +7,10 @@ import Link from "next/link";
 
 export default function ClientPage({
   serverOwnerTerms,
+  adminEmail,
 }: {
   serverOwnerTerms: string;
+  adminEmail: string;
 }) {
   const [email, setemail] = useState("");
   const [password, setPassword] = useState("");

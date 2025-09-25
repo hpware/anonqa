@@ -445,7 +445,7 @@ export default function SettingsPage({
               >
                 <span>JoinID: {hideJoinCodeOnClientSide(i)}</span>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <button
                       onClick={() =>
                         setOpenShadCnPopUp({
@@ -529,7 +529,7 @@ export default function SettingsPage({
                 <AlertDialog onOpenChange={clearTextBoxState}>
                   <AlertDialogTrigger asChild>
                     <Tooltip>
-                      <TooltipTrigger>
+                      <TooltipTrigger asChild>
                         <button>
                           <CircleXIcon />
                         </button>
