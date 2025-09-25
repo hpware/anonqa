@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { fetchQuery, fetchMutation } from "convex/nextjs";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
 export const POST = async (request: NextRequest) => {
@@ -8,11 +8,26 @@ export const POST = async (request: NextRequest) => {
     const body: any = await request.json();
     const cookie = await cookies();
     const session = cookie.get("session")?.value;
-    if (!(body.teamId && body.accountId && session)) {
+    /*      new_displayName: "v.string()",
+    new_handle: "v.string()",
+    new_imageUrl: "v.string()",
+    new_placeholder: ["v.array(v.string())"],
+    customRandomMessages: "v.string()",
+    teamId: body.team_id, */
+    if (
+      !(
+        body.team_id &&
+        body.new_displayName &&
+        body.new_handle &&
+        body.new_imageUrl &&
+        body.new_placeholder &&
+        body.customRandomMessages &&
+        session
+      )
+    ) {
       return new Response(
         JSON.stringify({
           success: false,
-          data: [],
           status: 400,
           message: "Wrong params!",
         }),
@@ -31,7 +46,6 @@ export const POST = async (request: NextRequest) => {
       return new Response(
         JSON.stringify({
           success: false,
-          data: [],
           status: 403,
           message: "You are not logged in!",
         }),
@@ -47,7 +61,7 @@ export const POST = async (request: NextRequest) => {
       api.func_feat_manage.checkAbleToBeAccessed,
       {
         userId: String(checkSession.userid),
-        teamId: body.teamId,
+        teamId: body.team_id,
       },
     );
     if (!checkteamaccess) {
@@ -65,11 +79,41 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
-    fetchMutation(api.func_users.kickPersonFromTeam, {
-      teamId: body.teamId,
-      userToBeKicked: body.accountId,
+    fetchMutation(api.func_users.saveNewUserSettings, {
+      new_displayName: body.new_displayName,
+      new_handle: body.new_handle,
+      new_imageUrl: body.new_imageUrl,
+      new_placeholder: body.new_placeholder,
+      customRandomMessages: body.customRandomMessages,
+      teamId: body.team_id,
     });
-  } catch (e) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        status: 200,
+        message: "",
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+  } catch (e: any) {
     console.error(e);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        status: 500,
+        message: "Server side error",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
   }
 };

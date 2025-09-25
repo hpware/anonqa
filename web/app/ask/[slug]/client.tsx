@@ -17,7 +17,7 @@ export default function Client({
   captchaFeat: boolean;
 }) {
   // Values
-  const [placeholder, setPlaceholder] = useState<string>("");
+  const [placeholder, setPlaceholder] = useState<string>("unknown placeholder");
   const [ptavalue, setPtavalue] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -29,15 +29,8 @@ export default function Client({
     randomizing: false,
   });
 
-  const [randomizedMesssages, setRandomizedMessages] = useState([
-    "Hello World",
-    "This is really fun!",
-    "This is really fun3!",
-    "This is really fun3!",
-    "This is really fu2n!",
-  ]);
+  const [randomizedMesssages, setRandomizedMessages] = useState([]);
   const sendIconRef = useRef(null);
-  // this is just here for a shitty animation, please replace this later.
   useEffect(() => {
     if (!sendIconRef.current) return;
 
@@ -53,9 +46,6 @@ export default function Client({
       },
       ease: "step(12).inOut",
     });
-  }, []);
-  useEffect(() => {
-    setPlaceholder("unknown placeholder");
   }, []);
   useEffect(() => {
     // Find existing favicon or create new link element
@@ -144,6 +134,11 @@ export default function Client({
   const thisUser = user[0];
   if (thisUser.setCustomRandomMessages) {
   }
+  useEffect(() => {
+    if (user[0]?.defaultMessages?.length) {
+      setPlaceholder(user[0].defaultMessages[0]);
+    }
+  }, [user[0]]);
 
   return (
     <div>

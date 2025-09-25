@@ -72,6 +72,7 @@ export default function SettingsPage({
   const [submitProfileData, setSubmitProfileData] = useState({
     loading: false,
     success: false,
+    error: "",
   });
   const [confetiAction, setConfetiAction] = useState(false);
   const getStatus =
@@ -171,37 +172,27 @@ export default function SettingsPage({
     setSubmitProfileData({
       success: false,
       loading: true,
+      error: "",
     });
-    if (
-      imageUrlChangeTextBox.text !== teamData2.imageUrl &&
-      imageUrlChangeTextBox.text.includes("://")
-    ) {
-      setTeamData2({
-        deleted: teamData2.deleted,
-        displayName: teamData2.displayName,
-        handle: teamData2.handle,
-        imageUrl: imageUrlChangeTextBox.text,
-        pageType: teamData2.pageType,
-        setCustomRandomMessages: teamData2.setCustomRandomMessages,
-        customRandomMessages: teamData2.customRandomMessages,
-        userId: teamData2.userId,
-        defaultMessages: teamData2.defaultMessages,
-      });
-    }
-    const req = await fetch("/api/teams/update", {
+    const req = await fetch("/api/teams/save_profile_settings", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         team_id: teamId,
-        updatedInfo: teamData2,
+        new_displayName: teamData2.displayName,
+        new_handle: teamData2.handle,
+        new_placeholder: teamData2.defaultMessages || "",
+        customRandomMessages: teamData2.customRandomMessages || [],
+        new_imageUrl: teamData2.imageUrl,
       }),
     });
     if (!req.ok) {
       setSubmitProfileData({
         success: false,
         loading: false,
+        error: "Error",
       });
       return;
     }
@@ -210,14 +201,29 @@ export default function SettingsPage({
       setSubmitProfileData({
         success: false,
         loading: false,
+        error: `${res.message}`,
       });
     }
     setSubmitProfileData({
       success: true,
       loading: false,
+      error: "",
     });
   };
 
+  const setPFPImage = () => {
+    setTeamData2({
+      deleted: teamData2.deleted,
+      displayName: teamData2.displayName,
+      handle: teamData2.handle,
+      imageUrl: imageUrlChangeTextBox.text,
+      pageType: teamData2.pageType,
+      setCustomRandomMessages: teamData2.setCustomRandomMessages,
+      customRandomMessages: teamData2.customRandomMessages,
+      userId: teamData2.userId,
+      defaultMessages: teamData2.defaultMessages,
+    });
+  };
   const clearTextBoxState = () => {
     setRevokeUserAccessTextBox("");
     setRevokeJoinCodeTextBox("");
@@ -227,6 +233,10 @@ export default function SettingsPage({
       revokeAccount: false,
     });
   };
+  useEffect(() => {
+    console.log(getAllUserAccountsInThisTeam);
+    console.log(getAllUserAccountsInThisTeam.filter((i) => i !== null));
+  }, [getAllUserAccountsInThisTeam]);
   return (
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       {confetiAction && <Confetti width={width} height={height} />}
@@ -235,7 +245,7 @@ export default function SettingsPage({
         <div>
           <span className="text-lg">Update Profile!</span>
           <div>
-            <div className="flex flex-row">
+            <div className="flex flex-row ph-no-capture">
               <button
                 onClick={() =>
                   setImageUrlChangeTextBox({
@@ -247,22 +257,25 @@ export default function SettingsPage({
                 <img
                   alt="Profile Picture"
                   src={teamData2.imageUrl}
-                  className="w-12 h-12 rounded-full p-1"
+                  className="w-12 h-12 rounded-full p-1 ph-no-capture"
                 />
               </button>
-              <div className="flex flex-col ml-2">
+              <div className="flex flex-col ml-2 ph-no-capture">
                 {imageUrlChangeTextBox.status && (
-                  <input
-                    type="text"
-                    value={imageUrlChangeTextBox.text}
-                    placeholder="Paste your image url!"
-                    onChange={(e) =>
-                      setImageUrlChangeTextBox({
-                        status: imageUrlChangeTextBox.status,
-                        text: e.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex flex-row gap-1">
+                    <input
+                      type="text"
+                      value={imageUrlChangeTextBox.text}
+                      placeholder="Paste your image url!"
+                      onChange={(e) =>
+                        setImageUrlChangeTextBox({
+                          status: imageUrlChangeTextBox.status,
+                          text: e.target.value,
+                        })
+                      }
+                    />
+                    <Button onClick={setPFPImage}>Apply</Button>
+                  </div>
                 )}
                 <input
                   type="text"
@@ -312,7 +325,7 @@ export default function SettingsPage({
                   onChange={(e) =>
                     setTeamData2({
                       deleted: teamData2.deleted,
-                      displayName: e.target.value,
+                      displayName: teamData2.displayName,
                       handle: teamData2.handle,
                       imageUrl: teamData2.imageUrl,
                       pageType: teamData2.pageType,
@@ -433,7 +446,7 @@ export default function SettingsPage({
             </AlertDialogContent>
           </AlertDialog>
           <h2 className="text-md">Currently active</h2>
-          {JSON.stringify(getAllJoinIds) === "[]" && (
+          {getAllJoinIds.length === 0 && (
             <div>
               <span className="p-2">
                 🤔 Hmm, don't seem like this team has any join codes rn!
@@ -441,34 +454,33 @@ export default function SettingsPage({
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1 max-h-1/2 overflow-y-scroll ph-no-capture">
-            {JSON.stringify(getAllJoinIds) !== "[]" &&
+            {getAllJoinIds.length !== 0 &&
               getAllJoinIds.map((i: any) => (
                 <div
                   className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
                   key={i}
                 >
                   <span>JoinID: {hideJoinCodeOnClientSide(i)}</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() =>
-                          setOpenShadCnPopUp({
-                            revokeId: true,
-                            revokeAccount: false,
-                          })
-                        }
-                      >
-                        <CircleXIcon />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <span>Revoke this joinID</span>
-                    </TooltipContent>
-                  </Tooltip>
-                  <AlertDialog
-                    open={openShadCnPopUp.revokeId}
-                    onOpenChange={clearTextBoxState}
-                  >
+                  <AlertDialog onOpenChange={clearTextBoxState}>
+                    <AlertDialogTrigger>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() =>
+                              setOpenShadCnPopUp({
+                                revokeId: true,
+                                revokeAccount: false,
+                              })
+                            }
+                          >
+                            <CircleXIcon />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <span>Revoke this joinID</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Revoke join code</AlertDialogTitle>
@@ -519,8 +531,17 @@ export default function SettingsPage({
         </div>
         <div className="content-center justify-center items-center">
           <h2 className="text-lg p-2">Users in this team</h2>
+          {getAllUserAccountsInThisTeam.filter((i) => i !== null).length ===
+            0 && (
+            <div>
+              <span className="p-2">
+                🤔 Hmm, doesn't seem like you have other members in this team.
+              </span>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center ph-no-capture">
-            {JSON.stringify(getAllUserAccountsInThisTeam) !== "[]" &&
+            {getAllUserAccountsInThisTeam.filter((i) => i !== null).length !==
+              0 &&
               getAllUserAccountsInThisTeam
                 .filter((i) => i !== null)
                 .map((i: any) => (
@@ -535,20 +556,22 @@ export default function SettingsPage({
                     </div>
                     <AlertDialog onOpenChange={clearTextBoxState}>
                       <AlertDialogTrigger asChild>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button>
+                        <button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
                               <CircleXIcon />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <span>Remove access to this account</span>
-                          </TooltipContent>
-                        </Tooltip>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <span>Remove access to this account</span>
+                            </TooltipContent>
+                          </Tooltip>
+                        </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Revoke join code</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            Revoke account access
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
                             <div>
                               <div className="flex flex-col">
@@ -578,9 +601,9 @@ export default function SettingsPage({
                             Cancel
                           </AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => revokeAccountAccess("dd")}
+                            onClick={() => revokeAccountAccess(i.userId)}
                             disabled={
-                              revokeUserAccessTextBox ===
+                              revokeUserAccessTextBox !==
                               "I authorize the deletion of this account"
                             }
                           >

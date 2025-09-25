@@ -381,3 +381,55 @@ export const checkIfJoinCodeIsValidAndIfItIsValidThenRevokeAkaInvlidsIt =
       };
     },
   });
+
+export const saveNewUserSettings = mutation({
+  args: {
+    new_displayName: v.string(),
+    new_handle: v.string(),
+    new_imageUrl: v.string(),
+    new_placeholder: v.array(v.string()),
+    customRandomMessages: v.array(v.string()),
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    ctx.db.patch(query[0]._id, {
+      displayName:
+        args.new_displayName === query[0].displayName
+          ? query[0].displayName
+          : args.new_displayName,
+      handle:
+        args.new_handle === query[0].handle ? query[0].handle : args.new_handle,
+      imageUrl:
+        args.new_imageUrl === query[0].imageUrl
+          ? query[0].imageUrl
+          : args.new_imageUrl,
+      defaultMessages:
+        args.new_placeholder === query[0].defaultMessages
+          ? query[0].defaultMessages
+          : args.new_placeholder,
+    });
+  },
+});
+
+export const kickPersonFromTeam = mutation({
+  args: { teamId: v.string(), userToBeKicked: v.string() },
+  handler: async (ctx, args) => {
+    const query = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    if (!query[0].controlableUsers.includes(args.userToBeKicked)) {
+      return;
+    }
+    const newUserList = query[0].controlableUsers.filter(
+      (i) => i !== args.userToBeKicked,
+    );
+    ctx.db.patch(query[0]._id, {
+      controlableUsers: newUserList,
+    });
+  },
+});
