@@ -125,14 +125,34 @@ export const setDataAsIgnored = mutation({
 });
 
 export const getAllUserInfoInATeam = query({
-  args: { teamId: v.string() },
+  args: { teamId: v.string(), currentUserId: v.string() },
   handler: async (ctx, args) => {
     const getTeamViaId = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
     const getControllerableUsers = getTeamViaId[0].controlableUsers;
-    const userArray = [];
+    const userArray = await Promise.all(
+      getControllerableUsers.map(async (usrid) => {
+        const login = await ctx.db
+          .query("login")
+          .filter((q) => q.eq(q.field("userId"), usrid))
+          .collect();
+        if (
+          login.length !== 0 &&
+          !login[0].deleted &&
+          login[0].userId !== args.currentUserId
+        ) {
+          return {
+            userId: login[0].userId,
+            email: login[0].email,
+            fname: login[0].fname,
+          };
+        }
+        return null;
+      }),
+    );
+    /**[];
     for (const i in getControllerableUsers) {
       const query = await ctx.db
         .query("login")
@@ -140,16 +160,17 @@ export const getAllUserInfoInATeam = query({
         .collect();
       userArray.push(
         query
-          .filter((i) => i.deleted)
-          .map((i) => {
+          .filter((i2) => i2.deleted)
+          .map((i2) => {
             return {
-              userId: i.userId,
-              email: i.email,
-              fname: i.fname,
+              userId: i2.userId,
+              email: i2.email,
+              fname: i2.fname,
             };
           }),
       );
-    }
+    }*/
+    console.log(userArray);
     return userArray;
   },
 });

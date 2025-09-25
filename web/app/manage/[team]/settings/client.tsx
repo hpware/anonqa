@@ -39,11 +39,13 @@ export default function SettingsPage({
   protocol,
   teamId,
   teamData,
+  userInfo,
 }: {
   host: string;
   protocol: string;
   teamId: string;
   teamData: any;
+  userInfo: any;
 }) {
   const { width, height } = useWindowSize();
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
@@ -81,9 +83,10 @@ export default function SettingsPage({
       teamId: teamId,
     }) || [];
 
-  const getALlUserAccountsInThisTeam =
+  const getAllUserAccountsInThisTeam =
     useQuery(api.func_feat_manage.getAllUserInfoInATeam, {
       teamId: teamId,
+      currentUserId: userInfo.userid,
     }) || [];
 
   useEffect(
@@ -438,150 +441,156 @@ export default function SettingsPage({
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-1 max-h-1/2 overflow-y-scroll ph-no-capture">
-            {getAllJoinIds.map((i: any) => (
-              <div
-                className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
-                key={i}
-              >
-                <span>JoinID: {hideJoinCodeOnClientSide(i)}</span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() =>
-                        setOpenShadCnPopUp({
-                          revokeId: true,
-                          revokeAccount: false,
-                        })
-                      }
-                    >
-                      <CircleXIcon />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <span>Revoke this joinID</span>
-                  </TooltipContent>
-                </Tooltip>
-                <AlertDialog
-                  open={openShadCnPopUp.revokeId}
-                  onOpenChange={clearTextBoxState}
+            {JSON.stringify(getAllJoinIds) !== "[]" &&
+              getAllJoinIds.map((i: any) => (
+                <div
+                  className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
+                  key={i}
                 >
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Revoke join code</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        <div>
-                          <div className="flex flex-col">
-                            <span>
-                              This action cannot be undone. This will
-                              permanently deactivate this join code.
-                            </span>
-                            <span>
-                              Please enter "
-                              <b>{`I authorize the deletion of this join code`}</b>
-                              "
-                            </span>
-                            <input
-                              type="text"
-                              className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                              placeholder={`I authorize the deletion of this join code`}
-                              value={revokeJoinCodeTextBox}
-                              onChange={(e) =>
-                                setRevokeJoinCodeTextBox(e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="cursor-pointer">
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => revokeJoinCode(i)}
-                        disabled={
-                          revokeJoinCodeTextBox !==
-                          "I authorize the deletion of this join code"
+                  <span>JoinID: {hideJoinCodeOnClientSide(i)}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() =>
+                          setOpenShadCnPopUp({
+                            revokeId: true,
+                            revokeAccount: false,
+                          })
                         }
                       >
-                        Ok
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            ))}
+                        <CircleXIcon />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span>Revoke this joinID</span>
+                    </TooltipContent>
+                  </Tooltip>
+                  <AlertDialog
+                    open={openShadCnPopUp.revokeId}
+                    onOpenChange={clearTextBoxState}
+                  >
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Revoke join code</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          <div>
+                            <div className="flex flex-col">
+                              <span>
+                                This action cannot be undone. This will
+                                permanently deactivate this join code.
+                              </span>
+                              <span>
+                                Please enter "
+                                <b>{`I authorize the deletion of this join code`}</b>
+                                "
+                              </span>
+                              <input
+                                type="text"
+                                className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                                placeholder={`I authorize the deletion of this join code`}
+                                value={revokeJoinCodeTextBox}
+                                onChange={(e) =>
+                                  setRevokeJoinCodeTextBox(e.target.value)
+                                }
+                              />
+                            </div>
+                          </div>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="cursor-pointer">
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => revokeJoinCode(i)}
+                          disabled={
+                            revokeJoinCodeTextBox !==
+                            "I authorize the deletion of this join code"
+                          }
+                        >
+                          Ok
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ))}
           </div>
         </div>
         <div className="content-center justify-center items-center">
           <h2 className="text-lg p-2">Users in this team</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-1 justify-center items-center ph-no-capture">
-            {getALlUserAccountsInThisTeam.map((i: any) => (
-              <div
-                className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
-                key={i.userId}
-              >
-                <CircleUserIcon />
-                <div className="flex flex-col">
-                  <span>Howard</span>
-                  <span>howard@me.com</span>
-                </div>
-                <AlertDialog onOpenChange={clearTextBoxState}>
-                  <AlertDialogTrigger asChild>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button>
-                          <CircleXIcon />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <span>Remove access to this account</span>
-                      </TooltipContent>
-                    </Tooltip>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Revoke join code</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        <div>
-                          <div className="flex flex-col">
-                            <span>This will remove acccess to this user!</span>
-                            <span>
-                              Please enter "
-                              <b>{`I authorize the deletion of this account`}</b>
-                              "
-                            </span>
-                            <input
-                              type="text"
-                              className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                              placeholder={`I authorize the deletion of this account`}
-                              value={revokeUserAccessTextBox}
-                              onChange={(e) =>
-                                setRevokeUserAccessTextBox(e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="cursor-pointer">
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => revokeAccountAccess("dd")}
-                        disabled={
-                          revokeUserAccessTextBox ===
-                          "I authorize the deletion of this account"
-                        }
-                      >
-                        Ok
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            ))}
+            {JSON.stringify(getAllUserAccountsInThisTeam) !== "[]" &&
+              getAllUserAccountsInThisTeam
+                .filter((i) => i !== null)
+                .map((i: any) => (
+                  <div
+                    className="bg-gray-300 w-fit border border-black p-2 rounded flex flex-row gap-2"
+                    key={i.userId}
+                  >
+                    <CircleUserIcon />
+                    <div className="flex flex-col">
+                      <span>{i.fname || "Unknown"}</span>
+                      <span>{i.email}</span>
+                    </div>
+                    <AlertDialog onOpenChange={clearTextBoxState}>
+                      <AlertDialogTrigger asChild>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button>
+                              <CircleXIcon />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <span>Remove access to this account</span>
+                          </TooltipContent>
+                        </Tooltip>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Revoke join code</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            <div>
+                              <div className="flex flex-col">
+                                <span>
+                                  This will remove acccess to this user!
+                                </span>
+                                <span>
+                                  Please enter "
+                                  <b>{`I authorize the deletion of this account`}</b>
+                                  "
+                                </span>
+                                <input
+                                  type="text"
+                                  className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                                  placeholder={`I authorize the deletion of this account`}
+                                  value={revokeUserAccessTextBox}
+                                  onChange={(e) =>
+                                    setRevokeUserAccessTextBox(e.target.value)
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="cursor-pointer">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => revokeAccountAccess("dd")}
+                            disabled={
+                              revokeUserAccessTextBox ===
+                              "I authorize the deletion of this account"
+                            }
+                          >
+                            Ok
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                ))}
           </div>
         </div>
         {/*<h2>Link your account(s)</h2>
