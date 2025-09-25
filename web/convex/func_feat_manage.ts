@@ -82,7 +82,7 @@ export const getJoinCodeData = query({
       .withIndex("teamId", (q) => q.eq("teamId", args.teamId))
       .collect();
 
-    return rows.map((row) => !row.used && row.code);
+    return rows.filter((row) => !row.used).map((row) => row.code);
   },
 });
 
@@ -132,6 +132,25 @@ export const getAllUserInfoInATeam = query({
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
     const getControllerableUsers = getTeamViaId[0].controlableUsers;
+    const userArray = [];
+    for (const i in getControllerableUsers) {
+      const query = await ctx.db
+        .query("login")
+        .filter((q) => q.eq(q.field("userId"), i))
+        .collect();
+      userArray.push(
+        query
+          .filter((i) => i.deleted)
+          .map((i) => {
+            return {
+              userId: i.userId,
+              email: i.email,
+              fname: i.fname,
+            };
+          }),
+      );
+    }
+    return userArray;
   },
 });
 

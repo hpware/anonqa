@@ -55,7 +55,6 @@ export const POST = async (request: NextRequest) => {
       return new Response(
         JSON.stringify({
           success: false,
-          joinId: "",
           status: 403,
           message: "You don't have access to this team!",
         }),

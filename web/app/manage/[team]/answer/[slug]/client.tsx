@@ -8,6 +8,8 @@ import { Threads } from "./formats";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CanvasText } from "./canvasText";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 gsap.registerPlugin(useGSAP);
 
@@ -147,12 +149,60 @@ export default function Page({
       ),
     },
   ];
+  if (message[0].answered) {
+    return (
+      <div>
+        <span className="text-lg text-bold justify-center text-center italic">
+          Revisit your answer!
+        </span>
+        <div className="space-y-2">
+          <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 min-h-[100px]">
+            {selections.map((i) => {
+              if (i.slug === message[0].type) {
+                return i.template ? <div key={i.slug}>{i.template}</div> : null;
+              }
+              return null;
+            })}
+          </div>
+        </div>
+        <Link
+          href={`/manage/${teamId}/`}
+          className="text-center justify-center items-center p-2 m-auto w-full"
+        >
+          <Button>Go back and answer more questions!</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="ph-no-capture">
       {success ? (
         <div>
-          <span>Success!</span>
+          <span className="text-lg text-bold justify-center text-center italic">
+            Success!
+          </span>
+          <div className="space-y-2">
+            <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 min-h-[100px]">
+              {selections.map((i) => {
+                if (i.slug === selectedPlatform) {
+                  return i.template ? (
+                    <div key={i.slug}>{i.template}</div>
+                  ) : null;
+                }
+                return null;
+              })}
+              {selectedPlatform.length == 0 && (
+                <div>Please select a template.</div>
+              )}
+            </div>
+          </div>
+          <Link
+            href={`/manage/${teamId}/`}
+            className="text-center justify-center items-center p-2 m-auto w-full"
+          >
+            <Button>Go back and answer more questions!</Button>
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors">

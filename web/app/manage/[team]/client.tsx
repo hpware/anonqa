@@ -189,10 +189,12 @@ export default function Page({
                     className="border-b dark:border-gray-700"
                   >
                     <TableCell className="font-medium">{i.msg}</TableCell>
+                    <TableCell>{i.type}</TableCell>
+                    <TableCell>{i.answer}</TableCell>
                     <TableCell className="flex flex-row gap-2">
                       <Link href={`/manage/${slug}/answer/${i.msgId}`}>
                         <button className="p-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                          Answer
+                          Preview
                         </button>
                       </Link>
                       <AlertDialog>
