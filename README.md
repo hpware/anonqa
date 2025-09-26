@@ -51,7 +51,7 @@ This is only a UI issue. It does not affect the use of the dashboard. (yes im wr
 This app is not really designed for mobile users (but mobile devices are what most ppl will use to access the app)
 
 ## goals
-ship and add error handling. the current systems does not error handle like at all and the settings page is still missing a few settings. like reseting passwords & delete team & login accounts.
+error handling, user change login email password, and custommessages. MUST be done today? and ship it (im already late for shipping)
 
 ## NOTES!
 DO NOT USE THE NATIVE `<Link>` component, this componenet will PRELOAD the page (which if its a FUCKING LOGOUT ROUTE) it will break, (i spent too much time debugging this garbage)
