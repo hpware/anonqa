@@ -135,10 +135,11 @@ export default function Client({
   if (thisUser.setCustomRandomMessages) {
   }
   useEffect(() => {
+    console.log(user)
     if (user[0]?.defaultMessages?.length) {
       setPlaceholder(user[0].defaultMessages[0]);
     }
-  }, [user[0]]);
+  }, [user]);
 
   return (
     <div>
