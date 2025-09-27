@@ -13,6 +13,9 @@ interface bodyData {
 }
 
 export const POST = async (response: NextRequest) => {
+  if (process.env.NEXT_PUBLIC_DISABLE_REGISTER !== "false") {
+    return new Response("registering is disabled.");
+  }
   // imports
   const body: bodyData = await response.json();
   const cookieStore = await cookies();
