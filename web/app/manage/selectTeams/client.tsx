@@ -91,7 +91,7 @@ export default function Page({ userid }: { userid: string }) {
               </Link>
             ))}
           </div>
-          <div className="flex flex-row justify-center items-center w-full">
+          <div>
             <Button
               className="p-2 bg-blue-300 hover:bg-blue-400 text-black transiton-all duration-300 m-2 rounded-lg"
               onClick={() => setOpenCreationDialog(!openCreationDialog)}
@@ -104,12 +104,11 @@ export default function Page({ userid }: { userid: string }) {
             >
               Join
             </Button>
-            <Button
-              className="m-2 rounded-lg p-2 bg-blue-300 hover:bg-blue-400 stroke-black transiton-all duration-300"
-              onClick={() => router.push("/auth/logout")}
-            >
-              <LogOutIcon className="m-0 p-0 stroke-black text-black" />
-            </Button>
+            <a href="/auth/logout">
+              <Button className="m-2 rounded-lg p-2 bg-blue-300 hover:bg-blue-400 stroke-black transiton-all duration-300">
+                <LogOutIcon className="m-0 p-0 stroke-black text-black" />
+              </Button>
+            </a>
           </div>
         </div>
       </div>
