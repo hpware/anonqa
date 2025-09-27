@@ -9,6 +9,7 @@ import {
 import { ConvexClientProvider } from "./ConvexProvider";
 import "./globals.css";
 import Script from "next/script";
+import { Toaster } from "@/components/ui/sonner";
 
 // font imports
 const bitcountGridDouble = Bitcount_Grid_Double({
@@ -56,6 +57,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${bitcountGridDouble.variable} ${barlow.variable} ${quicksand.variable} antialiased`}
       >
         <ConvexClientProvider>{children}</ConvexClientProvider>
+        <Toaster richColors />
       </body>
     </html>
   );

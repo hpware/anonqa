@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -25,6 +25,7 @@ export default function Page({ userid }: { userid: string }) {
       userId: String(userid),
     }) || [];
   // dialog
+  const router = useRouter();
   const [openCreationDialog, setOpenCreationDialog] = useState<boolean>(false);
   const [openJoinDialog, setOpenJoinDialog] = useState<boolean>(false);
   const [createNewTeamTextBoxes, setCreateNewTeamTextBoxes] = useState({
@@ -90,24 +91,25 @@ export default function Page({ userid }: { userid: string }) {
               </Link>
             ))}
           </div>
-          <div>
+          <div className="flex flex-row justify-center items-center w-full">
             <Button
-              className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg"
+              className="p-2 bg-blue-300 hover:bg-blue-400 text-black transiton-all duration-300 m-2 rounded-lg"
               onClick={() => setOpenCreationDialog(!openCreationDialog)}
             >
               Create
             </Button>
             <Button
-              className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg"
+              className="p-2 bg-blue-300 hover:bg-blue-400 text-black transiton-all duration-300 m-2 rounded-lg"
               onClick={() => setOpenJoinDialog(!openJoinDialog)}
             >
               Join
             </Button>
-            <a href="/auth/logout">
-              <Button className="p-2 bg-blue-300 hover:bg-blue-400 transiton-all duration-300 m-2 rounded-lg">
-                <LogOutIcon />
-              </Button>
-            </a>
+            <Button
+              className="m-2 rounded-lg p-2 bg-blue-300 hover:bg-blue-400 stroke-black transiton-all duration-300"
+              onClick={() => router.push("/auth/logout")}
+            >
+              <LogOutIcon className="m-0 p-0 stroke-black text-black" />
+            </Button>
           </div>
         </div>
       </div>

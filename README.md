@@ -33,7 +33,7 @@ Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for
 ## Features
 - AI Message flagging
 - Team Management.
-- Customizable random messages
+- ~~Customizable random messages (TBD)~~
 - Customizable Placeholders
 - LIVE updates (from the dashboard)
 - LIVE updates to the Teams page.

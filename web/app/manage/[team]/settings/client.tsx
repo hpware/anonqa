@@ -50,6 +50,7 @@ export default function SettingsPage({
   teamData: any;
   userInfo: any;
 }) {
+  const router = useRouter();
   const { width, height } = useWindowSize();
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
     useState("");
@@ -123,33 +124,34 @@ export default function SettingsPage({
     }
   }, [teamData.customMessages]);
 
-  const sendNewCustomMessage = async () => {
-    toast.info("Creating custom message...");
-    const req = await fetch("/api/customMessages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "create",
-        teamId: teamId,
-        msg: customMessageTextbox,
-      }),
-    });
-    if (!req.ok) {
-      toast.error("Failed to send custom message! dw you can still resent it!");
-      return;
-    }
-    const res = await req.json();
-    if (!res.success) {
-      toast.error(
-        `Failed to send custom message! dw you can still resent it! Server Failed with code: ${res.status} and message: ${res.message}`,
-      );
-      return;
-    }
-    toast.success("Custom Message Created!");
-    setCustomMessageTextbox("");
-  };
+  /**  const sendNewCustomMessage = async () => {
+  toast.info("Creating custom message...");
+  const req = await fetch("/api/teams/customMessages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "create",
+      teamId: teamId,
+      msg: customMessageTextbox,
+    }),
+  });
+  if (!req.ok) {
+    toast.error("Failed to send custom message! dw you can still resent it!");
+    return;
+  }
+  const res = await req.json();
+  if (!res.success) {
+    toast.error(
+      `Failed to send custom message! dw you can still resent it! Server Failed with code: ${res.status} and message: ${res.message}`,
+    );
+    return;
+  }
+  toast.success("Custom Message Created!");
+  setCustomMessageTextbox("");
+}; */
+
   const deleteCustomMessage = async (id: string) => {
     toast.info("Deleting custom message...");
     const req = await fetch("/api/customMessages", {
@@ -276,6 +278,31 @@ export default function SettingsPage({
       toast.error("Delete account: Request Failed");
     }
     const res = await req.json();
+    if (!res.success) {
+      toast.error(`Delete account: ${res.message}`);
+    }
+    toast.success("Account Deleted!");
+    router.push("/auth/logout");
+  };
+
+  const submitDeletionOfTeam = async () => {
+    const req = await fetch("/api/teams/deleteTeam", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        areyousure: "YES, IM SURE I WANT TO DELETE MY TEAM VIA THE API",
+        reallyq: "ABSOLUTELY YES! I WANT MY TEAM GONE NOW!",
+        captcha: "NO THANKS!",
+        teamId: teamId,
+      }),
+    });
+    if (!req.ok) {
+      toast.error("Delete account: Request Failed");
+    }
+    const res = await req.json();
+    router.push("/manage/selectTeams");
   };
 
   const submitUpdatesToTheServer = async () => {
@@ -338,6 +365,11 @@ export default function SettingsPage({
       defaultMessages: teamData2.defaultMessages,
     });
     toast("Profile pic loaded!");
+    if (imageUrlChangeTextBox.text.includes("boom")) {
+      toast.error("BOOM");
+      toast.success("BOOM");
+      toast.info("BOOM");
+    }
   };
   const clearTextBoxState = () => {
     setRevokeUserAccessTextBox("");
@@ -493,65 +525,65 @@ export default function SettingsPage({
             </Button>
           </div>
         </div>
-        <div>
-          <h2 className="text-lg">Manage Custom Messages!</h2>
-          <AlertDialog>
-            <AlertDialogTrigger>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button className="mr-2">Add a Custom Message</Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <span>Create custom messages!</span>
-                </TooltipContent>
-              </Tooltip>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Create new custom messsage</AlertDialogTitle>
-                <AlertDialogDescription>
-                  <div>
-                    <div className="flex flex-col">
-                      <span>Please enter your custom randomized message!</span>
-                      <input
-                        type="text"
-                        className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                        value={customMessageTextbox}
-                        onChange={(e) =>
-                          setCustomMessageTextbox(e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="cursor-pointer">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={sendNewCustomMessage}
-                  disabled={customMessageTextbox.length === 0}
-                >
-                  Ok
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          {JSON.stringify(customMessages) === "[]" && (
-            <div>
-              <span>
-                🤔 Hmm, you don't seem like have any custom messages setted up
-                yet.
-              </span>
-            </div>
-          )}
+        {/*        <div>
+  <h2 className="text-lg">Manage Custom Messages!</h2>
+  <AlertDialog>
+    <AlertDialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button className="mr-2">Add a Custom Message</Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <span>Create custom messages!</span>
+        </TooltipContent>
+      </Tooltip>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Create new custom messsage</AlertDialogTitle>
+        <AlertDialogDescription>
           <div>
-            {customMessages.map((i) => (
-              <div key={i}></div>
-            ))}
+            <div className="flex flex-col">
+              <span>Please enter your custom randomized message!</span>
+              <input
+                type="text"
+                className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                value={customMessageTextbox}
+                onChange={(e) =>
+                  setCustomMessageTextbox(e.target.value)
+                }
+              />
+            </div>
           </div>
-        </div>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel className="cursor-pointer">
+          Cancel
+        </AlertDialogCancel>
+        <AlertDialogAction
+          onClick={sendNewCustomMessage}
+          disabled={customMessageTextbox.length === 0}
+        >
+          Ok
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+  {JSON.stringify(customMessages) === "[]" && (
+    <div>
+      <span>
+        🤔 Hmm, you don't seem like have any custom messages setted up
+        yet.
+      </span>
+    </div>
+  )}
+  <div>
+    {customMessages.map((i) => (
+      <div key={i}></div>
+    ))}
+  </div>
+</div> */}
         <div className="">
           <h2 className="text-lg">Manage Join Codes!</h2>
           <Button onClick={createJoinCode} disabled={joinCodeCreate.loading}>
@@ -615,7 +647,7 @@ export default function SettingsPage({
           {getAllJoinIds.length === 0 && (
             <div>
               <span className="p-2">
-                🤔 Hmm, don't seem like this team has any join codes rn!
+                🤔 Hmm, don't seem like this team has any active join codes rn!
               </span>
             </div>
           )}
@@ -803,16 +835,16 @@ export default function SettingsPage({
                 <div className="flex flex-col">
                   <span>
                     This action cannot be undone. This will permanently delete
-                    your account and remove data from our servers.
+                    your team and remove data from our servers.
                   </span>
                   <span>
                     Please enter "
-                    <b>{`I authorize the deletion of the account.`}</b>"
+                    <b>{`I authorize the deletion of this team.`}</b>"
                   </span>
                   <input
                     type="text"
                     className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                    placeholder={`I authorize the deletion of the account.`}
+                    placeholder={`I authorize the deletion of this team.`}
                     value={deleteTeamTextBox}
                     onChange={(e) => setDeleteTeamTextBox(e.target.value)}
                   />
@@ -825,11 +857,10 @@ export default function SettingsPage({
               </AlertDialogCancel>
               <AlertDialogAction
                 disabled={
-                  deleteAccountVerifyTextBox !==
-                  "I authorize the deletion of the account."
+                  deleteTeamTextBox !== "I authorize the deletion of this team."
                 }
                 className="bg-red-500 hover:bg-red-700 transition-all duration-300 cursor-pointer"
-                onClick={submitDeletionOfAccount}
+                onClick={submitDeletionOfTeam}
               >
                 Continue
               </AlertDialogAction>

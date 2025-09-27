@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, redirect } from "next/navigation";
 import { ThemeProvider } from "./themeProvider";
 import { useTheme } from "./themeProvider";
-import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
 import { HamburgerIcon, HomeIcon, MenuIcon, XIcon } from "lucide-react";
 import gsap from "gsap";
@@ -187,7 +186,6 @@ export default function ManagementPageLayout({
         </div>
         <div className="pt-12 mt-6">{children}</div>
       </div>
-      <Toaster />
     </div>
   );
 }

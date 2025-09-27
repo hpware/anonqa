@@ -191,3 +191,25 @@ export const setJoinCodeAsInvalid = mutation({
     });
   },
 });
+
+export const addNewCustomRandomDiceMessage = mutation({
+  args: {
+    msg: v.string(),
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    if (!user) {
+      return { success: false, message: "User not found." };
+    }
+    if (user[0].controlableUsers?.includes(args.msg)) {
+      return { success: false, message: "Already in DB!" };
+    }
+    const newUserList = [...(user[0].customRandomMessages || []), args.msg];
+    await ctx.db.patch(user[0]._id, { customRandomMessages: newUserList });
+    return { success: true };
+  },
+});

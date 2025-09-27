@@ -224,11 +224,6 @@ export const createLoginAccount = mutation({
   },
 });
 
-// todo
-export const createTeamAccount = mutation({
-  handler: async (ctx, args) => {},
-});
-
 export const createSession = mutation({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
@@ -459,6 +454,52 @@ export const deleteThisUser = mutation({
     }
     try {
       await ctx.db.delete(query[0]._id);
+      const sessionsToDelete = await ctx.db
+        .query("session")
+        .filter((q) => q.eq(q.field("userAccount"), args.userId))
+        .collect();
+
+      // Delete each session
+      for (const session of sessionsToDelete) {
+        await ctx.db.delete(session._id);
+      }
+      return {
+        success: true,
+        msg: "",
+      };
+    } catch (e: any) {
+      console.error(e);
+      return {
+        success: false,
+        msg: e.message,
+      };
+    }
+  },
+});
+
+export const deleteThisTeam = mutation({
+  args: { teamId: v.string(), areyousure: v.string() },
+  handler: async (ctx, args) => {
+    if (args.areyousure !== "YES I AM SURE I WANT TO DELETE MY TEAM FOREVER") {
+      return {
+        success: false,
+        msg: "not sincere enough.",
+      };
+    }
+    const query = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    if (query.length === 0) {
+      return {
+        success: false,
+        msg: "USER NOT FOUND",
+      };
+    }
+    try {
+      await ctx.db.patch(query[0]._id, {
+        deleted: true,
+      });
       return {
         success: true,
         msg: "",
