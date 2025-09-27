@@ -114,7 +114,6 @@ export const setDataAsIgnored = mutation({
       .query("qas")
       .filter((q) => q.eq(q.field("msgId"), args.msgId))
       .collect();
-    console.log(data);
     if (!data[0]) {
       throw new Error("id not found");
     }
@@ -170,7 +169,6 @@ export const getAllUserInfoInATeam = query({
           }),
       );
     }*/
-    console.log(userArray);
     return userArray;
   },
 });

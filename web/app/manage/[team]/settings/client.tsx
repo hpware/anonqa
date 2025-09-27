@@ -9,6 +9,8 @@ import {
   CircleXIcon,
   ClipboardCopyIcon,
   ClipboardIcon,
+  CloudCheck,
+  CloudCheckIcon,
   SquirrelIcon,
 } from "lucide-react";
 import {
@@ -33,6 +35,7 @@ import { v4 as uuidv4 } from "uuid";
 import hideJoinCodeOnClientSide from "@/lib/hideJoinCodeOnClentSide";
 import { useWindowSize } from "react-use";
 import Confetti from "react-confetti";
+import { toast } from "sonner";
 
 export default function SettingsPage({
   host,
@@ -50,6 +53,7 @@ export default function SettingsPage({
   const { width, height } = useWindowSize();
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
     useState("");
+  const [customMessageTextbox, setCustomMessageTextbox] = useState("");
   const [customMessages, setCustomMessages] = useState([]);
   const [revokeJoinCodeTextBox, setRevokeJoinCodeTextBox] = useState("");
   const [revokeUserAccessTextBox, setRevokeUserAccessTextBox] = useState("");
@@ -74,11 +78,21 @@ export default function SettingsPage({
     success: false,
     error: "",
   });
+  const [updateLoginDetails, setUpdateLoginDetails] = useState({
+    email: {
+      allowedToChange: false,
+      current: "",
+      new: "",
+      newButAgain: "",
+    },
+    password: {
+      allowedToChange: false,
+      current: "",
+      new: "",
+      newButAgain: "",
+    },
+  });
   const [confetiAction, setConfetiAction] = useState(false);
-  const getStatus =
-    {}; /** useQuery(api.func_users.getUserSocialLinkAccountStatus, {
-    userid: "4f3bfccf-5ab4-46b4-4e3f-c6acaae8b666",
-  }); */
   const getAllJoinIds =
     useQuery(api.func_feat_manage.getJoinCodeData, {
       teamId: teamId,
@@ -90,13 +104,80 @@ export default function SettingsPage({
       currentUserId: userInfo.userid,
     }) || [];
 
+  // useEffects
   useEffect(
     () => {
-      setTimeout(() => setConfetiAction(false), 5000);
+      if (confetiAction === true) {
+        setTimeout(() => setConfetiAction(false), 5000);
+      }
     },
     [confetiAction], // 5 sec confeti max,
   );
 
+  useEffect(() => {
+    if (
+      teamData.customMessages !== undefined &&
+      teamData.customMessages?.length !== 0
+    ) {
+      setCustomMessages(teamData.customMessages);
+    }
+  }, [teamData.customMessages]);
+
+  const sendNewCustomMessage = async () => {
+    toast.info("Creating custom message...");
+    const req = await fetch("/api/customMessages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "create",
+        teamId: teamId,
+        msg: customMessageTextbox,
+      }),
+    });
+    if (!req.ok) {
+      toast.error("Failed to send custom message! dw you can still resent it!");
+      return;
+    }
+    const res = await req.json();
+    if (!res.success) {
+      toast.error(
+        `Failed to send custom message! dw you can still resent it! Server Failed with code: ${res.status} and message: ${res.message}`,
+      );
+      return;
+    }
+    toast.success("Custom Message Created!");
+    setCustomMessageTextbox("");
+  };
+  const deleteCustomMessage = async (id: string) => {
+    toast.info("Deleting custom message...");
+    const req = await fetch("/api/customMessages", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "delete",
+        teamId: teamId,
+        msgId: id,
+      }),
+    });
+
+    if (!req.ok) {
+      toast.error("Delete Custom Message: Request Failed");
+      return;
+    }
+    const res = await req.json();
+    if (!res.success) {
+      toast.error(
+        `Delete Custom Message: Server Failed with code: ${res.status} and message: ${res.message}`,
+      );
+      return;
+    }
+    toast.success("Custom Message Deleted!");
+    setCustomMessageTextbox("");
+  };
   const createJoinCode = async () => {
     try {
       setJoinCodeCreate({
@@ -129,6 +210,7 @@ export default function SettingsPage({
   };
 
   const revokeJoinCode = async (joinCode: string) => {
+    toast.info("Revoking Join code...");
     const req = await fetch("/api/teams/joincode/revoke", {
       method: "POST",
       headers: {
@@ -139,9 +221,22 @@ export default function SettingsPage({
         team_id: teamId,
       }),
     });
+    if (!req.ok) {
+      toast.error("Revoke join code: Request Failed");
+      return;
+    }
+    const res = await req.json();
+    if (!res.success) {
+      toast.error(
+        `Revoke join code: Server Failed with code: ${res.status} and message: ${res.message}`,
+      );
+      return;
+    }
+    toast.success("Join Code Revoked!");
   };
 
   const revokeAccountAccess = async (accountId: string) => {
+    toast.info("Revoking Account Access...");
     const req = await fetch("/api/teams/account/revoke", {
       method: "POST",
       headers: {
@@ -152,7 +247,18 @@ export default function SettingsPage({
         teamId: teamId,
       }),
     });
+    if (!req.ok) {
+      toast("Revoke account access: Request Failed");
+      return;
+    }
     const res = await req.json();
+    if (!res.success) {
+      toast(
+        `Revoke account access: Server Failed with code: ${res.status} and message: ${res.message}`,
+      );
+      return;
+    }
+    toast("Account Access Revoked!");
   };
   const submitDeletionOfAccount = async () => {
     const req = await fetch("/api/users/deleteAccount", {
@@ -166,6 +272,10 @@ export default function SettingsPage({
         captcha: "NO THANKS!",
       }),
     });
+    if (!req.ok) {
+      toast.error("Delete account: Request Failed");
+    }
+    const res = await req.json();
   };
 
   const submitUpdatesToTheServer = async () => {
@@ -189,6 +299,7 @@ export default function SettingsPage({
       }),
     });
     if (!req.ok) {
+      toast("Profile data failed submition :O");
       setSubmitProfileData({
         success: false,
         loading: false,
@@ -198,12 +309,15 @@ export default function SettingsPage({
     }
     const res = await req.json();
     if (!res.success) {
+      toast(`Profile data failed submition :O ${res.message}`);
       setSubmitProfileData({
         success: false,
         loading: false,
         error: `${res.message}`,
       });
     }
+    toast("Profile data submitted successfully!");
+    setConfetiAction(true);
     setSubmitProfileData({
       success: true,
       loading: false,
@@ -223,6 +337,7 @@ export default function SettingsPage({
       userId: teamData2.userId,
       defaultMessages: teamData2.defaultMessages,
     });
+    toast("Profile pic loaded!");
   };
   const clearTextBoxState = () => {
     setRevokeUserAccessTextBox("");
@@ -233,10 +348,19 @@ export default function SettingsPage({
       revokeAccount: false,
     });
   };
-  useEffect(() => {
-    console.log(getAllUserAccountsInThisTeam);
-    console.log(getAllUserAccountsInThisTeam.filter((i) => i !== null));
-  }, [getAllUserAccountsInThisTeam]);
+
+  const checkIfCurrentSomethingIsCorrect = async (type: string) => {
+    const req = await fetch("/api/teams/checkifsomethingiscorrect", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        checkType: type,
+      }),
+    });
+  };
+
   return (
     <div className="flex flex-col space-y-8 p-6 max-w-4xl mx-auto transition-colors gap-2">
       {confetiAction && <Confetti width={width} height={height} />}
@@ -371,7 +495,49 @@ export default function SettingsPage({
         </div>
         <div>
           <h2 className="text-lg">Manage Custom Messages!</h2>
-          <Button className="mr-2">Add a Custom Message</Button>
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="mr-2">Add a Custom Message</Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>Create custom messages!</span>
+                </TooltipContent>
+              </Tooltip>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Create new custom messsage</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <div>
+                    <div className="flex flex-col">
+                      <span>Please enter your custom randomized message!</span>
+                      <input
+                        type="text"
+                        className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                        value={customMessageTextbox}
+                        onChange={(e) =>
+                          setCustomMessageTextbox(e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="cursor-pointer">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={sendNewCustomMessage}
+                  disabled={customMessageTextbox.length === 0}
+                >
+                  Ok
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {JSON.stringify(customMessages) === "[]" && (
             <div>
               <span>
@@ -670,70 +836,128 @@ export default function SettingsPage({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        {/**        <div className="flex flex-col p-4">
-          <span>Add your custom short link!</span>
-          <div className="flex flex-row items-center gap-2">
-            <span>{`${protocol}//${host}/l/`}</span>
-            <input
-              type="text"
-              className="bg-gray-100 dark:bg-gray-800 rounded p-2"
-            />
-            <button className="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-              <SquirrelIcon />
-            </button>
-          </div>
-        </div> */}
       </div>
+      {/**  const [updateLoginDetails, setUpdateLoginDetails] = useState({
+        email: {
+          allowedToChange: false,
+          current: "",
+          new: "",
+          newButAgain: "",
+        },
+        password: {
+          allowedToChange: false,
+          current: "",
+          new: "",
+          newButAgain: "",
+        },
+      }); */}
       <div>
         <h2 className="text-2xl">Change account settings</h2>
-        {/**<AlertDialog onOpenChange={clearTextBoxState}>
-          <AlertDialogTrigger asChild>
-            <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
-              Delete your account
-            </button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                <div className="flex flex-col">
-                  <span>
-                    This action cannot be undone. This will permanently delete
-                    your account and remove data from our servers.
-                  </span>
-                  <span>
-                    Please enter "
-                    <b>{`I authorize the deletion of the account.`}</b>"
-                  </span>
-                  <input
-                    type="text"
-                    className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                    placeholder={`I authorize the deletion of the account.`}
-                    value={deleteAccountVerifyTextBox}
-                    onChange={(e) =>
-                      setDeleteAccountVerifyTextBox(e.target.value)
-                    }
-                  />
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="cursor-pointer">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                disabled={
-                  deleteAccountVerifyTextBox !==
-                  "I authorize the deletion of the account."
-                }
-                className="bg-red-500 hover:bg-red-700 transition-all duration-300 cursor-pointer"
-                onClick={submitDeletionOfAccount}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog> */}
+        {/**        <div className="flex flex-col gap-1">
+  <span>
+    Please enter you current email to change it:{" "}
+    <input
+      type="email"
+      value={updateLoginDetails.email.current}
+      onChange={(e) =>
+        setUpdateLoginDetails({
+          email: {
+            allowedToChange: false,
+            current: e.target.value,
+            new: updateLoginDetails.email.new,
+            newButAgain: updateLoginDetails.email.newButAgain,
+          },
+          password: updateLoginDetails.password,
+        })
+      }
+      className="border mr-2 rounded"
+    />
+    <Button
+      onClick={() => {
+        checkIfCurrentSomethingIsCorrect("email");
+      }}
+    >
+      <CloudCheckIcon />
+    </Button>
+  </span>
+  <span>
+    Please enter you current password to change it:{" "}
+    <input
+      type="password"
+      value={updateLoginDetails.password.current}
+      onChange={(e) =>
+        setUpdateLoginDetails({
+          email: updateLoginDetails.email,
+          password: {
+            allowedToChange: false,
+            current: e.target.value,
+            new: updateLoginDetails.password.new,
+            newButAgain: updateLoginDetails.password.newButAgain,
+          },
+        })
+      }
+      className="border mr-2 rounded"
+    />
+    <Button
+      onClick={() => {
+        checkIfCurrentSomethingIsCorrect("email");
+      }}
+    >
+      <CloudCheckIcon />
+    </Button>
+  </span>
+</div> */}
+        <div>
+          {" "}
+          <AlertDialog onOpenChange={clearTextBoxState}>
+            <AlertDialogTrigger asChild>
+              <button className="bg-red-500 p-2 rounded hover:bg-red-500/70 transition-all duration-300 cursor-pointer text-white m-1">
+                Delete your account
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <div className="flex flex-col">
+                    <span>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove data from our servers.
+                    </span>
+                    <span>
+                      Please enter "
+                      <b>{`I authorize the deletion of the account.`}</b>"
+                    </span>
+                    <input
+                      type="text"
+                      className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                      placeholder={`I authorize the deletion of the account.`}
+                      value={deleteAccountVerifyTextBox}
+                      onChange={(e) =>
+                        setDeleteAccountVerifyTextBox(e.target.value)
+                      }
+                    />
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="cursor-pointer">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={
+                    deleteAccountVerifyTextBox !==
+                    "I authorize the deletion of the account."
+                  }
+                  className="bg-red-500 hover:bg-red-700 transition-all duration-300 cursor-pointer"
+                  onClick={submitDeletionOfAccount}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </div>
   );

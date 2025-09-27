@@ -435,3 +435,40 @@ export const kickPersonFromTeam = mutation({
     });
   },
 });
+
+export const deleteThisUser = mutation({
+  args: { userId: v.string(), areyousure: v.string() },
+  handler: async (ctx, args) => {
+    if (
+      args.areyousure !== "YES I AM SURE I WANT TO DELETE MY ACCOUNT FOREVER"
+    ) {
+      return {
+        success: false,
+        msg: "not sincere enough.",
+      };
+    }
+    const query = await ctx.db
+      .query("login")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .collect();
+    if (query.length === 0) {
+      return {
+        success: false,
+        msg: "USER NOT FOUND",
+      };
+    }
+    try {
+      await ctx.db.delete(query[0]._id);
+      return {
+        success: true,
+        msg: "",
+      };
+    } catch (e: any) {
+      console.error(e);
+      return {
+        success: false,
+        msg: e.message,
+      };
+    }
+  },
+});

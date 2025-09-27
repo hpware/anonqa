@@ -17,7 +17,7 @@ export default function Client({
   captchaFeat: boolean;
 }) {
   // Values
-  const [placeholder, setPlaceholder] = useState<string>("unknown placeholder");
+  const [placeholder, setPlaceholder] = useState<string>("");
   const [ptavalue, setPtavalue] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -128,14 +128,21 @@ export default function Client({
       randomizing: true,
     });
     const randomIndex = Math.floor(Math.random() * randomizedMesssages.length);
-    setPtavalue(randomizedMesssages[randomIndex]);
+    console.log(randomizedMesssages[randomIndex]);
+    setPtavalue("randomizedMesssages[randomIndex]");
   };
 
   const thisUser = user[0];
   if (thisUser.setCustomRandomMessages) {
   }
   useEffect(() => {
-    console.log(user)
+    console.log(user);
+    if (
+      user[0]?.customRandomMessages?.length !== undefined &&
+      user[0]?.customRandomMessages?.length !== 0
+    ) {
+      setRandomizedMessages(user[0]?.customRandomMessages);
+    }
     if (user[0]?.defaultMessages?.length) {
       setPlaceholder(user[0].defaultMessages[0]);
     }
@@ -182,16 +189,17 @@ export default function Client({
             {error.length > 0 && <span className="text-red-600">{error}</span>}
             <div className="text-center justify-center flex flex-row w-full mx-auto gap-1 rounded-lg my-3 px-1">
               <button
-                className="rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+                className="rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer  hover:bg-gray-400/60 transition-all duration-300  "
                 style={{ pointerEvents: "auto" }}
                 onClick={goBackToText}
               >
                 <ArrowBigLeftDashIcon />
               </button>
               <button
-                className="rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer"
+                className="disabled:hidden rounded-lg p-2 bg-gray-300/60 w-10 h-10 flex items-center justify-center hover:cursor-pointer hover:bg-gray-400/60 transition-all duration-300"
                 style={{ pointerEvents: "auto" }}
                 onClick={randomizeMessage}
+                disabled={randomizedMesssages.length === 0}
               >
                 <DicesIcon />
               </button>
