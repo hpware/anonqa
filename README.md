@@ -26,6 +26,9 @@ Figma!: https://www.figma.com/design/Rc1A45MnZTXP4Yi4yYyhFP/anon-qa-app-design?n
 ## How can I self host?
 TBD
 
+## Video
+https://github.com/user-attachments/assets/a91906ef-84c5-4b6f-a53b-cccf43218087
+
 ## What?
 
 Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for their anon qa stuff, 2 years ago I tried doing this in linktree (for myself), but failed bacause of it's limited functionalty. Now I have learned some stacks, (the NTP stack (Nuxt, Tailwind, Postgres)), I will try to redo my attempts at doing so, with self hostable services (or something you can host it yourself on vercel or cloudflare).
