@@ -13,7 +13,7 @@ Other than the email, you can also contact me on discord `hwtw` (you can maybe d
 ## What is made by AI?
 Most of the code is writen by myself. However, I sometimes do ask an AI (Claude Sonnet 3.5 or Grok Code Fast 1) or enable to AI auto compelete functions from Zed.
 
-The code fully writien by AI is the ~/web/manage/[team]/answer/[slug]/canvasText.tsx, canvasText component, as I'm incaptiable working with canvases.
+The code fully writien by AI is the `~/web/manage/[team]/answer/[slug]/canvasText.tsx`, canvasText component, as I'm incaptiable working with canvases.
 
 The login/registering pages's base is writen by an AI, and changed by me (some styles and fonts) and the main function as well.
 
@@ -53,8 +53,8 @@ This is only a UI issue. It does not affect the use of the dashboard. (yes im wr
 ### Mobile usage!
 This app is not really designed for mobile users (but mobile devices are what most ppl will use to access the app)
 
-## goals
-error handling, user change login email password, and custommessages. MUST be done today? and ship it (im already late for shipping)
+### WHY DOES IT SENT FOR SO LONG??
+THis app's code does checks on the api while using `await`, so if the db is slow your query to db is also slow too! This is made so that if ever the DB hit an error it can return back to the user.
 
 ## NOTES!
 DO NOT USE THE NATIVE `<Link>` component, this componenet will PRELOAD the page (which if its a FUCKING LOGOUT ROUTE) it will break, (i spent too much time debugging this garbage)

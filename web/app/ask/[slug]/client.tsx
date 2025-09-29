@@ -6,6 +6,7 @@ import { Turnstile } from "@/components/turnstile";
 import { ArrowBigLeftDashIcon, DicesIcon, SendIcon } from "lucide-react";
 import gsap from "gsap";
 import { Metadata } from "next";
+import { toast } from "sonner";
 
 export default function Client({
   slug,
@@ -110,6 +111,7 @@ export default function Client({
     const res = await req.json();
     if (!res.success) {
       setError(res.fail_message);
+      toast(res.fail_message);
     } else {
       setPtavalue("");
       setTurnstileToken(null);
