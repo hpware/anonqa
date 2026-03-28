@@ -124,45 +124,47 @@ export default function SettingsPage({
     }
   }, [teamData.customMessages]);
 
-  /**  const sendNewCustomMessage = async () => {
-  toast.info("Creating custom message...");
-  const req = await fetch("/api/teams/customMessages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      action: "create",
-      teamId: teamId,
-      msg: customMessageTextbox,
-    }),
-  });
-  if (!req.ok) {
-    toast.error("Failed to send custom message! dw you can still resent it!");
-    return;
-  }
-  const res = await req.json();
-  if (!res.success) {
-    toast.error(
-      `Failed to send custom message! dw you can still resent it! Server Failed with code: ${res.status} and message: ${res.message}`,
-    );
-    return;
-  }
-  toast.success("Custom Message Created!");
-  setCustomMessageTextbox("");
-}; */
+  const sendNewCustomMessage = async () => {
+    toast.info("Creating custom message...");
+    const req = await fetch("/api/teams/customMessages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "create",
+        teamId: teamId,
+        msg: customMessageTextbox,
+      }),
+    });
+    if (!req.ok) {
+      toast.error(
+        "Failed to send custom message! dw you can still resent it!",
+      );
+      return;
+    }
+    const res = await req.json();
+    if (!res.success) {
+      toast.error(
+        `Failed to send custom message! dw you can still resent it! Server Failed with code: ${res.status} and message: ${res.message}`,
+      );
+      return;
+    }
+    toast.success("Custom Message Created!");
+    setCustomMessageTextbox("");
+  };
 
-  const deleteCustomMessage = async (id: string) => {
+  const deleteCustomMessage = async (msg: string) => {
     toast.info("Deleting custom message...");
-    const req = await fetch("/api/customMessages", {
-      method: "DELETE",
+    const req = await fetch("/api/teams/customMessages", {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         action: "delete",
         teamId: teamId,
-        msgId: id,
+        msg: msg,
       }),
     });
 
@@ -178,7 +180,6 @@ export default function SettingsPage({
       return;
     }
     toast.success("Custom Message Deleted!");
-    setCustomMessageTextbox("");
   };
   const createJoinCode = async () => {
     try {
@@ -320,9 +321,10 @@ export default function SettingsPage({
         team_id: teamId,
         new_displayName: teamData2.displayName,
         new_handle: teamData2.handle,
-        new_placeholder: teamData2.defaultMessages || "",
+        new_placeholder: teamData2.defaultMessages || [],
         customRandomMessages: teamData2.customRandomMessages || [],
         new_imageUrl: teamData2.imageUrl,
+        pageType: teamData2.pageType,
       }),
     });
     if (!req.ok) {
@@ -480,19 +482,27 @@ export default function SettingsPage({
                   placeholder="Your page's placeholder!"
                   onChange={(e) =>
                     setTeamData2({
-                      deleted: teamData2.deleted,
-                      displayName: teamData2.displayName,
-                      handle: teamData2.handle,
-                      imageUrl: teamData2.imageUrl,
-                      pageType: teamData2.pageType,
-                      setCustomRandomMessages:
-                        teamData2.setCustomRandomMessages,
-                      customRandomMessages: teamData2.customRandomMessages,
-                      userId: teamData2.userId,
+                      ...teamData2,
                       defaultMessages: [e.target.value],
                     })
                   }
                 />
+                <div className="flex flex-row gap-2 items-center mt-1">
+                  <span className="text-sm">Page mode:</span>
+                  <select
+                    value={teamData2.pageType}
+                    onChange={(e) =>
+                      setTeamData2({
+                        ...teamData2,
+                        pageType: e.target.value,
+                      })
+                    }
+                    className="border rounded p-1 text-sm"
+                  >
+                    <option value="basic">Basic (Q&A)</option>
+                    <option value="confess">Confess Mode</option>
+                  </select>
+                </div>
               </div>
             </div>
             <Button
@@ -525,65 +535,77 @@ export default function SettingsPage({
             </Button>
           </div>
         </div>
-        {/*        <div>
-  <h2 className="text-lg">Manage Custom Messages!</h2>
-  <AlertDialog>
-    <AlertDialogTrigger>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button className="mr-2">Add a Custom Message</Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <span>Create custom messages!</span>
-        </TooltipContent>
-      </Tooltip>
-    </AlertDialogTrigger>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Create new custom messsage</AlertDialogTitle>
-        <AlertDialogDescription>
-          <div>
-            <div className="flex flex-col">
-              <span>Please enter your custom randomized message!</span>
-              <input
-                type="text"
-                className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                value={customMessageTextbox}
-                onChange={(e) =>
-                  setCustomMessageTextbox(e.target.value)
-                }
-              />
+        <div>
+          <h2 className="text-lg">Manage Custom Messages!</h2>
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="mr-2">Add a Custom Message</Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span>Create custom messages!</span>
+                </TooltipContent>
+              </Tooltip>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Create new custom message</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <div>
+                    <div className="flex flex-col">
+                      <span>
+                        Please enter your custom randomized message!
+                      </span>
+                      <input
+                        type="text"
+                        className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
+                        value={customMessageTextbox}
+                        onChange={(e) =>
+                          setCustomMessageTextbox(e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="cursor-pointer">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={sendNewCustomMessage}
+                  disabled={customMessageTextbox.length === 0}
+                >
+                  Ok
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          {customMessages.length === 0 && (
+            <div>
+              <span className="p-2">
+                No custom messages set up yet. Add one above!
+              </span>
             </div>
+          )}
+          <div className="flex flex-col gap-1 mt-2">
+            {customMessages.map((msg: string) => (
+              <div
+                key={msg}
+                className="bg-gray-200 dark:bg-gray-700 p-2 rounded flex flex-row justify-between items-center"
+              >
+                <span>{msg}</span>
+                <button
+                  className="text-red-500 hover:text-red-700 p-1"
+                  onClick={() => deleteCustomMessage(msg)}
+                >
+                  <CircleXIcon className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel className="cursor-pointer">
-          Cancel
-        </AlertDialogCancel>
-        <AlertDialogAction
-          onClick={sendNewCustomMessage}
-          disabled={customMessageTextbox.length === 0}
-        >
-          Ok
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-  {JSON.stringify(customMessages) === "[]" && (
-    <div>
-      <span>
-        🤔 Hmm, you don't seem like have any custom messages setted up
-        yet.
-      </span>
-    </div>
-  )}
-  <div>
-    {customMessages.map((i) => (
-      <div key={i}></div>
-    ))}
-  </div>
-</div> */}
+        </div>
         <div className="">
           <h2 className="text-lg">Manage Join Codes!</h2>
           <Button onClick={createJoinCode} disabled={joinCodeCreate.loading}>
@@ -814,13 +836,21 @@ export default function SettingsPage({
                 ))}
           </div>
         </div>
-        {/*<h2>Link your account(s)</h2>
-        <button
-          className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
-        >
-          {true && <CheckCircle2Icon />}
-          <span>Threads</span>
-        </button>*/}
+        <div>
+          <h2 className="text-lg">Link your account(s)</h2>
+          <a
+            href={`/api/social/threads/authorize?teamId=${teamId}`}
+            className={`p-2 m-2 rounded flex flex-row w-fit cursor-pointer transition-all duration-300 ${teamData2.threads ? "bg-green-400 dark:bg-green-500 hover:bg-green-500/70" : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"}`}
+          >
+            {teamData2.threads && <CheckCircle2Icon className="mr-1" />}
+            <span>Threads</span>
+          </a>
+          {teamData2.threads && (
+            <span className="text-sm text-gray-500 ml-2">
+              Linked as @{teamData2.threads.username}
+            </span>
+          )}
+        </div>
         <h3 className="text-xl">Important settings</h3>
         <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
@@ -868,76 +898,225 @@ export default function SettingsPage({
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      {/**  const [updateLoginDetails, setUpdateLoginDetails] = useState({
-        email: {
-          allowedToChange: false,
-          current: "",
-          new: "",
-          newButAgain: "",
-        },
-        password: {
-          allowedToChange: false,
-          current: "",
-          new: "",
-          newButAgain: "",
-        },
-      }); */}
       <div>
         <h2 className="text-2xl">Change account settings</h2>
-        {/**        <div className="flex flex-col gap-1">
-  <span>
-    Please enter you current email to change it:{" "}
-    <input
-      type="email"
-      value={updateLoginDetails.email.current}
-      onChange={(e) =>
-        setUpdateLoginDetails({
-          email: {
-            allowedToChange: false,
-            current: e.target.value,
-            new: updateLoginDetails.email.new,
-            newButAgain: updateLoginDetails.email.newButAgain,
-          },
-          password: updateLoginDetails.password,
-        })
-      }
-      className="border mr-2 rounded"
-    />
-    <Button
-      onClick={() => {
-        checkIfCurrentSomethingIsCorrect("email");
-      }}
-    >
-      <CloudCheckIcon />
-    </Button>
-  </span>
-  <span>
-    Please enter you current password to change it:{" "}
-    <input
-      type="password"
-      value={updateLoginDetails.password.current}
-      onChange={(e) =>
-        setUpdateLoginDetails({
-          email: updateLoginDetails.email,
-          password: {
-            allowedToChange: false,
-            current: e.target.value,
-            new: updateLoginDetails.password.new,
-            newButAgain: updateLoginDetails.password.newButAgain,
-          },
-        })
-      }
-      className="border mr-2 rounded"
-    />
-    <Button
-      onClick={() => {
-        checkIfCurrentSomethingIsCorrect("email");
-      }}
-    >
-      <CloudCheckIcon />
-    </Button>
-  </span>
-</div> */}
+        <div className="flex flex-col gap-3 mt-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-md font-medium">Change Email</span>
+            <div className="flex flex-col gap-1">
+              <input
+                type="email"
+                placeholder="Current email"
+                value={updateLoginDetails.email.current}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    email: {
+                      ...updateLoginDetails.email,
+                      current: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <input
+                type="email"
+                placeholder="New email"
+                value={updateLoginDetails.email.new}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    email: {
+                      ...updateLoginDetails.email,
+                      new: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <input
+                type="email"
+                placeholder="Confirm new email"
+                value={updateLoginDetails.email.newButAgain}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    email: {
+                      ...updateLoginDetails.email,
+                      newButAgain: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <input
+                type="password"
+                placeholder="Current password (for verification)"
+                value={updateLoginDetails.password.current}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    password: {
+                      ...updateLoginDetails.password,
+                      current: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <Button
+                disabled={
+                  !updateLoginDetails.email.current ||
+                  !updateLoginDetails.email.new ||
+                  updateLoginDetails.email.new !==
+                    updateLoginDetails.email.newButAgain ||
+                  !updateLoginDetails.password.current
+                }
+                onClick={async () => {
+                  const req = await fetch("/api/users/updateCredentials", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      type: "email",
+                      currentEmail: updateLoginDetails.email.current,
+                      currentPassword: updateLoginDetails.password.current,
+                      newEmail: updateLoginDetails.email.new,
+                    }),
+                  });
+                  const res = await req.json();
+                  if (res.success) {
+                    toast.success("Email updated!");
+                    setUpdateLoginDetails({
+                      ...updateLoginDetails,
+                      email: {
+                        allowedToChange: false,
+                        current: "",
+                        new: "",
+                        newButAgain: "",
+                      },
+                      password: {
+                        ...updateLoginDetails.password,
+                        current: "",
+                      },
+                    });
+                  } else {
+                    toast.error(res.message || "Failed to update email");
+                  }
+                }}
+              >
+                Update Email
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-md font-medium">Change Password</span>
+            <div className="flex flex-col gap-1">
+              <input
+                type="email"
+                placeholder="Your email (for verification)"
+                value={updateLoginDetails.email.current}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    email: {
+                      ...updateLoginDetails.email,
+                      current: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <input
+                type="password"
+                placeholder="Current password"
+                value={updateLoginDetails.password.current}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    password: {
+                      ...updateLoginDetails.password,
+                      current: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <input
+                type="password"
+                placeholder="New password"
+                value={updateLoginDetails.password.new}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    password: {
+                      ...updateLoginDetails.password,
+                      new: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                value={updateLoginDetails.password.newButAgain}
+                onChange={(e) =>
+                  setUpdateLoginDetails({
+                    ...updateLoginDetails,
+                    password: {
+                      ...updateLoginDetails.password,
+                      newButAgain: e.target.value,
+                    },
+                  })
+                }
+                className="border rounded p-1"
+              />
+              <Button
+                disabled={
+                  !updateLoginDetails.email.current ||
+                  !updateLoginDetails.password.current ||
+                  !updateLoginDetails.password.new ||
+                  updateLoginDetails.password.new !==
+                    updateLoginDetails.password.newButAgain
+                }
+                onClick={async () => {
+                  const req = await fetch("/api/users/updateCredentials", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      type: "password",
+                      currentEmail: updateLoginDetails.email.current,
+                      currentPassword: updateLoginDetails.password.current,
+                      newPassword: updateLoginDetails.password.new,
+                    }),
+                  });
+                  const res = await req.json();
+                  if (res.success) {
+                    toast.success("Password updated!");
+                    setUpdateLoginDetails({
+                      email: {
+                        allowedToChange: false,
+                        current: "",
+                        new: "",
+                        newButAgain: "",
+                      },
+                      password: {
+                        allowedToChange: false,
+                        current: "",
+                        new: "",
+                        newButAgain: "",
+                      },
+                    });
+                  } else {
+                    toast.error(res.message || "Failed to update password");
+                  }
+                }}
+              >
+                Update Password
+              </Button>
+            </div>
+          </div>
+        </div>
         <div>
           {" "}
           <AlertDialog onOpenChange={clearTextBoxState}>

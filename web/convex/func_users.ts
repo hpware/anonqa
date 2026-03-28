@@ -41,37 +41,39 @@ export const doesUserNameExist = query({
 
 // for the registering endpoint
 export const addUser = internalMutation({
-  args: { username: v.string() },
+  args: { username: v.string(), userId: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    /**    const newUser = ctx.db
-  .insert("users", {
-    imageUrl: "",
-    displayName: args.username,
-    controlableUsers: [args.username],
-    userId: uuidv4(),
-    deleted: false,
-    handle: args.username,
-    setCustomRandomMessages: false,
-    pageType: "basic",
-  })
-  .catch((err) => {
-    console.error("Error inserting user:", err);
-    throw new Error("Failed to create user");
-  });
-return newUser; */
-    return [];
+    const userId = args.userId ?? uuidv4();
+    const newUser = await ctx.db.insert("users", {
+      imageUrl: "/assets/default.png",
+      displayName: args.username,
+      controlableUsers: [userId],
+      userId: userId,
+      deleted: false,
+      handle: args.username,
+      setCustomRandomMessages: false,
+      customRandomMessages: [],
+      pageType: "basic",
+      defaultMessages: [],
+      customShortUrlSlug: "",
+      onBoarded: false,
+    });
+    return newUser;
   },
 });
 
 export const getUserSocialLinkAccountStatus = query({
   args: { userid: v.string(), session: v.string() },
   handler: async (ctx, args) => {
-    /**    const data = await ctx.db
-      .query("linkAccountUsers")
-      .filter((q) => q.eq(q.field("userid"), args.userid))
+    const data = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.userid))
       .first();
-    return data; */
-    return [];
+    if (!data) return { threads: null };
+    return {
+      threads: data.threads ?? null,
+      hasThreadsToken: !!data.threads_auth_token,
+    };
   },
 });
 
@@ -387,28 +389,24 @@ export const saveNewUserSettings = mutation({
     new_placeholder: v.array(v.string()),
     customRandomMessages: v.array(v.string()),
     teamId: v.string(),
+    pageType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const query = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
-    ctx.db.patch(query[0]._id, {
-      displayName:
-        args.new_displayName === query[0].displayName
-          ? query[0].displayName
-          : args.new_displayName,
-      handle:
-        args.new_handle === query[0].handle ? query[0].handle : args.new_handle,
-      imageUrl:
-        args.new_imageUrl === query[0].imageUrl
-          ? query[0].imageUrl
-          : args.new_imageUrl,
-      defaultMessages:
-        args.new_placeholder === query[0].defaultMessages
-          ? query[0].defaultMessages
-          : args.new_placeholder,
-    });
+    const patch: Record<string, any> = {
+      displayName: args.new_displayName,
+      handle: args.new_handle,
+      imageUrl: args.new_imageUrl,
+      defaultMessages: args.new_placeholder,
+      customRandomMessages: args.customRandomMessages,
+    };
+    if (args.pageType) {
+      patch.pageType = args.pageType;
+    }
+    await ctx.db.patch(query[0]._id, patch);
   },
 });
 

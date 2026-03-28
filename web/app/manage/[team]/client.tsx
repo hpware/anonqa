@@ -26,6 +26,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { FlagIcon } from "lucide-react";
 
 export default function Page({
   slug,
@@ -53,7 +55,7 @@ export default function Page({
     await fetch("/api/teams/submit_qa", {
       method: "POST",
       headers: {
-        "Content-Type": "applications/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         type: "ignore",
@@ -62,6 +64,11 @@ export default function Page({
         team_id: slug,
       }),
     });
+  };
+
+  const reportMessage = async (id: string, msg: string) => {
+    ignoreTextAction(id);
+    toast("Message reported and ignored. Thank you!");
   };
   const unansweredMessages = messages.filter(
     (i) => !i.answered && i.moderation && !i.ignore,
@@ -179,6 +186,33 @@ export default function Page({
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
+                      <AlertDialog>
+                        <AlertDialogTrigger>
+                          <button className="p-1 bg-red-100 dark:bg-red-900/30 rounded hover:bg-red-200 dark:hover:bg-red-800/40 text-red-600 dark:text-red-400">
+                            <FlagIcon className="w-4 h-4" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Report message</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will flag the message as inappropriate and
+                              remove it from your inbox.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="cursor-pointer">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-red-500 hover:bg-red-600 transition-all duration-300 cursor-pointer"
+                              onClick={() => reportMessage(i.msgId, i.msg)}
+                            >
+                              Report
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -283,7 +317,6 @@ export default function Page({
           </div>
         )}
       </div>
-      {/**{<ReportMenu /> */}
     </div>
   );
 }

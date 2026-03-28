@@ -46,6 +46,24 @@ export default function Page({
 
   const sendUpdateToCloud = async () => {
     try {
+      // If threads is selected, publish to threads first
+      if (selectedPlatform === "threads") {
+        const threadsReq = await fetch("/api/social/threads/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            teamId: teamId,
+            text: `Q: ${message[0].msg}\n\nA: ${answer}`,
+          }),
+        });
+        const threadsRes = await threadsReq.json();
+        if (!threadsRes.success) {
+          toast(`Failed to post to Threads: ${threadsRes.message}`);
+          return;
+        }
+        toast("Posted to Threads!");
+      }
+
       const req = await fetch("/api/teams/submit_qa", {
         method: "POST",
         headers: {
@@ -69,6 +87,24 @@ export default function Page({
     }
   };
 
+  const [threadsUser, setThreadsUser] = useState<any>(null);
+  useEffect(() => {
+    fetch(`/api/social/threads/getUserInfo?teamId=${teamId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setThreadsUser(data.data);
+        }
+      })
+      .catch(() => {});
+  }, [teamId]);
+
+  useEffect(() => {
+    if (message.length > 0 && message[0].answered) {
+      setAnswer(String(message[0].answer));
+    }
+  }, [message]);
+
   if (message.length === 0) {
     return <div>Oops! this content cannot be fetched!</div>;
   }
@@ -85,28 +121,21 @@ export default function Page({
   };
 
   const selections: selectionsInterface[] = [
-    /**    {
-  text: "Post to threads",
-  slug: "threads",
-  changingDisplayText: "Threads",
-  template: (
-    <Threads
-      user={JSON.parse(
-        JSON.stringify({
-          id: "1",
-          name: "hpware",
-          is_verified: true,
-          username: "testing",
-          threads_profile_picture_url:
-            "https://avatars.githubusercontent.com/u/157942818?v=4",
-        }),
-      )}
-    >
-      <span className="break-all">Q: {message[0].msg}</span>
-      <span className="break-all">A: {answer}</span>
-    </Threads>
-  ),
-},  */
+    ...(threadsUser
+      ? [
+          {
+            text: "Post to threads",
+            slug: "threads",
+            changingDisplayText: "Threads",
+            template: (
+              <Threads user={threadsUser}>
+                <span className="break-all">Q: {message[0].msg}</span>
+                <span className="break-all">A: {answer}</span>
+              </Threads>
+            ),
+          },
+        ]
+      : []),
     {
       text: "Post with pic (Stories)",
       slug: "pic-stories",
@@ -150,12 +179,6 @@ export default function Page({
       ),
     },
   ];
-
-  useEffect(() => {
-    if (message[0].answered) {
-      setAnswer(String(message[0].answer));
-    }
-  }, []);
 
   return (
     <div className="ph-no-capture">

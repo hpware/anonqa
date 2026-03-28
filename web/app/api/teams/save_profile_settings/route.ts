@@ -79,13 +79,14 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
-    fetchMutation(api.func_users.saveNewUserSettings, {
+    await fetchMutation(api.func_users.saveNewUserSettings, {
       new_displayName: body.new_displayName,
       new_handle: body.new_handle,
       new_imageUrl: body.new_imageUrl,
       new_placeholder: body.new_placeholder,
       customRandomMessages: body.customRandomMessages,
       teamId: body.team_id,
+      pageType: body.pageType || undefined,
     });
     return new Response(
       JSON.stringify({

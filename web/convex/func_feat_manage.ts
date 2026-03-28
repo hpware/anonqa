@@ -14,17 +14,99 @@ export const getTeams = query({
   },
 });
 
-/**export const getThreadsAuthToken = query({
+export const getThreadsAuthToken = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
     const data = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.userId))
       .collect();
-    return data[0].threads_auth_token;
+    if (data.length === 0) return null;
+    return data[0].threads_auth_token ?? null;
   },
 });
- */
+
+export const getThreadsUserData = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const data = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .collect();
+    if (data.length === 0) return null;
+    return data[0].threads ?? null;
+  },
+});
+
+export const saveThreadsAuth = mutation({
+  args: {
+    userId: v.string(),
+    accessToken: v.string(),
+    threadsData: v.object({
+      id: v.string(),
+      name: v.string(),
+      is_verified: v.boolean(),
+      username: v.string(),
+      threads_profile_picture_url: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .collect();
+    if (user.length === 0) return { success: false };
+    await ctx.db.patch(user[0]._id, {
+      threads_auth_token: args.accessToken,
+      threads: args.threadsData,
+    });
+    return { success: true };
+  },
+});
+
+export const deleteCustomRandomDiceMessage = mutation({
+  args: {
+    msg: v.string(),
+    teamId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), args.teamId))
+      .collect();
+    if (user.length === 0) {
+      return { success: false, message: "User not found." };
+    }
+    const updated = (user[0].customRandomMessages || []).filter(
+      (m) => m !== args.msg,
+    );
+    await ctx.db.patch(user[0]._id, { customRandomMessages: updated });
+    return { success: true };
+  },
+});
+
+export const updateEmailOrPassword = mutation({
+  args: {
+    userId: v.string(),
+    type: v.string(),
+    newValue: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const login = await ctx.db
+      .query("login")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .collect();
+    if (login.length === 0) {
+      return { success: false, message: "Account not found." };
+    }
+    if (args.type === "email") {
+      await ctx.db.patch(login[0]._id, { email: args.newValue });
+    } else if (args.type === "password") {
+      await ctx.db.patch(login[0]._id, { passwordHashed: args.newValue });
+    }
+    return { success: true };
+  },
+});
 
 export const addUserIntoTeam = mutation({
   args: {

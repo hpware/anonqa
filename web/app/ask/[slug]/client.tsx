@@ -131,12 +131,11 @@ export default function Client({
     });
     const randomIndex = Math.floor(Math.random() * randomizedMesssages.length);
     console.log(randomizedMesssages[randomIndex]);
-    setPtavalue("randomizedMesssages[randomIndex]");
+    setPtavalue(randomizedMesssages[randomIndex]);
   };
 
   const thisUser = user[0];
-  if (thisUser.setCustomRandomMessages) {
-  }
+  const isConfessMode = thisUser.pageType === "confess";
   useEffect(() => {
     console.log(user);
     if (
@@ -151,11 +150,13 @@ export default function Client({
   }, [user]);
 
   return (
-    <div>
+    <div className={isConfessMode ? "bg-gray-950 text-white min-h-screen" : ""}>
       {success ? (
         <div className="flex flex-col justify-center text-center w-full md:w-md absolute inset-0 m-auto">
           <div className="justify-center m-auto flex flex-col w-full md:w-md">
-            <span className="text-3xl text-bold">Success!!!!</span>
+            <span className="text-3xl text-bold">
+              {isConfessMode ? "Confession sent!" : "Success!!!!"}
+            </span>
             <button
               className="p-2 m-2 bg-black rounded-lg text-white hover:cursor-pointer hover:bg-black/50 transition-all duration-300 disabled:bg-black/70 disabled:cursor-not-allowed cool-font"
               onClick={() => setSuccess(false)}
@@ -182,8 +183,13 @@ export default function Client({
             <div className="relative md:m-0 m-2 ph-no-capture">
               <textarea
                 required
-                className="rounded p-1 mt-1 h-[150px] border w-full pr-14 resize-none"
-                placeholder={placeholder}
+                className={`rounded p-1 mt-1 h-[150px] border w-full pr-14 resize-none ${isConfessMode ? "bg-gray-900 border-gray-700 text-white placeholder-gray-500" : ""}`}
+                placeholder={
+                  placeholder ||
+                  (isConfessMode
+                    ? "Write your confession..."
+                    : "Ask me anything!")
+                }
                 value={ptavalue}
                 onChange={handleTextareaChange}
               />
@@ -212,7 +218,7 @@ export default function Client({
                   ptavalue.length == 0 || (captchaFeat && !turnstileToken)
                 }
               >
-                Submit!
+                {isConfessMode ? "Confess" : "Submit!"}
               </button>
             </div>
             {captchaFeat && (

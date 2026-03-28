@@ -60,7 +60,11 @@ export default defineSchema({
   })
     .index("by_session", ["sessionId"])
     .index("by_account", ["userAccount"]),
-  //featuresOn: defineTable({}), // beta?
+  featuresOn: defineTable({
+    featureName: v.string(),
+    enabled: v.boolean(),
+    description: v.optional(v.string()),
+  }).index("by_name", ["featureName"]),
   joinCodes: defineTable({
     code: v.string(),
     teamId: v.string(),

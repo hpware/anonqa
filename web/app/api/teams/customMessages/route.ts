@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { fetchQuery } from "convex/nextjs";
+import { fetchQuery, fetchMutation } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import isValidUUID from "@/lib/checkValidUUID";
 
@@ -13,6 +13,7 @@ export const POST = async (request: NextRequest) => {
       !(
         body.teamId &&
         body.msg &&
+        body.action &&
         session &&
         isValidUUID(body.teamId) &&
         isValidUUID(session)
@@ -72,6 +73,60 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
+
+    if (body.action === "create") {
+      const result = await fetchMutation(
+        api.func_feat_manage.addNewCustomRandomDiceMessage,
+        {
+          msg: body.msg,
+          teamId: body.teamId,
+        },
+      );
+      return new Response(
+        JSON.stringify({
+          success: result.success,
+          status: result.success ? 200 : 400,
+          message: result.success ? "" : result.message,
+        }),
+        {
+          status: result.success ? 200 : 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    if (body.action === "delete") {
+      const result = await fetchMutation(
+        api.func_feat_manage.deleteCustomRandomDiceMessage,
+        {
+          msg: body.msg,
+          teamId: body.teamId,
+        },
+      );
+      return new Response(
+        JSON.stringify({
+          success: result.success,
+          status: result.success ? 200 : 400,
+          message: result.success ? "" : result.message,
+        }),
+        {
+          status: result.success ? 200 : 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        status: 400,
+        message: "Invalid action",
+      }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (e: any) {
     console.error(e);
     return new Response(
