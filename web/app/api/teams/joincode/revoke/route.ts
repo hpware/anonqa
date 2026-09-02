@@ -46,6 +46,7 @@ export const POST = async (request: NextRequest) => {
       {
         userId: String(checkSession.userid),
         teamId: body.team_id,
+        session: String(session),
       },
     );
     if (!checkteamaccess) {
@@ -63,9 +64,10 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
-    fetchMutation(api.func_feat_manage.setJoinCodeAsInvalid, {
+    await fetchMutation(api.func_feat_manage.setJoinCodeAsInvalid, {
       joinCode: body.code,
       team_id: body.team_id,
+      session: String(session),
     });
     return new Response(
       JSON.stringify({

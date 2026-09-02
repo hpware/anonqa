@@ -49,6 +49,7 @@ export const POST = async (request: NextRequest) => {
       {
         userId: String(checkSession.userid),
         teamId: body.team_id,
+        session: String(session),
       },
     );
     if (!checkteamaccess) {

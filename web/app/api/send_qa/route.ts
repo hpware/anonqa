@@ -13,6 +13,21 @@ interface bodyData {
 export const POST = async (request: NextRequest) => {
   const body: bodyData = await request.json();
   //
+  if (
+    !body ||
+    typeof body.message !== "string" ||
+    body.message.trim().length === 0 ||
+    body.message.length > 2000
+  ) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        fail_message: "Message is empty or too long (max 2000 characters)",
+        downloadAuthUrl: null as any,
+      }),
+      { status: 400 },
+    );
+  }
   var captchaSuccess = false;
   if (Boolean(process.env.NEXT_PUBLIC_CAPTCHA_FEAT)) {
     // if there is no turnstile data.
@@ -81,11 +96,22 @@ export const POST = async (request: NextRequest) => {
   }
   const { message, user } = body;
   const getUserDetails = await fetchQuery(api.func_users.data, { slug: user });
+  if (getUserDetails.length === 0) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        fail_message: "This user does not exist",
+        downloadAuthUrl: null as any,
+      }),
+      { status: 404 },
+    );
+  }
   try {
     await fetchMutation(api.func_qa.qa, {
       status: safe,
       toUser: getUserDetails[0].userId,
       msg: message,
+      secret: process.env.CONVEX_SERVER_SECRET ?? "",
     });
   } catch (e) {
     console.log(e);

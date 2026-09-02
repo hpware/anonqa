@@ -40,6 +40,7 @@ export const POST = async (request: NextRequest) => {
       {
         userId: String(checkSession.userid),
         teamId: body.team_id,
+        session: String(session),
       },
     );
     console.log(checkteamaccess);
@@ -60,8 +61,9 @@ export const POST = async (request: NextRequest) => {
     }
     console.log(body.type);
     if (body.type === "ignore") {
-      fetchMutation(api.func_feat_manage.setDataAsIgnored, {
+      await fetchMutation(api.func_feat_manage.setDataAsIgnored, {
         msgId: body.q_id,
+        session: String(session),
       });
       return new Response(
         JSON.stringify({
@@ -82,6 +84,7 @@ export const POST = async (request: NextRequest) => {
       msgId: body.q_id,
       answer: body.ans,
       teamId: body.team_id,
+      session: String(session),
     });
     if (!updateData.success) {
       return new Response(

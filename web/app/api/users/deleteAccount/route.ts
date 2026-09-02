@@ -50,6 +50,7 @@ export const DELETE = async (request: NextRequest) => {
   const sendRequest = await fetchMutation(api.func_users.deleteThisUser, {
     userId: String(checkSession.userid),
     areyousure: "YES I AM SURE I WANT TO DELETE MY ACCOUNT FOREVER",
+    session: String(session),
   });
   if (!sendRequest.success) {
     return new Response(

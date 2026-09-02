@@ -69,6 +69,7 @@ export const POST = async (request: NextRequest) => {
         team_handle: body.team_handle,
         team_name: body.team_name,
         user_id: String(checkSession.userid),
+        session: String(session),
       },
     );
     return new Response(

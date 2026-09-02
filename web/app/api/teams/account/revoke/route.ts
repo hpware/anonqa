@@ -48,6 +48,7 @@ export const POST = async (request: NextRequest) => {
       {
         userId: String(checkSession.userid),
         teamId: body.teamId,
+        session: String(session),
       },
     );
     if (!checkteamaccess) {
@@ -65,9 +66,10 @@ export const POST = async (request: NextRequest) => {
         },
       );
     }
-    fetchMutation(api.func_users.kickPersonFromTeam, {
+    await fetchMutation(api.func_users.kickPersonFromTeam, {
       teamId: body.teamId,
       userToBeKicked: body.accountId,
+      session: String(session),
     });
   } catch (e) {
     console.error(e);

@@ -31,18 +31,20 @@ export default function Page({
   slug,
   host,
   protocol,
+  session,
 }: {
   slug: string;
   host: string;
   protocol: string;
+  session: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<string>("unanswered");
 
-  const getUserDetails = useQuery(api.func_users.data_dash, { slug: slug });
   const messages =
     useQuery(api.func_qa.getAllToUser, {
-      user: getUserDetails?.[0]?.userId || "",
+      teamId: slug,
+      session: session,
     }) || [];
 
   const getTeamSlugData = useQuery(api.func_users.getTeamSlugViaTeamId, {

@@ -1,12 +1,20 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
-import generateRandomString from "@/lib/randomGenString";
 import { v4 as uuidv4 } from "uuid";
+import {
+  requireTeamAccess,
+  requireValidSession,
+} from "./auth";
 
 export const getTeams = query({
-  args: { userId: v.string() },
+  args: { userId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    // only allow reading the team list of the session's own user
+    const sessionUserId = await requireValidSession(ctx, args.session);
+    if (sessionUserId !== args.userId) {
+      return [];
+    }
     const data = filter(ctx.db.query("users"), (doc) =>
       doc.controlableUsers.includes(args.userId),
     ).collect();
@@ -30,8 +38,10 @@ export const addUserIntoTeam = mutation({
   args: {
     userId: v.string(),
     teamId: v.string(),
+    session: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     const user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
@@ -49,8 +59,9 @@ export const addUserIntoTeam = mutation({
 });
 
 export const createJoinCode = mutation({
-  args: { teamId: v.string(), joinId: v.string() },
+  args: { teamId: v.string(), joinId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     await ctx.db.insert("joinCodes", {
       code: args.joinId,
       teamId: args.teamId,
@@ -60,8 +71,13 @@ export const createJoinCode = mutation({
 });
 
 export const checkAbleToBeAccessed = query({
-  args: { teamId: v.string(), userId: v.string() },
+  args: { teamId: v.string(), userId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    // the session must belong to the userId whose access we are checking
+    const sessionUserId = await requireValidSession(ctx, args.session);
+    if (sessionUserId !== args.userId) {
+      return false;
+    }
     const user = await ctx.db
       .query("users")
       .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
@@ -75,8 +91,10 @@ export const checkAbleToBeAccessed = query({
 export const getJoinCodeData = query({
   args: {
     teamId: v.string(),
+    session: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     const rows = await ctx.db
       .query("joinCodes")
       .withIndex("teamId", (q) => q.eq("teamId", args.teamId))
@@ -87,8 +105,18 @@ export const getJoinCodeData = query({
 });
 
 export const createNewTeam = mutation({
-  args: { team_handle: v.string(), team_name: v.string(), user_id: v.string() },
+  args: {
+    team_handle: v.string(),
+    team_name: v.string(),
+    user_id: v.string(),
+    session: v.string(),
+  },
   handler: async (ctx, args) => {
+    // a session may only create teams owned by itself
+    const sessionUserId = await requireValidSession(ctx, args.session);
+    if (sessionUserId !== args.user_id) {
+      throw new Error("Unauthorized: cannot create a team for another user.");
+    }
     const teamId = uuidv4();
     await ctx.db.insert("users", {
       imageUrl: "/assets/default.png",
@@ -108,7 +136,7 @@ export const createNewTeam = mutation({
 });
 
 export const setDataAsIgnored = mutation({
-  args: { msgId: v.string() },
+  args: { msgId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
     const data = await ctx.db
       .query("qas")
@@ -117,6 +145,8 @@ export const setDataAsIgnored = mutation({
     if (!data[0]) {
       throw new Error("id not found");
     }
+    // only members of the team that received this message may ignore it
+    await requireTeamAccess(ctx, args.session, data[0].toUser);
     await ctx.db.patch(data[0]._id, {
       ignore: true,
     });
@@ -124,8 +154,10 @@ export const setDataAsIgnored = mutation({
 });
 
 export const getAllUserInfoInATeam = query({
-  args: { teamId: v.string(), currentUserId: v.string() },
+  args: { teamId: v.string(), currentUserId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    // member emails may only be read by members of the same team
+    await requireTeamAccess(ctx, args.session, args.teamId);
     const getTeamViaId = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
@@ -174,8 +206,9 @@ export const getAllUserInfoInATeam = query({
 });
 
 export const setJoinCodeAsInvalid = mutation({
-  args: { joinCode: v.string(), team_id: v.string() },
+  args: { joinCode: v.string(), team_id: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.team_id);
     const query = await ctx.db
       .query("joinCodes")
       .filter((q) => q.eq(q.field("code"), args.joinCode))

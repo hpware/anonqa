@@ -25,17 +25,22 @@ export default function Page({
   slug,
   teamId,
   message,
+  session,
 }: {
   slug: string;
   teamId: string;
   message: Doc<"qas">[];
+  session: string;
 }) {
   const router = useRouter();
   const [answer, setAnswer] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const selectionsPreviewInterfaceRef = useRef(null);
-  const getMessage = useQuery(api.func_qa.getViaId, { id: slug });
+  const getMessage = useQuery(api.func_qa.getViaId, {
+    id: slug,
+    session: session,
+  });
   useGSAP(
     () => {
       // gsap code here...
