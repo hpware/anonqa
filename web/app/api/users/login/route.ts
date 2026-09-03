@@ -30,7 +30,7 @@ export const POST = async (response: NextRequest) => {
   try {
     const checkUserAccount = await fetchQuery(
       api.func_users.checkAccountAndReturnPassword,
-      { email: body.email },
+      { email: body.email, secret: process.env.CONVEX_SERVER_SECRET ?? "" },
     );
     if (!checkUserAccount.valid) {
       return new Response(
@@ -84,6 +84,7 @@ export const POST = async (response: NextRequest) => {
     }
     const saveAndGetQuery = await fetchMutation(api.func_users.createSession, {
       userId: String(checkUserAccount.userId),
+      secret: process.env.CONVEX_SERVER_SECRET ?? "",
     });
     if (!saveAndGetQuery.success) {
       return new Response(
@@ -102,6 +103,8 @@ export const POST = async (response: NextRequest) => {
     }
     cookieStore.set("session", saveAndGetQuery.session, {
       httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       expires: saveAndGetQuery.expiresAt,
     });
 

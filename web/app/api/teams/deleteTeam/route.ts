@@ -50,6 +50,7 @@ export const DELETE = async (request: NextRequest) => {
   const sendRequest = await fetchMutation(api.func_users.deleteThisTeam, {
     teamId: body.teamId,
     areyousure: "YES I AM SURE I WANT TO DELETE MY TEAM FOREVER",
+    session: String(session),
   });
   if (!sendRequest.success) {
     return new Response(

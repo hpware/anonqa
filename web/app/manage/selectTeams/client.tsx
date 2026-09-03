@@ -19,10 +19,17 @@ import { redirect, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
-export default function Page({ userid }: { userid: string }) {
+export default function Page({
+  userid,
+  session,
+}: {
+  userid: string;
+  session: string;
+}) {
   const teams: Doc<"users">[] =
     useQuery(api.func_feat_manage.getTeams, {
       userId: String(userid),
+      session: session,
     }) || [];
   // dialog
   const router = useRouter();

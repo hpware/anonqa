@@ -29,6 +29,7 @@ export default async function Page({
       teamId={team}
       teamData={query[0]}
       userInfo={getUser}
+      session={session}
     />
   );
 }

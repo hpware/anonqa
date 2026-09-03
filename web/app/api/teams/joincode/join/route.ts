@@ -49,6 +49,7 @@ export const POST = async (request: NextRequest) => {
       {
         userId: String(checkSession.userid),
         joinCode: body.code,
+        session: String(session),
       },
     );
   if (!checkIfJoinCodeIsValidAndIfItIsValidThenRevokeAkaInvlidsIt.success) {

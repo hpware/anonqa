@@ -49,6 +49,7 @@ export const POST = async (request: NextRequest) => {
       {
         userId: String(checkSession.userid),
         teamId: body.team_id,
+        session: String(session),
       },
     );
     if (!checkteamaccess) {
@@ -68,9 +69,10 @@ export const POST = async (request: NextRequest) => {
       );
     }
     const createJoinId = `sinv_d_${generateRandomString(40, "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890")}`;
-    fetchMutation(api.func_feat_manage.createJoinCode, {
+    await fetchMutation(api.func_feat_manage.createJoinCode, {
       teamId: body.team_id,
       joinId: createJoinId,
+      session: String(session),
     });
     return new Response(
       JSON.stringify({

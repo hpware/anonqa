@@ -48,6 +48,7 @@ export const POST = async (request: NextRequest) => {
     {
       userId: String(checkSession.userid),
       teamId: body.teamId,
+      session: String(session),
     },
   );
   if (!checkteamaccess) {
@@ -68,6 +69,7 @@ export const POST = async (request: NextRequest) => {
   }
   const query = await fetchQuery(api.func_feat_manage.getJoinCodeData, {
     teamId: body.teamId,
+    session: String(session),
   });
   return new Response(
     JSON.stringify({

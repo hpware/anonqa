@@ -43,12 +43,14 @@ export default function SettingsPage({
   teamId,
   teamData,
   userInfo,
+  session,
 }: {
   host: string;
   protocol: string;
   teamId: string;
   teamData: any;
   userInfo: any;
+  session: string;
 }) {
   const router = useRouter();
   const { width, height } = useWindowSize();
@@ -97,12 +99,14 @@ export default function SettingsPage({
   const getAllJoinIds =
     useQuery(api.func_feat_manage.getJoinCodeData, {
       teamId: teamId,
+      session: session,
     }) || [];
 
   const getAllUserAccountsInThisTeam =
     useQuery(api.func_feat_manage.getAllUserInfoInATeam, {
       teamId: teamId,
       currentUserId: userInfo.userid,
+      session: session,
     }) || [];
 
   // useEffects

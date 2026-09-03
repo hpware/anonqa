@@ -3,6 +3,11 @@ import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
 import { filter } from "convex-helpers/server/filter";
 import { CanvasText } from "@/app/manage/[team]/answer/[slug]/canvasText";
+import {
+  requireServerSecret,
+  requireTeamAccess,
+  requireValidSession,
+} from "./auth";
 
 // cron to remove users
 export const removedeleted = internalMutation({
@@ -155,8 +160,13 @@ return queryquery[0].toUser; */
 });
 
 export const getTeams = query({
-  args: { userId: v.string() },
+  args: { userId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    // only allow reading the team list of the session's own user
+    const sessionUserId = await requireValidSession(ctx, args.session);
+    if (sessionUserId !== args.userId) {
+      return [];
+    }
     const data = filter(ctx.db.query("users"), (doc) =>
       doc.controlableUsers.includes(args.userId),
     ).collect();
@@ -164,9 +174,11 @@ export const getTeams = query({
   },
 });
 
+// for the login endpoint (server-to-server only, see convex/auth.ts)
 export const checkAccountAndReturnPassword = query({
-  args: { email: v.string() },
+  args: { email: v.string(), secret: v.string() },
   handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
     const query = await ctx.db
       .query("login")
       .filter((q) => q.eq(q.field("email"), args.email))
@@ -188,9 +200,11 @@ export const checkAccountAndReturnPassword = query({
   },
 });
 
+// for the registering endpoint (server-to-server only, see convex/auth.ts)
 export const lookUpAccountsByEmail = query({
-  args: { email: v.string() },
+  args: { email: v.string(), secret: v.string() },
   handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
     return await ctx.db
       .query("login")
       .withIndex("by_email", (q) => q.eq("email", args.email))
@@ -198,9 +212,16 @@ export const lookUpAccountsByEmail = query({
   },
 });
 
+// server-to-server only, see convex/auth.ts
 export const createLoginAccount = mutation({
-  args: { email: v.string(), password: v.string(), fname: v.string() },
+  args: {
+    email: v.string(),
+    password: v.string(),
+    fname: v.string(),
+    secret: v.string(),
+  },
   handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
     try {
       const generateUserID = uuidv4();
       await ctx.db.insert("login", {
@@ -224,9 +245,11 @@ export const createLoginAccount = mutation({
   },
 });
 
+// server-to-server only (called after the caller authenticated the user), see convex/auth.ts
 export const createSession = mutation({
-  args: { userId: v.string() },
+  args: { userId: v.string(), secret: v.string() },
   handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
     const sessionUuid = uuidv4();
     const oneDayFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await ctx.db.insert("session", {
@@ -276,8 +299,12 @@ export const verifySession = query({
 });
 
 export const getFname = query({
-  args: { userId: v.string() },
+  args: { userId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    const sessionUserId = await requireValidSession(ctx, args.session);
+    if (sessionUserId !== args.userId) {
+      return null;
+    }
     const query = await ctx.db
       .query("login")
       .withIndex("userId", (q) => q.eq("userId", args.userId))
@@ -320,8 +347,16 @@ export const getDefaultPlaceholderAndDiceThingy = query({
 
 export const checkIfJoinCodeIsValidAndIfItIsValidThenRevokeAkaInvlidsIt =
   mutation({
-    args: { joinCode: v.string(), userId: v.string() },
+    args: { joinCode: v.string(), userId: v.string(), session: v.string() },
     handler: async (ctx, args) => {
+      const sessionUserId = await requireValidSession(ctx, args.session);
+      if (sessionUserId !== args.userId) {
+        return {
+          success: false,
+          msg: "Unauthorized.",
+          teamId: "",
+        };
+      }
       const fetchJoinCode = await ctx.db
         .query("joinCodes")
         .filter((q) => q.eq(q.field("code"), args.joinCode))
@@ -387,8 +422,10 @@ export const saveNewUserSettings = mutation({
     new_placeholder: v.array(v.string()),
     customRandomMessages: v.array(v.string()),
     teamId: v.string(),
+    session: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     const query = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
@@ -413,8 +450,13 @@ export const saveNewUserSettings = mutation({
 });
 
 export const kickPersonFromTeam = mutation({
-  args: { teamId: v.string(), userToBeKicked: v.string() },
+  args: {
+    teamId: v.string(),
+    userToBeKicked: v.string(),
+    session: v.string(),
+  },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     const query = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
@@ -432,8 +474,16 @@ export const kickPersonFromTeam = mutation({
 });
 
 export const deleteThisUser = mutation({
-  args: { userId: v.string(), areyousure: v.string() },
+  args: { userId: v.string(), areyousure: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    const sessionUserId = await requireValidSession(ctx, args.session);
+    // a session may only delete the account it belongs to
+    if (sessionUserId !== args.userId) {
+      return {
+        success: false,
+        msg: "Unauthorized.",
+      };
+    }
     if (
       args.areyousure !== "YES I AM SURE I WANT TO DELETE MY ACCOUNT FOREVER"
     ) {
@@ -478,8 +528,9 @@ export const deleteThisUser = mutation({
 });
 
 export const deleteThisTeam = mutation({
-  args: { teamId: v.string(), areyousure: v.string() },
+  args: { teamId: v.string(), areyousure: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     if (args.areyousure !== "YES I AM SURE I WANT TO DELETE MY TEAM FOREVER") {
       return {
         success: false,

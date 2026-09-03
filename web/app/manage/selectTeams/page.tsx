@@ -16,5 +16,5 @@ export default async function Page() {
     redirect("/auth/logout");
   }
 
-  return <Client userid={String(getUser.userid)} />;
+  return <Client userid={String(getUser.userid)} session={session} />;
 }
