@@ -2,10 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
 import { v4 as uuidv4 } from "uuid";
-import {
-  requireTeamAccess,
-  requireValidSession,
-} from "./auth";
+import { requireTeamAccess, requireValidSession } from "./auth";
 
 export const getTeams = query({
   args: { userId: v.string(), session: v.string() },
@@ -15,8 +12,9 @@ export const getTeams = query({
     if (sessionUserId !== args.userId) {
       return [];
     }
-    const data = filter(ctx.db.query("users"), (doc) =>
-      doc.controlableUsers.includes(args.userId),
+    const data = filter(
+      ctx.db.query("users"),
+      (doc) => !doc.deleted && doc.controlableUsers.includes(args.userId),
     ).collect();
     return data;
   },
@@ -46,7 +44,7 @@ export const addUserIntoTeam = mutation({
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
-    if (!user) {
+    if (!user.length) {
       return { success: false, message: "User not found." };
     }
     if (user[0].controlableUsers?.includes(args.userId)) {
@@ -82,7 +80,7 @@ export const checkAbleToBeAccessed = query({
       .query("users")
       .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
       .unique();
-    if (!user) return false; // or throw if this should never happen
+    if (!user || user.deleted) return false; // or throw if this should never happen
     const controlable = user.controlableUsers ?? [];
     return controlable.includes(args.userId);
   },
@@ -117,6 +115,17 @@ export const createNewTeam = mutation({
     if (sessionUserId !== args.user_id) {
       throw new Error("Unauthorized: cannot create a team for another user.");
     }
+    if (
+      !/^[a-zA-Z0-9_-]{1,64}$/.test(args.team_handle) ||
+      !args.team_name.trim()
+    ) {
+      throw new Error("Invalid team name or handle.");
+    }
+    const existing = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("handle"), args.team_handle))
+      .first();
+    if (existing) throw new Error("This handle is already in use.");
     const teamId = uuidv4();
     await ctx.db.insert("users", {
       imageUrl: "/assets/default.png",
@@ -226,23 +235,42 @@ export const setJoinCodeAsInvalid = mutation({
 });
 
 export const addNewCustomRandomDiceMessage = mutation({
-  args: {
-    msg: v.string(),
-    teamId: v.string(),
-  },
+  args: { msg: v.string(), teamId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("userId"), args.teamId))
-      .collect();
-    if (!user) {
-      return { success: false, message: "User not found." };
-    }
-    if (user[0].controlableUsers?.includes(args.msg)) {
-      return { success: false, message: "Already in DB!" };
-    }
-    const newUserList = [...(user[0].customRandomMessages || []), args.msg];
-    await ctx.db.patch(user[0]._id, { customRandomMessages: newUserList });
-    return { success: true };
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    const msg = args.msg.trim();
+    if (!msg || msg.length > 2000)
+      throw new Error("Message must contain 1–2000 characters.");
+    const messages = user!.customRandomMessages ?? [];
+    if (messages.includes(msg))
+      return { success: false, message: "Message already exists." };
+    await ctx.db.patch(user!._id, {
+      customRandomMessages: [...messages, msg],
+      setCustomRandomMessages: true,
+    });
+    return { success: true, message: "" };
+  },
+});
+
+export const deleteCustomRandomDiceMessage = mutation({
+  args: { msg: v.string(), teamId: v.string(), session: v.string() },
+  handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    const messages = (user!.customRandomMessages ?? []).filter(
+      (msg) => msg !== args.msg,
+    );
+    await ctx.db.patch(user!._id, {
+      customRandomMessages: messages,
+      setCustomRandomMessages: messages.length > 0,
+    });
+    return { success: true, message: "" };
   },
 });

@@ -33,7 +33,7 @@ export default function Page({
   session: string;
 }) {
   const router = useRouter();
-  const [answer, setAnswer] = useState<string>("");
+  const [answer, setAnswer] = useState<string>(message[0]?.answer ?? "");
   const [success, setSuccess] = useState<boolean>(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const selectionsPreviewInterfaceRef = useRef(null);
@@ -156,12 +156,6 @@ export default function Page({
     },
   ];
 
-  useEffect(() => {
-    if (message[0].answered) {
-      setAnswer(String(message[0].answer));
-    }
-  }, []);
-
   return (
     <div className="ph-no-capture">
       {message[0].answered ? (
@@ -283,6 +277,7 @@ export default function Page({
           <div>
             <button
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              disabled={!selectedPlatform || !answer.trim()}
               onClick={sendUpdateToCloud}
             >
               {selectedPlatform === "threads"

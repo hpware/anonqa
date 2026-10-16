@@ -4,123 +4,87 @@ import { safetyPrompt } from "@/lib/prompts";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
-interface bodyData {
-  user: string;
-  message: string;
-  cf_turnstile?: string; // beta
-}
-
 export const POST = async (request: NextRequest) => {
-  const body: bodyData = await request.json();
-  //
+  const body = await request.json().catch(() => null);
   if (
     !body ||
+    typeof body.user !== "string" ||
+    !body.user ||
     typeof body.message !== "string" ||
-    body.message.trim().length === 0 ||
+    !body.message.trim() ||
     body.message.length > 2000
   ) {
-    return new Response(
-      JSON.stringify({
-        success: false,
-        fail_message: "Message is empty or too long (max 2000 characters)",
-        downloadAuthUrl: null as any,
-      }),
-      { status: 400 },
-    );
-  }
-  var captchaSuccess = false;
-  if (Boolean(process.env.NEXT_PUBLIC_CAPTCHA_FEAT)) {
-    // if there is no turnstile data.
-    if (!body.cf_turnstile) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          fail_message: "Captcha request failed or captcha request expired",
-          downloadAuthUrl: null as any,
-        }),
-        { status: 400 },
-      );
-    }
-    const CF_SECRET_KEY = process.env.CF_TURNSTILE_PRIVATE_KEY;
-    const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
-    const result = await fetch(url, {
-      body: JSON.stringify({
-        secret: CF_SECRET_KEY,
-        response: body.cf_turnstile,
-      }),
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const outcome = await result.json();
-    const challengeTime = new Date(outcome.challenge_ts).getTime();
-    const currentTime = new Date().getTime();
-    if (outcome.success && currentTime - challengeTime < 3600000) {
-      captchaSuccess = true;
-    }
-  } else {
-    captchaSuccess = true;
-  }
-  if (!captchaSuccess) {
-    return new Response(
-      JSON.stringify({
-        success: false,
-        fail_message: "Captcha request failed or captcha request expired",
-        downloadAuthUrl: null as any,
-      }),
-      { status: 400 },
-    );
-  }
-  // check message ALLOWED or BLOCKED
-  const completion = await openai.chat.completions.create({
-    model: process.env.MOD_AI_MODEL || "openai/gpt-4o", // default model
-    messages: [
+    return Response.json(
       {
-        role: "system",
-        content: safetyPrompt,
-      },
-      {
-        role: "user",
-        content: body.message,
-      },
-    ],
-  });
-  const status = String(completion.choices[0].message.content);
-  let safe = false; // other models
-  if (status == "ALLOW") {
-    // this will all models like llama guard 4 to function correctly.
-    safe = true;
-  } else {
-    safe = false; // default block action if the AI does not behave.
-  }
-  const { message, user } = body;
-  const getUserDetails = await fetchQuery(api.func_users.data, { slug: user });
-  if (getUserDetails.length === 0) {
-    return new Response(
-      JSON.stringify({
         success: false,
-        fail_message: "This user does not exist",
-        downloadAuthUrl: null as any,
-      }),
-      { status: 404 },
+        fail_message: "Invalid recipient or message (max 2000 characters).",
+      },
+      { status: 400 },
     );
   }
   try {
+    if (process.env.NEXT_PUBLIC_CAPTCHA_FEAT === "true") {
+      if (typeof body.cf_turnstile !== "string" || !body.cf_turnstile) {
+        return Response.json(
+          { success: false, fail_message: "Please complete the captcha." },
+          { status: 400 },
+        );
+      }
+      const result = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            secret: process.env.CF_TURNSTILE_PRIVATE_KEY,
+            response: body.cf_turnstile,
+          }),
+        },
+      );
+      const outcome = await result.json();
+      if (!result.ok || !outcome.success) {
+        return Response.json(
+          {
+            success: false,
+            fail_message: "Captcha failed or expired. Please try again.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+    const users = await fetchQuery(api.func_users.data, { slug: body.user });
+    if (!users.length || users[0].deleted) {
+      return Response.json(
+        { success: false, fail_message: "This user does not exist." },
+        { status: 404 },
+      );
+    }
+    const completion = await openai.chat.completions.create({
+      model: process.env.MOD_AI_MODEL || "openai/gpt-4o",
+      messages: [
+        { role: "system", content: safetyPrompt },
+        { role: "user", content: body.message },
+      ],
+    });
+    const safe = completion.choices[0]?.message.content?.trim() === "ALLOW";
     await fetchMutation(api.func_qa.qa, {
       status: safe,
-      toUser: getUserDetails[0].userId,
-      msg: message,
+      toUser: users[0].userId,
+      msg: body.message,
       secret: process.env.CONVEX_SERVER_SECRET ?? "",
     });
-  } catch (e) {
-    console.log(e);
-  }
-  return new Response(
-    JSON.stringify({
+    return Response.json({
       success: true,
       message: "Message sent successfully",
-    }),
-    { status: 200 },
-  );
+    });
+  } catch (error) {
+    console.error("Message submission failed", error);
+    return Response.json(
+      {
+        success: false,
+        fail_message: "Could not send your message. Please try again.",
+      },
+      { status: 503 },
+    );
+  }
 };

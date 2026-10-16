@@ -13,6 +13,13 @@ export const qa = mutation({
   },
   handler: async (ctx, args) => {
     await requireServerSecret(args.secret);
+    const team = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.toUser))
+      .unique();
+    if (!team || team.deleted) throw new Error("Team not found.");
+    if (!args.msg.trim() || args.msg.length > 2000)
+      throw new Error("Invalid message.");
     await ctx.db.insert("qas", {
       answered: false,
       msg: args.msg,

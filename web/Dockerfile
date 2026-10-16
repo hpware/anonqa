@@ -1,33 +1,34 @@
-FROM oven/bun:latest as builder
-
+FROM oven/bun:1.4.2 AS dependencies
 WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Copy package files
-COPY package.json ./
-COPY bun.lock* package-lock.json* yarn.lock* ./
-
-# Install dependencies
-RUN bun pm untrusted
-RUN bun install
-
-# Copy source files
+FROM node:24-bookworm-slim AS builder
+WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
-# Build the application
-RUN bun run convex deploy --cmd 'bun run build'
+ARG NEXT_PUBLIC_CONVEX_URL
+ARG NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY=""
+ARG NEXT_PUBLIC_CAPTCHA_FEAT=false
+ARG NEXT_PUBLIC_DISABLE_REGISTER=true
+ARG NEXT_PUBLIC_POSTHOG_KEY=""
+ARG NEXT_PUBLIC_SERVER_USER_TERMS=""
+ARG NEXT_PUBLIC_ADMINISTRATOR_EMAIL=""
+ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL \
+    NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_CF_TURNSTILE_SITE_KEY \
+    NEXT_PUBLIC_CAPTCHA_FEAT=$NEXT_PUBLIC_CAPTCHA_FEAT \
+    NEXT_PUBLIC_DISABLE_REGISTER=$NEXT_PUBLIC_DISABLE_REGISTER \
+    NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY \
+    NEXT_PUBLIC_SERVER_USER_TERMS=$NEXT_PUBLIC_SERVER_USER_TERMS \
+    NEXT_PUBLIC_ADMINISTRATOR_EMAIL=$NEXT_PUBLIC_ADMINISTRATOR_EMAIL
+RUN node node_modules/next/dist/bin/next build
 
-# Production stage
-FROM oven/bun:latest
-
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
-
-# Copy files to prod
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.output /app/.output
-COPY --from=builder /app/ctxdb.zip /app/ctxdb.zip
-
-
-RUN bun install --production
-
+ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
+USER node
 EXPOSE 3000
-
-CMD ["bun", "run", "start"]
+CMD ["node", "server.js"]

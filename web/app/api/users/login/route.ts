@@ -13,10 +13,18 @@ interface bodyData {
 
 export const POST = async (response: NextRequest) => {
   // imports
-  const body: bodyData = await response.json();
+  const body: bodyData = await response.json().catch(() => null);
   const cookieStore = await cookies();
   // content
-  if (!(body && body.email && body.password)) {
+  if (!(
+    body &&
+    typeof body.email === "string" &&
+    body.email.length <= 320 &&
+    body.email &&
+    typeof body.password === "string" &&
+    body.password &&
+    body.password.length <= 1024
+  )) {
     return new Response(
       JSON.stringify({
         error: true,
@@ -36,11 +44,11 @@ export const POST = async (response: NextRequest) => {
       return new Response(
         JSON.stringify({
           error: true,
-          status: 200,
+          status: 401,
           message: "Incorrect Email or Password",
         }),
         {
-          status: 200,
+          status: 401,
           headers: {
             "Content-Type": "application/json",
           },
@@ -56,10 +64,11 @@ export const POST = async (response: NextRequest) => {
         return new Response(
           JSON.stringify({
             error: true,
-            status: 200, // not the best status code (please change this)
+            status: 401,
             message: "Incorrect Email or Password",
           }),
           {
+            status: 401,
             headers: {
               "Content-Type": "application/json",
             },
@@ -125,9 +134,10 @@ export const POST = async (response: NextRequest) => {
       JSON.stringify({
         error: true,
         status: 500,
-        message: `Server Side Error: ${e.message}`,
+        message: "Server side error",
       }),
       {
+        status: 500,
         headers: {
           "Content-Type": "application/json",
         },

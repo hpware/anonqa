@@ -18,6 +18,7 @@ export function Threads({
     <div className="border rounded-lg border-gray-300 p-3">
       <div className="flex flex-row ml-ml-2">
         <img
+          alt="Profile picture"
           src={user.threads_profile_picture_url}
           className="rounded-full w-8 h-8"
         />

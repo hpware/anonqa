@@ -24,7 +24,7 @@ And some convex functions are assisted by the AI on convex's docs website! https
 Figma!: https://www.figma.com/design/Rc1A45MnZTXP4Yi4yYyhFP/anon-qa-app-design?node-id=14-23&t=C91bU8Bd40tcVmDe-1
 
 ## How can I self host?
-TBD
+See [web/README.md](web/README.md) for setup, deployment, Docker, and verification.
 
 ## Video
 https://github.com/user-attachments/assets/a91906ef-84c5-4b6f-a53b-cccf43218087
@@ -36,7 +36,7 @@ Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for
 ## Features
 - AI Message flagging
 - Team Management.
-- ~~Customizable random messages (TBD)~~
+- Customizable random messages
 - Customizable Placeholders
 - LIVE updates (from the dashboard)
 - LIVE updates to the Teams page.

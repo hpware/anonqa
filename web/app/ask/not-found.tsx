@@ -6,7 +6,7 @@ export default function ErrorPage() {
         <div className="flex flex-col justify-center text-center">
           <span className="text-3xl md:text-5xl lg:text-7xl">⊙⁠﹏⁠⊙</span>
           <span className="text-xl md:text-2xl mb-3">Aw snap!</span>
-          <span>The user that you're looking for doesn't exist!</span>
+          <span>The user that you&apos;re looking for doesn&apos;t exist!</span>
           <span>
             You can take this username{" "}
             <Link

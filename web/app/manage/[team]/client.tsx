@@ -55,7 +55,7 @@ export default function Page({
     await fetch("/api/teams/submit_qa", {
       method: "POST",
       headers: {
-        "Content-Type": "applications/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         type: "ignore",
@@ -79,7 +79,7 @@ export default function Page({
       <div className="justify-center text-center flex flex-col items-center [&_a]:text-blue-500 [&_a]:hover:text-blue-500/70">
         <span>Share your link to the world!</span>
         <code className="ph-no-capture p-2 bg-gray-300 rounded">
-          {protocol}//{host}/ask/{getTeamSlugData}
+          {`${protocol}//${host}/ask/${getTeamSlugData ?? ""}`}
         </code>
       </div>
       <div className="flex fle-row justify-center text-center gap-2 pt-2">

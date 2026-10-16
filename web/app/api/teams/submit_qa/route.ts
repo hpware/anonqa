@@ -8,13 +8,20 @@ export const POST = async (request: NextRequest) => {
     const body: any = await request.json();
     const cookie = await cookies();
     const session = cookie.get("session")?.value || "";
-    if (!(session && body.type && body.q_id && body.ans && body.team_id)) {
+    if (!(
+      session &&
+      body.type &&
+      body.q_id &&
+      (body.type === "ignore" || body.ans) &&
+      body.team_id
+    )) {
       return new Response(
         JSON.stringify({
           success: false,
           status: 400,
           message: "Invalid params",
         }),
+        { status: 400 },
       );
     }
     const checkSession = await fetchQuery(api.func_users.verifySession, {

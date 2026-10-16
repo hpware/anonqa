@@ -1,6 +1,8 @@
-export const GET = async () => {
-  //const req = await fetch(
-  //  "https://graph.threads.net/v1.0/me?fields=id,name,is_verified,username,threads_profile_picture_url",
-  //);
-  return Response.redirect("/");
-};
+export const GET = async () =>
+  Response.json(
+    {
+      success: false,
+      message: "Threads integration is not configured or supported.",
+    },
+    { status: 501 },
+  );

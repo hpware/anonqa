@@ -85,6 +85,7 @@ export default function Page({
               <Link href={`/manage/${i.userId}/`} key={i.userId}>
                 <button className="flex flex-row justify-center text-center align-middle bg-gray-300 hover:bg-gray-300/70 p-3 mx-auto w-fit rounded gap-5 px-12 cursor-pointer duration-300 transition-all border border-black">
                   <img
+                    alt="Profile picture"
                     src={i.imageUrl}
                     className="rounded-full w-10 h-10 m-1"
                   />

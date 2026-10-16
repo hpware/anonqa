@@ -24,6 +24,7 @@ export default async function Page({
   });
   return (
     <Client
+      key={team}
       host={host}
       protocol={protocol}
       teamId={team}

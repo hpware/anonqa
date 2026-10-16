@@ -2,7 +2,6 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { v4 as uuidv4 } from "uuid";
 import { filter } from "convex-helpers/server/filter";
-import { CanvasText } from "@/app/manage/[team]/answer/[slug]/canvasText";
 import {
   requireServerSecret,
   requireTeamAccess,
@@ -20,9 +19,14 @@ export const removedeleted = internalMutation({
 
     for (const user of usersToDelete) {
       await ctx.db.delete(user._id);
+      const codes = await ctx.db
+        .query("joinCodes")
+        .withIndex("teamId", (q) => q.eq("teamId", user.userId))
+        .collect();
+      for (const code of codes) await ctx.db.delete(code._id);
       const deleteMessages = await ctx.db
         .query("qas")
-        .filter((q) => q.eq(q.field("toUser"), user.handle))
+        .filter((q) => q.eq(q.field("toUser"), user.userId))
         .collect();
       for (const delMsg of deleteMessages) {
         await ctx.db.delete(delMsg._id);
@@ -44,42 +48,6 @@ export const doesUserNameExist = query({
   },
 });
 
-// for the registering endpoint
-export const addUser = internalMutation({
-  args: { username: v.string() },
-  handler: async (ctx, args) => {
-    /**    const newUser = ctx.db
-  .insert("users", {
-    imageUrl: "",
-    displayName: args.username,
-    controlableUsers: [args.username],
-    userId: uuidv4(),
-    deleted: false,
-    handle: args.username,
-    setCustomRandomMessages: false,
-    pageType: "basic",
-  })
-  .catch((err) => {
-    console.error("Error inserting user:", err);
-    throw new Error("Failed to create user");
-  });
-return newUser; */
-    return [];
-  },
-});
-
-export const getUserSocialLinkAccountStatus = query({
-  args: { userid: v.string(), session: v.string() },
-  handler: async (ctx, args) => {
-    /**    const data = await ctx.db
-      .query("linkAccountUsers")
-      .filter((q) => q.eq(q.field("userid"), args.userid))
-      .first();
-    return data; */
-    return [];
-  },
-});
-
 export const data = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -87,7 +55,7 @@ export const data = query({
       .query("users")
       .filter((q) => q.eq(q.field("handle"), args.slug))
       .collect();
-    if (result.length === 0) {
+    if (result.length === 0 || result[0].deleted) {
       return [];
     }
     return [
@@ -113,7 +81,7 @@ export const data_dash = query({
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.slug))
       .collect();
-    if (result.length === 0) {
+    if (result.length === 0 || result[0].deleted) {
       return [];
     }
     return [
@@ -132,33 +100,6 @@ export const data_dash = query({
   },
 });
 
-export const specialSelections = query({
-  args: { slug: v.string() },
-  handler: async (ctx, args) => {
-    /**    const result = await ctx.db
-  .query("randomizer")
-  .filter((q) => q.eq(q.field("userId"), args.slug))
-  .collect();
-return result; */
-    return [];
-  },
-});
-
-export const getTo = query({
-  args: { slug: v.string() },
-  handler: async (ctx, args) => {
-    /**    const queryquery = await ctx.db
-  .query("urls")
-  .filter((q) => q.eq(q.field("toUser"), args.slug))
-  .collect();
-if (queryquery.length === 0) {
-  return null;
-}
-return queryquery[0].toUser; */
-    return [];
-  },
-});
-
 export const getTeams = query({
   args: { userId: v.string(), session: v.string() },
   handler: async (ctx, args) => {
@@ -167,8 +108,9 @@ export const getTeams = query({
     if (sessionUserId !== args.userId) {
       return [];
     }
-    const data = filter(ctx.db.query("users"), (doc) =>
-      doc.controlableUsers.includes(args.userId),
+    const data = filter(
+      ctx.db.query("users"),
+      (doc) => !doc.deleted && doc.controlableUsers.includes(args.userId),
     ).collect();
     return data;
   },
@@ -223,6 +165,11 @@ export const createLoginAccount = mutation({
   handler: async (ctx, args) => {
     await requireServerSecret(args.secret);
     try {
+      const existing = await ctx.db
+        .query("login")
+        .withIndex("by_email", (q) => q.eq("email", args.email))
+        .first();
+      if (existing) return { success: false, userId: null };
       const generateUserID = uuidv4();
       await ctx.db.insert("login", {
         email: args.email,
@@ -323,8 +270,7 @@ export const getTeamSlugViaTeamId = query({
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
-    if (!query) return null;
-    return query[0].handle;
+    return query[0]?.handle ?? null;
   },
 });
 
@@ -335,7 +281,8 @@ export const getDefaultPlaceholderAndDiceThingy = query({
       .query("users")
       .filter((q) => q.eq(q.field("handle"), args.slug))
       .collect();
-    if (!query) return { diceMode: false, dice: [], default: [], user: "" };
+    if (!query.length || query[0].deleted)
+      return { diceMode: false, dice: [], default: [], user: "" };
     return {
       diceMode: query[0].setCustomRandomMessages || false,
       dice: query[0].customRandomMessages || [],
@@ -379,7 +326,10 @@ export const checkIfJoinCodeIsValidAndIfItIsValidThenRevokeAkaInvlidsIt =
         .query("users")
         .filter((q) => q.eq(q.field("userId"), fetchJoinCode[0].teamId))
         .collect();
-      if (fetchCurrentTeamJoinedUsers.length === 0) {
+      if (
+        fetchCurrentTeamJoinedUsers.length === 0 ||
+        fetchCurrentTeamJoinedUsers[0].deleted
+      ) {
         return {
           success: false,
           msg: "Cannot find team that is connected with this join code.",
@@ -396,14 +346,14 @@ export const checkIfJoinCodeIsValidAndIfItIsValidThenRevokeAkaInvlidsIt =
         };
       }
       // then redeem the join code ig.
-      ctx.db.patch(fetchJoinCode[0]._id, {
+      await ctx.db.patch(fetchJoinCode[0]._id, {
         used: true,
       });
       const newControlableUsers = [
         ...fetchCurrentTeamJoinedUsers[0].controlableUsers,
         args.userId,
       ];
-      ctx.db.patch(fetchCurrentTeamJoinedUsers[0]._id, {
+      await ctx.db.patch(fetchCurrentTeamJoinedUsers[0]._id, {
         controlableUsers: newControlableUsers,
       });
       return {
@@ -430,21 +380,24 @@ export const saveNewUserSettings = mutation({
       .query("users")
       .filter((q) => q.eq(q.field("userId"), args.teamId))
       .collect();
-    ctx.db.patch(query[0]._id, {
-      displayName:
-        args.new_displayName === query[0].displayName
-          ? query[0].displayName
-          : args.new_displayName,
-      handle:
-        args.new_handle === query[0].handle ? query[0].handle : args.new_handle,
-      imageUrl:
-        args.new_imageUrl === query[0].imageUrl
-          ? query[0].imageUrl
-          : args.new_imageUrl,
-      defaultMessages:
-        args.new_placeholder === query[0].defaultMessages
-          ? query[0].defaultMessages
-          : args.new_placeholder,
+    const handle = args.new_handle.trim();
+    if (!/^[a-zA-Z0-9_-]{1,64}$/.test(handle) || !args.new_displayName.trim()) {
+      throw new Error("Invalid display name or handle.");
+    }
+    const existing = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("handle"), handle))
+      .first();
+    if (existing && existing._id !== query[0]._id) {
+      throw new Error("This handle is already in use.");
+    }
+    await ctx.db.patch(query[0]._id, {
+      displayName: args.new_displayName.trim(),
+      handle,
+      imageUrl: args.new_imageUrl,
+      defaultMessages: args.new_placeholder,
+      customRandomMessages: args.customRandomMessages,
+      setCustomRandomMessages: args.customRandomMessages.length > 0,
     });
   },
 });
@@ -467,7 +420,7 @@ export const kickPersonFromTeam = mutation({
     const newUserList = query[0].controlableUsers.filter(
       (i) => i !== args.userToBeKicked,
     );
-    ctx.db.patch(query[0]._id, {
+    await ctx.db.patch(query[0]._id, {
       controlableUsers: newUserList,
     });
   },
@@ -504,6 +457,17 @@ export const deleteThisUser = mutation({
     }
     try {
       await ctx.db.delete(query[0]._id);
+      const teams = await ctx.db.query("users").collect();
+      for (const team of teams) {
+        if (!team.controlableUsers.includes(args.userId)) continue;
+        const members = team.controlableUsers.filter(
+          (id) => id !== args.userId,
+        );
+        await ctx.db.patch(team._id, {
+          controlableUsers: members,
+          deleted: team.deleted || members.length === 0,
+        });
+      }
       const sessionsToDelete = await ctx.db
         .query("session")
         .filter((q) => q.eq(q.field("userAccount"), args.userId))
@@ -562,5 +526,16 @@ export const deleteThisTeam = mutation({
         msg: e.message,
       };
     }
+  },
+});
+
+export const revokeSession = mutation({
+  args: { session: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("session")
+      .withIndex("by_session", (q) => q.eq("sessionId", args.session))
+      .unique();
+    if (session) await ctx.db.delete(session._id);
   },
 });
