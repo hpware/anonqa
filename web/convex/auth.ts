@@ -13,7 +13,9 @@ import { MutationCtx, QueryCtx } from "./_generated/server";
  *   1. Convex:  npx convex env set CONVEX_SERVER_SECRET <value>
  *   2. Web app: CONVEX_SERVER_SECRET in the Vercel/server environment.
  */
-export async function requireServerSecret(secret?: string | null): Promise<void> {
+export async function requireServerSecret(
+  secret?: string | null,
+): Promise<void> {
   const expected = process.env.CONVEX_SERVER_SECRET;
   if (!expected) {
     throw new Error(
@@ -74,7 +76,7 @@ export async function requireTeamAccess(
     .query("users")
     .withIndex("by_userId", (q) => q.eq("userId", teamId))
     .unique();
-  if (!team) {
+  if (!team || team.deleted) {
     throw new Error("Unauthorized: team not found.");
   }
   const controlable = team.controlableUsers ?? [];

@@ -18,7 +18,7 @@ export default function Client({
   captchaFeat: boolean;
 }) {
   // Values
-  const [placeholder, setPlaceholder] = useState<string>("");
+  const placeholder = user[0]?.defaultMessages?.[0] ?? "";
   const [ptavalue, setPtavalue] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -30,14 +30,15 @@ export default function Client({
     randomizing: false,
   });
 
-  const [randomizedMesssages, setRandomizedMessages] = useState([]);
+  const randomizedMesssages: string[] = user[0]?.customRandomMessages ?? [];
+  const thisUser = user[0];
   const sendIconRef = useRef(null);
   useEffect(() => {
     if (!sendIconRef.current) return;
 
     const sendIconCurrent = sendIconRef.current;
 
-    gsap.to(sendIconCurrent, {
+    const animation = gsap.to(sendIconCurrent, {
       duration: 1,
       y: -100,
       stagger: {
@@ -47,7 +48,10 @@ export default function Client({
       },
       ease: "step(12).inOut",
     });
-  }, []);
+    return () => {
+      animation.kill();
+    };
+  }, [submitting]);
   useEffect(() => {
     // Find existing favicon or create new link element
     let link: HTMLLinkElement | null =
@@ -70,7 +74,7 @@ export default function Client({
       document.head.appendChild(appleIcon);
     }
     appleIcon.href = thisUser.imageUrl;
-  }, []);
+  }, [thisUser.imageUrl]);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (lastStatus.randomizing) {
@@ -97,27 +101,31 @@ export default function Client({
   const submitForm = async () => {
     setError("");
     setSubmitting(true);
-    const req = await fetch("/api/send_qa", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user: slug,
-        message: ptavalue,
-        cf_turnstile: turnstileToken,
-      }),
-    });
-    const res = await req.json();
-    if (!res.success) {
-      setError(res.fail_message);
-      toast(res.fail_message);
-    } else {
-      setPtavalue("");
+    try {
+      const req = await fetch("/api/send_qa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: slug,
+          message: ptavalue,
+          cf_turnstile: turnstileToken,
+        }),
+      });
+      const res = await req.json();
+      if (!req.ok || !res.success) {
+        const message = res.fail_message || "Could not send your message.";
+        setError(message);
+        toast.error(message);
+      } else {
+        setPtavalue("");
+        setSuccess(true);
+      }
+    } catch {
+      setError("Could not send your message. Please try again.");
+    } finally {
       setTurnstileToken(null);
-      setSuccess(true);
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const changeImage = () => {
@@ -130,25 +138,9 @@ export default function Client({
       randomizing: true,
     });
     const randomIndex = Math.floor(Math.random() * randomizedMesssages.length);
-    console.log(randomizedMesssages[randomIndex]);
-    setPtavalue("randomizedMesssages[randomIndex]");
+    if (randomizedMesssages.length)
+      setPtavalue(randomizedMesssages[randomIndex]);
   };
-
-  const thisUser = user[0];
-  if (thisUser.setCustomRandomMessages) {
-  }
-  useEffect(() => {
-    console.log(user);
-    if (
-      user[0]?.customRandomMessages?.length !== undefined &&
-      user[0]?.customRandomMessages?.length !== 0
-    ) {
-      setRandomizedMessages(user[0]?.customRandomMessages);
-    }
-    if (user[0]?.defaultMessages?.length) {
-      setPlaceholder(user[0].defaultMessages[0]);
-    }
-  }, [user]);
 
   return (
     <div>
@@ -170,7 +162,9 @@ export default function Client({
             <div className="flex flex-row">
               <img
                 alt="Profile Picture"
-                src={thisUser.imageUrl}
+                src={
+                  imageNotAvailable ? "/assets/default.png" : thisUser.imageUrl
+                }
                 className="w-12 h-12 rounded-full p-1"
                 onError={changeImage}
               />
@@ -182,6 +176,7 @@ export default function Client({
             <div className="relative md:m-0 m-2 ph-no-capture">
               <textarea
                 required
+                maxLength={2000}
                 className="rounded p-1 mt-1 h-[150px] border w-full pr-14 resize-none"
                 placeholder={placeholder}
                 value={ptavalue}

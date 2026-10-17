@@ -13,6 +13,7 @@ export default defineSchema({
     customRandomMessages: v.optional(v.array(v.string())),
     pageType: v.string(), // FOR ONLY 1. basic (as default) 2. Confess mode 3. idk
     threads_auth_token: v.optional(v.string()),
+    threads_token_expires_at: v.optional(v.number()),
     threads: v.optional(
       v.object({
         id: v.string(),
@@ -40,6 +41,19 @@ export default defineSchema({
       v.object({
         platform: v.string(),
         url: v.optional(v.string()),
+      }),
+    ),
+    threadsPublication: v.optional(
+      v.object({
+        attemptId: v.string(),
+        startedAt: v.optional(v.number()),
+        answer: v.string(),
+        phase: v.union(
+          v.literal("preparing"),
+          v.literal("publishing"),
+          v.literal("published"),
+        ),
+        postId: v.optional(v.string()),
       }),
     ),
     moderation: v.optional(v.boolean()),

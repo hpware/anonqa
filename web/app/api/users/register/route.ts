@@ -14,13 +14,26 @@ interface bodyData {
 
 export const POST = async (response: NextRequest) => {
   if (process.env.NEXT_PUBLIC_DISABLE_REGISTER !== "false") {
-    return new Response("registering is disabled.");
+    return Response.json(
+      { error: true, message: "Registration is disabled." },
+      { status: 403 },
+    );
   }
   // imports
-  const body: bodyData = await response.json();
+  const body: bodyData = await response.json().catch(() => null);
   const cookieStore = await cookies();
   // content
-  if (!(body && body.email && body.password && body.fname)) {
+  if (!(
+    body &&
+    typeof body.email === "string" &&
+    body.email.length <= 320 &&
+    body.email &&
+    typeof body.password === "string" &&
+    body.password &&
+    body.password.length <= 1024 &&
+    typeof body.fname === "string" &&
+    body.fname.trim()
+  )) {
     return new Response(
       JSON.stringify({
         error: true,
@@ -40,11 +53,11 @@ export const POST = async (response: NextRequest) => {
       return new Response(
         JSON.stringify({
           error: true,
-          status: 200,
+          status: 409,
           message: "This email is already linked to an account.",
         }),
         {
-          status: 200,
+          status: 409,
           headers: {
             "Content-Type": "application/json",
           },
@@ -61,19 +74,14 @@ export const POST = async (response: NextRequest) => {
         secret: process.env.CONVEX_SERVER_SECRET ?? "",
       },
     );
-    if (!checkUserAccount.success) {
-      return new Response(
-        JSON.stringify({
-          error: true,
-          status: 500,
-          message: "Failed to create account in db!",
-        }),
+    if (!checkUserAccount.success || !checkUserAccount.userId) {
+      return Response.json(
         {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-          },
+          error: true,
+          message:
+            "Could not create account. The email may already be registered.",
         },
+        { status: 409 },
       );
     }
     const saveAndGetQuery = await fetchMutation(api.func_users.createSession, {
@@ -120,9 +128,10 @@ export const POST = async (response: NextRequest) => {
       JSON.stringify({
         error: true,
         status: 500,
-        message: `Server Side Error: ${e.message}`,
+        message: "Server side error",
       }),
       {
+        status: 500,
         headers: {
           "Content-Type": "application/json",
         },

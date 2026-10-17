@@ -36,6 +36,8 @@ import hideJoinCodeOnClientSide from "@/lib/hideJoinCodeOnClentSide";
 import { useWindowSize } from "react-use";
 import Confetti from "react-confetti";
 import { toast } from "sonner";
+import { ThreadsSettings } from "@/components/threads-settings";
+import { AccountSettings } from "@/components/account-settings";
 
 export default function SettingsPage({
   host,
@@ -44,6 +46,8 @@ export default function SettingsPage({
   teamData,
   userInfo,
   session,
+  threadsConfigured,
+  threadsNotice,
 }: {
   host: string;
   protocol: string;
@@ -51,13 +55,18 @@ export default function SettingsPage({
   teamData: any;
   userInfo: any;
   session: string;
+  threadsConfigured: boolean;
+  threadsNotice?: string;
 }) {
   const router = useRouter();
   const { width, height } = useWindowSize();
   const [deleteAccountVerifyTextBox, setDeleteAccountVerifyTextBox] =
     useState("");
+  const [updatingCustomMessage, setUpdatingCustomMessage] = useState(false);
   const [customMessageTextbox, setCustomMessageTextbox] = useState("");
-  const [customMessages, setCustomMessages] = useState([]);
+  const [customMessages, setCustomMessages] = useState<string[]>(
+    teamData.customRandomMessages ?? [],
+  );
   const [revokeJoinCodeTextBox, setRevokeJoinCodeTextBox] = useState("");
   const [revokeUserAccessTextBox, setRevokeUserAccessTextBox] = useState("");
   const [customPFPTextBox, setCustomPFPTextBox] = useState("");
@@ -80,20 +89,6 @@ export default function SettingsPage({
     loading: false,
     success: false,
     error: "",
-  });
-  const [updateLoginDetails, setUpdateLoginDetails] = useState({
-    email: {
-      allowedToChange: false,
-      current: "",
-      new: "",
-      newButAgain: "",
-    },
-    password: {
-      allowedToChange: false,
-      current: "",
-      new: "",
-      newButAgain: "",
-    },
   });
   const [confetiAction, setConfetiAction] = useState(false);
   const getAllJoinIds =
@@ -119,71 +114,38 @@ export default function SettingsPage({
     [confetiAction], // 5 sec confeti max,
   );
 
-  useEffect(() => {
-    if (
-      teamData.customMessages !== undefined &&
-      teamData.customMessages?.length !== 0
-    ) {
-      setCustomMessages(teamData.customMessages);
-    }
-  }, [teamData.customMessages]);
-
-  /**  const sendNewCustomMessage = async () => {
-  toast.info("Creating custom message...");
-  const req = await fetch("/api/teams/customMessages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      action: "create",
-      teamId: teamId,
-      msg: customMessageTextbox,
-    }),
-  });
-  if (!req.ok) {
-    toast.error("Failed to send custom message! dw you can still resent it!");
-    return;
-  }
-  const res = await req.json();
-  if (!res.success) {
-    toast.error(
-      `Failed to send custom message! dw you can still resent it! Server Failed with code: ${res.status} and message: ${res.message}`,
-    );
-    return;
-  }
-  toast.success("Custom Message Created!");
-  setCustomMessageTextbox("");
-}; */
-
-  const deleteCustomMessage = async (id: string) => {
-    toast.info("Deleting custom message...");
-    const req = await fetch("/api/customMessages", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "delete",
-        teamId: teamId,
-        msgId: id,
-      }),
-    });
-
-    if (!req.ok) {
-      toast.error("Delete Custom Message: Request Failed");
-      return;
-    }
-    const res = await req.json();
-    if (!res.success) {
-      toast.error(
-        `Delete Custom Message: Server Failed with code: ${res.status} and message: ${res.message}`,
+  const updateCustomMessage = async (msg: string, remove = false) => {
+    setUpdatingCustomMessage(true);
+    try {
+      const req = await fetch("/api/teams/customMessages", {
+        method: remove ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId, msg }),
+      });
+      const result = await req.json();
+      if (!req.ok || !result.success) {
+        toast.error(result.message || "Could not update custom messages.");
+        return;
+      }
+      const messages = remove
+        ? customMessages.filter((item) => item !== msg)
+        : [...customMessages, msg.trim()];
+      setCustomMessages(messages);
+      setTeamData2((current: typeof teamData) => ({
+        ...current,
+        customRandomMessages: messages,
+      }));
+      setCustomMessageTextbox("");
+      toast.success(
+        remove ? "Custom message deleted." : "Custom message created.",
       );
-      return;
+    } catch {
+      toast.error("Could not update custom messages. Please try again.");
+    } finally {
+      setUpdatingCustomMessage(false);
     }
-    toast.success("Custom Message Deleted!");
-    setCustomMessageTextbox("");
   };
+
   const createJoinCode = async () => {
     try {
       setJoinCodeCreate({
@@ -315,45 +277,55 @@ export default function SettingsPage({
       loading: true,
       error: "",
     });
-    const req = await fetch("/api/teams/save_profile_settings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        team_id: teamId,
-        new_displayName: teamData2.displayName,
-        new_handle: teamData2.handle,
-        new_placeholder: teamData2.defaultMessages || "",
-        customRandomMessages: teamData2.customRandomMessages || [],
-        new_imageUrl: teamData2.imageUrl,
-      }),
-    });
-    if (!req.ok) {
-      toast("Profile data failed submition :O");
+    try {
+      const req = await fetch("/api/teams/save_profile_settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          team_id: teamId,
+          new_displayName: teamData2.displayName,
+          new_handle: teamData2.handle,
+          new_placeholder: teamData2.defaultMessages || [],
+          customRandomMessages: teamData2.customRandomMessages || [],
+          new_imageUrl: teamData2.imageUrl,
+        }),
+      });
+      if (!req.ok) {
+        toast("Profile data failed submition :O");
+        setSubmitProfileData({
+          success: false,
+          loading: false,
+          error: "Error",
+        });
+        return;
+      }
+      const res = await req.json();
+      if (!res.success) {
+        toast(`Profile data failed submition :O ${res.message}`);
+        setSubmitProfileData({
+          success: false,
+          loading: false,
+          error: `${res.message}`,
+        });
+        return;
+      }
+      toast("Profile data submitted successfully!");
+      setConfetiAction(true);
+      setSubmitProfileData({
+        success: true,
+        loading: false,
+        error: "",
+      });
+    } catch {
+      toast.error("Could not save your profile. Please try again.");
       setSubmitProfileData({
         success: false,
         loading: false,
-        error: "Error",
-      });
-      return;
-    }
-    const res = await req.json();
-    if (!res.success) {
-      toast(`Profile data failed submition :O ${res.message}`);
-      setSubmitProfileData({
-        success: false,
-        loading: false,
-        error: `${res.message}`,
+        error: "Network request failed.",
       });
     }
-    toast("Profile data submitted successfully!");
-    setConfetiAction(true);
-    setSubmitProfileData({
-      success: true,
-      loading: false,
-      error: "",
-    });
   };
 
   const setPFPImage = () => {
@@ -382,18 +354,6 @@ export default function SettingsPage({
     setOpenShadCnPopUp({
       revokeId: false,
       revokeAccount: false,
-    });
-  };
-
-  const checkIfCurrentSomethingIsCorrect = async (type: string) => {
-    const req = await fetch("/api/teams/checkifsomethingiscorrect", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        checkType: type,
-      }),
     });
   };
 
@@ -480,7 +440,7 @@ export default function SettingsPage({
                 </div>
                 <input
                   type="text"
-                  value={teamData2.defaultMessages[0]}
+                  value={teamData2.defaultMessages[0] ?? ""}
                   placeholder="Your page's placeholder!"
                   onChange={(e) =>
                     setTeamData2({
@@ -529,65 +489,41 @@ export default function SettingsPage({
             </Button>
           </div>
         </div>
-        {/*        <div>
-  <h2 className="text-lg">Manage Custom Messages!</h2>
-  <AlertDialog>
-    <AlertDialogTrigger>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button className="mr-2">Add a Custom Message</Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <span>Create custom messages!</span>
-        </TooltipContent>
-      </Tooltip>
-    </AlertDialogTrigger>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Create new custom messsage</AlertDialogTitle>
-        <AlertDialogDescription>
-          <div>
-            <div className="flex flex-col">
-              <span>Please enter your custom randomized message!</span>
-              <input
-                type="text"
-                className="p-2 m-1 border border-gray-300 bg-white rounded-lg"
-                value={customMessageTextbox}
-                onChange={(e) =>
-                  setCustomMessageTextbox(e.target.value)
-                }
-              />
-            </div>
-          </div>
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel className="cursor-pointer">
-          Cancel
-        </AlertDialogCancel>
-        <AlertDialogAction
-          onClick={sendNewCustomMessage}
-          disabled={customMessageTextbox.length === 0}
-        >
-          Ok
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-  {JSON.stringify(customMessages) === "[]" && (
-    <div>
-      <span>
-        🤔 Hmm, you don't seem like have any custom messages setted up
-        yet.
-      </span>
-    </div>
-  )}
-  <div>
-    {customMessages.map((i) => (
-      <div key={i}></div>
-    ))}
-  </div>
-</div> */}
+        <section className="space-y-3">
+          <h2 className="text-lg">Manage custom messages</h2>
+          <p>
+            Visitors can use the dice button to choose one of these messages.
+          </p>
+          <label htmlFor="custom-message">New custom message</label>
+          <textarea
+            id="custom-message"
+            value={customMessageTextbox}
+            maxLength={2000}
+            className="w-full rounded border p-2"
+            onChange={(e) => setCustomMessageTextbox(e.target.value)}
+          />
+          <Button
+            disabled={updatingCustomMessage || !customMessageTextbox.trim()}
+            onClick={() => updateCustomMessage(customMessageTextbox)}
+          >
+            Add message
+          </Button>
+          {customMessages.length === 0 && <p>No custom messages yet.</p>}
+          <ul className="space-y-2">
+            {customMessages.map((msg) => (
+              <li key={msg} className="flex items-center gap-3">
+                <span className="break-all">{msg}</span>
+                <Button
+                  variant="outline"
+                  disabled={updatingCustomMessage}
+                  onClick={() => updateCustomMessage(msg, true)}
+                >
+                  Delete
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
         <div className="">
           <h2 className="text-lg">Manage Join Codes!</h2>
           <Button onClick={createJoinCode} disabled={joinCodeCreate.loading}>
@@ -651,7 +587,8 @@ export default function SettingsPage({
           {getAllJoinIds.length === 0 && (
             <div>
               <span className="p-2">
-                🤔 Hmm, don't seem like this team has any active join codes rn!
+                🤔 Hmm, don&apos;t seem like this team has any active join codes
+                rn!
               </span>
             </div>
           )}
@@ -694,9 +631,9 @@ export default function SettingsPage({
                                 permanently deactivate this join code.
                               </span>
                               <span>
-                                Please enter "
+                                Please enter &quot;
                                 <b>{`I authorize the deletion of this join code`}</b>
-                                "
+                                &quot;
                               </span>
                               <input
                                 type="text"
@@ -737,7 +674,8 @@ export default function SettingsPage({
             0 && (
             <div>
               <span className="p-2">
-                🤔 Hmm, doesn't seem like you have other members in this team.
+                🤔 Hmm, doesn&apos;t seem like you have other members in this
+                team.
               </span>
             </div>
           )}
@@ -781,9 +719,9 @@ export default function SettingsPage({
                                   This will remove acccess to this user!
                                 </span>
                                 <span>
-                                  Please enter "
+                                  Please enter &quot;
                                   <b>{`I authorize the deletion of this account`}</b>
-                                  "
+                                  &quot;
                                 </span>
                                 <input
                                   type="text"
@@ -818,13 +756,12 @@ export default function SettingsPage({
                 ))}
           </div>
         </div>
-        {/*<h2>Link your account(s)</h2>
-        <button
-          className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
-        >
-          {true && <CheckCircle2Icon />}
-          <span>Threads</span>
-        </button>*/}
+        <ThreadsSettings
+          teamId={teamId}
+          session={session}
+          configured={threadsConfigured}
+          notice={threadsNotice}
+        />
         <h3 className="text-xl">Important settings</h3>
         <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
@@ -842,8 +779,8 @@ export default function SettingsPage({
                     your team and remove data from our servers.
                   </span>
                   <span>
-                    Please enter "
-                    <b>{`I authorize the deletion of this team.`}</b>"
+                    Please enter &quot;
+                    <b>{`I authorize the deletion of this team.`}</b>&quot;
                   </span>
                   <input
                     type="text"
@@ -872,76 +809,9 @@ export default function SettingsPage({
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      {/**  const [updateLoginDetails, setUpdateLoginDetails] = useState({
-        email: {
-          allowedToChange: false,
-          current: "",
-          new: "",
-          newButAgain: "",
-        },
-        password: {
-          allowedToChange: false,
-          current: "",
-          new: "",
-          newButAgain: "",
-        },
-      }); */}
       <div>
         <h2 className="text-2xl">Change account settings</h2>
-        {/**        <div className="flex flex-col gap-1">
-  <span>
-    Please enter you current email to change it:{" "}
-    <input
-      type="email"
-      value={updateLoginDetails.email.current}
-      onChange={(e) =>
-        setUpdateLoginDetails({
-          email: {
-            allowedToChange: false,
-            current: e.target.value,
-            new: updateLoginDetails.email.new,
-            newButAgain: updateLoginDetails.email.newButAgain,
-          },
-          password: updateLoginDetails.password,
-        })
-      }
-      className="border mr-2 rounded"
-    />
-    <Button
-      onClick={() => {
-        checkIfCurrentSomethingIsCorrect("email");
-      }}
-    >
-      <CloudCheckIcon />
-    </Button>
-  </span>
-  <span>
-    Please enter you current password to change it:{" "}
-    <input
-      type="password"
-      value={updateLoginDetails.password.current}
-      onChange={(e) =>
-        setUpdateLoginDetails({
-          email: updateLoginDetails.email,
-          password: {
-            allowedToChange: false,
-            current: e.target.value,
-            new: updateLoginDetails.password.new,
-            newButAgain: updateLoginDetails.password.newButAgain,
-          },
-        })
-      }
-      className="border mr-2 rounded"
-    />
-    <Button
-      onClick={() => {
-        checkIfCurrentSomethingIsCorrect("email");
-      }}
-    >
-      <CloudCheckIcon />
-    </Button>
-  </span>
-</div> */}
+        <AccountSettings session={session} />
         <div>
           {" "}
           <AlertDialog onOpenChange={clearTextBoxState}>
@@ -960,8 +830,8 @@ export default function SettingsPage({
                       your account and remove data from our servers.
                     </span>
                     <span>
-                      Please enter "
-                      <b>{`I authorize the deletion of the account.`}</b>"
+                      Please enter &quot;
+                      <b>{`I authorize the deletion of the account.`}</b>&quot;
                     </span>
                     <input
                       type="text"

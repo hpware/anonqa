@@ -5,8 +5,10 @@ import { api } from "@/convex/_generated/api";
 import { cookies } from "next/headers";
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ team: string }>;
+  searchParams: Promise<{ threads?: string }>;
 }) {
   const headersList = await headers();
   const url =
@@ -24,12 +26,21 @@ export default async function Page({
   });
   return (
     <Client
+      key={team}
       host={host}
       protocol={protocol}
       teamId={team}
       teamData={query[0]}
       userInfo={getUser}
       session={session}
+      threadsConfigured={
+        !!(
+          process.env.THREADS_APP_ID &&
+          process.env.THREADS_APP_SECRET &&
+          process.env.THREADS_REDIRECT_URI
+        )
+      }
+      threadsNotice={(await searchParams).threads}
     />
   );
 }

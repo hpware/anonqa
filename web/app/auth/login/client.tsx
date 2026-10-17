@@ -143,7 +143,7 @@ export default function ClientPage({
               )}
             </button>
             <span className="text-xs text-gray-600">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/auth/register"
                 className="text-blue-600 transition-all duration-300 hover:text-blue-700"
@@ -154,7 +154,7 @@ export default function ClientPage({
           </div>
           {serverOwnerTerms.length !== 0 && (
             <span className="text-center justfiy-center text-xs/5">
-              By registering for an acccount, you agree the server owner's{" "}
+              By registering for an acccount, you agree the server owner&apos;s{" "}
               <a
                 href={serverOwnerTerms}
                 className="text-blue-600 transition-all duration-300 hover:text-blue-700"

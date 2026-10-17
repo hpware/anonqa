@@ -12,6 +12,13 @@ export default function ClientPage({
   disableRegister: boolean;
   serverOwnerTerms: string;
 }) {
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
   if (disableRegister) {
     return (
       <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -42,12 +49,6 @@ export default function ClientPage({
       </div>
     );
   }
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const hashPassword = async (pass: string): Promise<string> => {
     const encoder = new TextEncoder();
@@ -203,7 +204,7 @@ export default function ClientPage({
           </div>
           {serverOwnerTerms.length !== 0 && (
             <span className="text-center justfiy-center text-xs/5">
-              By registering for an acccount, you agree the server owner's{" "}
+              By registering for an acccount, you agree the server owner&apos;s{" "}
               <a
                 href={serverOwnerTerms}
                 className="text-blue-600 transition-all duration-300 hover:text-blue-700"

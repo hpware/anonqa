@@ -7,7 +7,8 @@ import { redirect } from "next/navigation";
 
 export default async function Page() {
   const cookie = await cookies();
-  const session = String(cookie.get("session")?.value) || "";
+  const session = cookie.get("session")?.value;
+  if (!session) redirect("/auth/login");
   const getUser = await fetchQuery(api.func_users.verifySession, {
     currentSession: session,
   });

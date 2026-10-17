@@ -38,7 +38,7 @@ export default async function AnonQAManagementLayout({
         <div className="flex flex-col justify-center text-center">
           <span className="text-3xl md:text-5xl lg:text-7xl">⊙⁠﹏⁠⊙</span>
           <span className="text-xl md:text-2xl mb-3">Aw snap!</span>
-          <span>You don't have access to this team!</span>
+          <span>You don&apos;t have access to this team!</span>
           <span>
             Click{" "}
             <Link

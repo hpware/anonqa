@@ -15,7 +15,7 @@ export default async function Page(props: {
   }
   return (
     <div>
-      <Client slug={slug} user={user} captchaFeat={Boolean(captchaFeat)} />
+      <Client slug={slug} user={user} captchaFeat={captchaFeat === "true"} />
     </div>
   );
 }
