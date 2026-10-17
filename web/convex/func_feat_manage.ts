@@ -2,7 +2,11 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
 import { v4 as uuidv4 } from "uuid";
-import { requireTeamAccess, requireValidSession } from "./auth";
+import {
+  requireServerSecret,
+  requireTeamAccess,
+  requireValidSession,
+} from "./auth";
 
 export const getTeams = query({
   args: { userId: v.string(), session: v.string() },
@@ -12,25 +16,13 @@ export const getTeams = query({
     if (sessionUserId !== args.userId) {
       return [];
     }
-    const data = filter(
+    const data = await filter(
       ctx.db.query("users"),
       (doc) => !doc.deleted && doc.controlableUsers.includes(args.userId),
     ).collect();
-    return data;
+    return data.map(({ threads_auth_token, ...team }) => team);
   },
 });
-
-/**export const getThreadsAuthToken = query({
-  args: { userId: v.string() },
-  handler: async (ctx, args) => {
-    const data = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
-      .collect();
-    return data[0].threads_auth_token;
-  },
-});
- */
 
 export const addUserIntoTeam = mutation({
   args: {
@@ -272,5 +264,87 @@ export const deleteCustomRandomDiceMessage = mutation({
       setCustomRandomMessages: messages.length > 0,
     });
     return { success: true, message: "" };
+  },
+});
+
+export const threadsStatus = query({
+  args: { teamId: v.string(), session: v.string() },
+  handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
+    const team = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    return {
+      connected: !!team!.threads_auth_token && !!team!.threads,
+      expired:
+        !team!.threads_token_expires_at ||
+        team!.threads_token_expires_at <= Date.now(),
+      profile: team!.threads ?? null,
+    };
+  },
+});
+
+export const getThreadsConnection = query({
+  args: { teamId: v.string(), session: v.string(), secret: v.string() },
+  handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
+    await requireTeamAccess(ctx, args.session, args.teamId);
+    const team = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    if (!team!.threads_auth_token || !team!.threads) return null;
+    return {
+      token: team!.threads_auth_token,
+      profile: team!.threads,
+      expiresAt: team!.threads_token_expires_at ?? 0,
+    };
+  },
+});
+
+export const saveThreadsConnection = mutation({
+  args: {
+    teamId: v.string(),
+    session: v.string(),
+    secret: v.string(),
+    token: v.string(),
+    expiresAt: v.number(),
+    profile: v.object({
+      id: v.string(),
+      name: v.string(),
+      username: v.string(),
+      is_verified: v.boolean(),
+      threads_profile_picture_url: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
+    await requireTeamAccess(ctx, args.session, args.teamId);
+    const team = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    await ctx.db.patch(team!._id, {
+      threads_auth_token: args.token,
+      threads: args.profile,
+      threads_token_expires_at: args.expiresAt,
+    });
+  },
+});
+
+export const disconnectThreads = mutation({
+  args: { teamId: v.string(), session: v.string() },
+  handler: async (ctx, args) => {
+    await requireTeamAccess(ctx, args.session, args.teamId);
+    const team = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.teamId))
+      .unique();
+    await ctx.db.patch(team!._id, {
+      threads_auth_token: undefined,
+      threads: undefined,
+      threads_token_expires_at: undefined,
+    });
   },
 });

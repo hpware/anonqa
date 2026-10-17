@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, test } from "bun:test";
 import { convexTest } from "convex-test";
 import schema from "../convex/schema";
 import { api, internal } from "../convex/_generated/api";
@@ -11,7 +11,14 @@ const modules = {
   "../convex/func_qa.ts": () => import("../convex/func_qa"),
 };
 let t;
+const originalSecret = process.env.CONVEX_SERVER_SECRET;
+const secret = "test-server-secret";
+afterAll(() => {
+  if (originalSecret === undefined) delete process.env.CONVEX_SERVER_SECRET;
+  else process.env.CONVEX_SERVER_SECRET = originalSecret;
+});
 beforeEach(async () => {
+  process.env.CONVEX_SERVER_SECRET = secret;
   t = convexTest(schema, modules);
   await t.run(async (ctx) => {
     await ctx.db.insert("session", {
@@ -202,4 +209,272 @@ test("concurrent team creation cannot reserve the same handle twice", async () =
   expect(
     results.filter((result) => result.status === "fulfilled"),
   ).toHaveLength(1);
+});
+
+describe("account credentials", () => {
+  beforeEach(async () => {
+    await t.run(async (ctx) => {
+      await ctx.db.insert("login", {
+        email: "owner@example.com",
+        userId: "owner",
+        fname: "Owner",
+        passwordHashed: "old-hash",
+      });
+      await ctx.db.insert("login", {
+        email: "other@example.com",
+        userId: "other",
+        fname: "Other",
+        passwordHashed: "other-hash",
+      });
+      await ctx.db.insert("session", {
+        sessionId: "other-device",
+        userAccount: "owner",
+        expires_at: Date.now() + 60000,
+      });
+    });
+  });
+  test("keeps hashes server-only and returns a safe account profile", async () => {
+    await expect(
+      t.query(api.func_users.getAccountCredentials, {
+        session: "valid",
+        secret: "wrong",
+      }),
+    ).rejects.toThrow("Unauthorized");
+    expect(
+      await t.query(api.func_users.getAccountProfile, { session: "valid" }),
+    ).toEqual({ email: "owner@example.com", fname: "Owner" });
+  });
+  test("rejects duplicate emails and stale password verification", async () => {
+    const args = {
+      session: "valid",
+      secret,
+      expectedPasswordHash: "old-hash",
+      expectedEmail: "owner@example.com",
+      email: "OTHER@example.com",
+    };
+    expect(
+      (await t.mutation(api.func_users.updateAccountCredentials, args)).success,
+    ).toBe(false);
+    expect(
+      (
+        await t.mutation(api.func_users.updateAccountCredentials, {
+          ...args,
+          email: "new@example.com",
+          expectedPasswordHash: "stale",
+        })
+      ).success,
+    ).toBe(false);
+    expect(
+      (await t.query(api.func_users.verifySession, { currentSession: "valid" }))
+        .linked,
+    ).toBe(true);
+  });
+  test("updates credentials atomically, rotates the current session, and revokes other devices", async () => {
+    const result = await t.mutation(api.func_users.updateAccountCredentials, {
+      session: "valid",
+      secret,
+      expectedPasswordHash: "old-hash",
+      expectedEmail: "owner@example.com",
+      email: "new@example.com",
+      passwordHash: "new-hash",
+    });
+    expect(result.success).toBe(true);
+    for (const session of ["valid", "other-device"])
+      expect(
+        (
+          await t.query(api.func_users.verifySession, {
+            currentSession: session,
+          })
+        ).linked,
+      ).toBe(false);
+    expect(
+      await t.query(api.func_users.getAccountCredentials, {
+        session: result.session,
+        secret,
+      }),
+    ).toEqual({ email: "new@example.com", passwordHash: "new-hash" });
+  });
+});
+
+describe("Threads", () => {
+  const profile = {
+    id: "123",
+    name: "Owner",
+    username: "owner",
+    is_verified: false,
+    threads_profile_picture_url: "https://example.com/avatar.png",
+  };
+  beforeEach(async () => {
+    await t.mutation(api.func_feat_manage.saveThreadsConnection, {
+      teamId: "team",
+      session: "valid",
+      secret,
+      token: "private-token",
+      expiresAt: Date.now() + 60000,
+      profile,
+    });
+    await t.run((ctx) =>
+      ctx.db.insert("qas", {
+        toUser: "team",
+        msgId: "question",
+        msg: "How are you?",
+        answered: false,
+      }),
+    );
+  });
+  test("never exposes tokens through browser queries and checks team access", async () => {
+    for (const reference of [
+      api.func_users.getTeams,
+      api.func_feat_manage.getTeams,
+    ]) {
+      const teams = await t.query(reference, {
+        userId: "owner",
+        session: "valid",
+      });
+      expect(JSON.stringify(teams)).not.toContain("private-token");
+    }
+    const status = await t.query(api.func_feat_manage.threadsStatus, {
+      teamId: "team",
+      session: "valid",
+    });
+    expect(status.profile).toEqual(profile);
+    expect(JSON.stringify(status)).not.toContain("private-token");
+    await expect(
+      t.query(api.func_feat_manage.getThreadsConnection, {
+        teamId: "team",
+        session: "valid",
+        secret: "wrong",
+      }),
+    ).rejects.toThrow("Unauthorized");
+    await expect(
+      t.query(api.func_feat_manage.getThreadsConnection, {
+        teamId: "team",
+        session: "outsider",
+        secret,
+      }),
+    ).rejects.toThrow("Unauthorized");
+  });
+  test("disconnect removes the saved token and profile", async () => {
+    await t.mutation(api.func_feat_manage.disconnectThreads, {
+      teamId: "team",
+      session: "valid",
+    });
+    expect(
+      await t.query(api.func_feat_manage.getThreadsConnection, {
+        teamId: "team",
+        session: "valid",
+        secret,
+      }),
+    ).toBeNull();
+    expect(
+      (
+        await t.query(api.func_feat_manage.threadsStatus, {
+          teamId: "team",
+          session: "valid",
+        })
+      ).connected,
+    ).toBe(false);
+  });
+  test("concurrent publications reserve one post and repeated requests return the saved result", async () => {
+    const args = {
+      teamId: "team",
+      msgId: "question",
+      answer: "Great!",
+      session: "valid",
+      secret,
+    };
+    const reservations = await Promise.all([
+      t.mutation(api.func_qa.prepareThreadsPublication, args),
+      t.mutation(api.func_qa.prepareThreadsPublication, args),
+    ]);
+    expect(reservations.filter((result) => result.success)).toHaveLength(1);
+    const reservation = reservations.find((result) => result.success);
+    const attempt = {
+      msgId: "question",
+      attemptId: reservation.attemptId,
+      secret,
+    };
+    await t.mutation(api.func_qa.updateThreadsPublication, {
+      ...attempt,
+      phase: "publishing",
+    });
+    await expect(
+      t.mutation(api.func_qa.updateThreadsPublication, {
+        ...attempt,
+        phase: "cancel",
+      }),
+    ).rejects.toThrow("Cannot cancel");
+    await t.mutation(api.func_qa.updateThreadsPublication, {
+      ...attempt,
+      phase: "published",
+      postId: "456",
+      url: "https://www.threads.com/@owner/post/example",
+    });
+    const [message] = await t.query(api.func_qa.getViaId, {
+      id: "question",
+      session: "valid",
+    });
+    expect(message.answer).toBe("Great!");
+    expect(message.type).toBe("threads");
+    expect(message.linkedPosts.url).toContain("/post/example");
+    expect(
+      await t.mutation(api.func_qa.prepareThreadsPublication, args),
+    ).toEqual({
+      success: true,
+      completed: true,
+      postId: "456",
+      url: "https://www.threads.com/@owner/post/example",
+    });
+  });
+  test("rejects oversize posts and unauthorized publications", async () => {
+    const args = {
+      teamId: "team",
+      msgId: "question",
+      answer: "😀".repeat(125),
+      session: "valid",
+      secret,
+    };
+    expect(
+      (await t.mutation(api.func_qa.prepareThreadsPublication, args)).success,
+    ).toBe(false);
+    await expect(
+      t.mutation(api.func_qa.prepareThreadsPublication, {
+        ...args,
+        session: "outsider",
+      }),
+    ).rejects.toThrow("Unauthorized");
+  });
+});
+
+test("an abandoned preparation can be retried without letting the old request publish", async () => {
+  await t.run((ctx) =>
+    ctx.db.insert("qas", {
+      toUser: "team",
+      msgId: "abandoned",
+      msg: "Question",
+      answered: false,
+      threadsPublication: {
+        attemptId: "old-attempt",
+        startedAt: Date.now() - 180000,
+        answer: "Old",
+        phase: "preparing",
+      },
+    }),
+  );
+  const result = await t.mutation(api.func_qa.prepareThreadsPublication, {
+    teamId: "team",
+    msgId: "abandoned",
+    answer: "New",
+    session: "valid",
+    secret,
+  });
+  expect(result.success).toBe(true);
+  await expect(
+    t.mutation(api.func_qa.updateThreadsPublication, {
+      msgId: "abandoned",
+      attemptId: "old-attempt",
+      phase: "publishing",
+      secret,
+    }),
+  ).rejects.toThrow("no longer matches");
 });

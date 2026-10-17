@@ -1,13 +1,9 @@
-Context:
-X and Threads are both awful apis to work with. So please no, this feature is not working.
+Threads OAuth linking, status, disconnection, and text publication are implemented.
+See web/README.md for Meta app configuration, permissions, token handling, and failure recovery.
 
-All of the current endpoints are commented out and replaced with
-
-```
-export const GET = async () => {
-  return Response.redirect("/");
-};
-
-```
-
-this code block.
+Routes:
+GET authorize?teamId=... — begin the authenticated OAuth flow
+GET authorize/callback — validate state, exchange code, and save the team connection
+GET getUserInfo?teamId=... — safe connection status (never returns a token)
+DELETE getUserInfo?teamId=... — remove the saved connection
+POST publish — { teamId, msgId, answer }; publish once and save the answer/link

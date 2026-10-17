@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { toast } from "sonner";
@@ -24,7 +23,7 @@ interface selectionsInterface {
 export default function Page({
   slug,
   teamId,
-  message,
+  message: initialMessages,
   session,
 }: {
   slug: string;
@@ -32,8 +31,15 @@ export default function Page({
   message: Doc<"qas">[];
   session: string;
 }) {
-  const router = useRouter();
-  const [answer, setAnswer] = useState<string>(message[0]?.answer ?? "");
+  const [answer, setAnswer] = useState<string>(
+    initialMessages[0]?.answer ?? "",
+  );
+  const [pending, setPending] = useState(false);
+  const [postUrl, setPostUrl] = useState("");
+  const threads = useQuery(api.func_feat_manage.threadsStatus, {
+    teamId,
+    session,
+  });
   const [success, setSuccess] = useState<boolean>(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const selectionsPreviewInterfaceRef = useRef(null);
@@ -49,28 +55,45 @@ export default function Page({
     { scope: selectionsPreviewInterfaceRef },
   );
 
+  const message = getMessage ?? initialMessages;
+  const previewAnswer = message[0]?.answered
+    ? (message[0].answer ?? answer)
+    : answer;
+
   const sendUpdateToCloud = async () => {
+    setPending(true);
     try {
-      const req = await fetch("/api/teams/submit_qa", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const req = await fetch(
+        selectedPlatform === "threads"
+          ? "/api/social/threads/publish"
+          : "/api/teams/submit_qa",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            teamId,
+            msgId: slug,
+            answer,
+            type: selectedPlatform,
+            q_id: slug,
+            ans: answer,
+            team_id: teamId,
+          }),
         },
-        body: JSON.stringify({
-          type: selectedPlatform,
-          q_id: slug,
-          ans: answer,
-          team_id: teamId,
-        }),
-      });
+      );
       const res = await req.json();
-      if (!res.success) {
+      if (!req.ok || !res.success) {
         toast(`Cannot send data to db, error: ${res.message}`);
         return;
       }
+      if (res.url) setPostUrl(res.url);
       setSuccess(true);
-    } catch (e: any) {
-      toast(`Cannot send data to db, error: ${e.msg}`);
+    } catch {
+      toast.error("Could not save your answer. Please try again.");
+    } finally {
+      setPending(false);
     }
   };
 
@@ -90,35 +113,34 @@ export default function Page({
   };
 
   const selections: selectionsInterface[] = [
-    /**    {
-  text: "Post to threads",
-  slug: "threads",
-  changingDisplayText: "Threads",
-  template: (
-    <Threads
-      user={JSON.parse(
-        JSON.stringify({
-          id: "1",
-          name: "hpware",
-          is_verified: true,
-          username: "testing",
-          threads_profile_picture_url:
-            "https://avatars.githubusercontent.com/u/157942818?v=4",
-        }),
-      )}
-    >
-      <span className="break-all">Q: {message[0].msg}</span>
-      <span className="break-all">A: {answer}</span>
-    </Threads>
-  ),
-},  */
+    ...((threads?.connected && !threads.expired && threads.profile) ||
+    message[0].type === "threads"
+      ? [
+          {
+            text: "Post to Threads",
+            slug: "threads",
+            changingDisplayText: "Threads",
+            template: threads?.profile ? (
+              <Threads user={threads.profile}>
+                <span className="break-all">Q: {message[0].msg}</span>
+                <span className="break-all">A: {previewAnswer}</span>
+              </Threads>
+            ) : (
+              <div>
+                <p>Q: {message[0].msg}</p>
+                <p>A: {previewAnswer}</p>
+              </div>
+            ),
+          },
+        ]
+      : []),
     {
       text: "Post with pic (Stories)",
       slug: "pic-stories",
       changingDisplayText: "Stories Pic Mode",
       template: (
         <CanvasText
-          text={`Q: ${message[0].msg}\n\nA: ${answer}`}
+          text={`Q: ${message[0].msg}\n\nA: ${previewAnswer}`}
           width={400}
           height={600}
           fontSize={28}
@@ -133,7 +155,7 @@ export default function Page({
       changingDisplayText: "Feed Pic Mode",
       template: (
         <CanvasText
-          text={`Q: ${message[0].msg}\n\nA: ${answer}`}
+          text={`Q: ${message[0].msg}\n\nA: ${previewAnswer}`}
           width={600}
           height={400}
           fontSize={24}
@@ -150,7 +172,7 @@ export default function Page({
       template: (
         <div className="flex flex-col">
           <span className="break-all">Q: {message[0].msg}</span>
-          <span className="break-all">A: {answer}</span>
+          <span className="break-all">A: {previewAnswer}</span>
         </div>
       ),
     },
@@ -158,6 +180,16 @@ export default function Page({
 
   return (
     <div className="ph-no-capture">
+      {(postUrl || message[0].linkedPosts?.url) && (
+        <a
+          className="text-blue-600 underline"
+          href={postUrl || message[0].linkedPosts?.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View on Threads
+        </a>
+      )}
       {message[0].answered ? (
         <div>
           <span className="text-lg text-bold justify-center text-center italic">
@@ -225,6 +257,7 @@ export default function Page({
               How would you answer this question?
             </label>
             <textarea
+              disabled={pending}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               className="w-full h-32 p-3 rounded-lg border border-gray-300
@@ -249,7 +282,7 @@ export default function Page({
                   onClick={() =>
                     changeSelectedPlatform(i.slug, i.changingDisplayText)
                   }
-                  disabled={selectedPlatform === i.slug}
+                  disabled={pending || selectedPlatform === i.slug}
                   key={i.text}
                 >
                   {i.text}
@@ -257,6 +290,16 @@ export default function Page({
               ))}
             </div>
           </div>
+          {selectedPlatform === "threads" && (
+            <p>
+              {
+                new TextEncoder().encode(`Q: ${message[0].msg}\n\nA: ${answer}`)
+                  .length
+              }
+              /500 bytes. Posting shares this question and answer publicly on
+              Threads.
+            </p>
+          )}
           {/* Preview Section */}
           <div className="space-y-2">
             <h3 className="text-lg font-medium dark:text-gray-200">Preview</h3>
@@ -277,12 +320,22 @@ export default function Page({
           <div>
             <button
               className="px-4 py-2 bg-gray-200 dark:bg-gray-700  hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors"
-              disabled={!selectedPlatform || !answer.trim()}
+              disabled={
+                pending ||
+                !selectedPlatform ||
+                !answer.trim() ||
+                (selectedPlatform === "threads" &&
+                  new TextEncoder().encode(
+                    `Q: ${message[0].msg}\n\nA: ${answer}`,
+                  ).length > 500)
+              }
               onClick={sendUpdateToCloud}
             >
-              {selectedPlatform === "threads"
-                ? "Post & Save"
-                : "Generate & Save"}
+              {pending
+                ? "Saving…"
+                : selectedPlatform === "threads"
+                  ? "Post & Save"
+                  : "Generate & Save"}
             </button>
           </div>
         </div>

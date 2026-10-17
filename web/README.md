@@ -47,4 +47,20 @@ Lint currently reports four advisory warnings for existing profile `<img>` eleme
 
 ## Feature status
 
-Custom message creation/deletion, dice suggestions, profile settings, teams, anonymous submissions, answer formats, and session revocation are implemented. Threads integration and account email/password changes remain unavailable: their API stubs return an explicit HTTP 501. The UI does not offer these unfinished integrations.
+Custom messages, dice suggestions, profile settings, team creation/joining, anonymous submissions, answer formats, session revocation, account credential changes, and Threads linking/text publication are implemented.
+
+### Account settings
+
+Open **Account settings** from the team picker, or use the account section in team settings. Updating email/password requires the current password. New passwords require at least 12 characters. Changes rotate the current session and revoke other sessions. Existing password hashes and the login/register format remain compatible. There is no password-recovery email flow.
+
+### Threads setup
+
+Create a Meta app with the Threads use case and request `threads_basic` and `threads_content_publish`. Configure its OAuth redirect URI to exactly match `THREADS_REDIRECT_URI`, usually `https://your-domain/api/social/threads/authorize/callback`. Set `THREADS_APP_ID`, `THREADS_APP_SECRET`, and `THREADS_REDIRECT_URI` on the Next.js server. HTTPS is required outside local development. Meta may require tester enrollment or app review before other users can connect.
+
+In team settings, use **Connect Threads** to authorize a profile. Team members can then select **Post to Threads** in the answer editor and explicitly publish the question and answer. The combined post is limited to 500 UTF-8 bytes. Successful posts are saved with a Threads link; when permalink lookup fails, the link opens the connected profile. The integration uses Meta's `auto_publish_text` option; image/video publishing is not offered. Existing image export formats continue to work locally.
+
+Access tokens remain on the backend and are excluded from public and team-list queries. OAuth callbacks use signed, session-bound, short-lived state cookies. Long-lived tokens normally expire after 60 days; use **Reconnect Threads** when needed. **Disconnect Threads** deletes the saved connection locally; users can also revoke the app in Threads settings.
+
+Concurrent or repeated publication requests cannot post the same question twice. If a network failure makes the publication outcome uncertain, the question stays reserved and the UI asks you to check Threads. To resolve such a request, a deployment administrator must inspect `qas.threadsPublication` in Convex: after confirming a post did not publish, clear that field to permit a retry; if it did publish, reconcile the saved answer/link instead. Do not clear a reservation until the original request has stopped and its outcome is known.
+
+Meta API behavior is covered by mocked integration tests; verify the OAuth flow and posting with a test profile after configuring your own app. API references: [OAuth](https://developers.facebook.com/docs/threads/get-started/get-access-tokens-and-permissions/), [long-lived tokens](https://developers.facebook.com/docs/threads/get-started/long-lived-tokens/), and [publishing](https://developers.facebook.com/documentation/threads/reference/publishing/).

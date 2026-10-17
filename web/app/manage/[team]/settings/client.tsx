@@ -36,6 +36,8 @@ import hideJoinCodeOnClientSide from "@/lib/hideJoinCodeOnClentSide";
 import { useWindowSize } from "react-use";
 import Confetti from "react-confetti";
 import { toast } from "sonner";
+import { ThreadsSettings } from "@/components/threads-settings";
+import { AccountSettings } from "@/components/account-settings";
 
 export default function SettingsPage({
   host,
@@ -44,6 +46,8 @@ export default function SettingsPage({
   teamData,
   userInfo,
   session,
+  threadsConfigured,
+  threadsNotice,
 }: {
   host: string;
   protocol: string;
@@ -51,6 +55,8 @@ export default function SettingsPage({
   teamData: any;
   userInfo: any;
   session: string;
+  threadsConfigured: boolean;
+  threadsNotice?: string;
 }) {
   const router = useRouter();
   const { width, height } = useWindowSize();
@@ -83,20 +89,6 @@ export default function SettingsPage({
     loading: false,
     success: false,
     error: "",
-  });
-  const [updateLoginDetails, setUpdateLoginDetails] = useState({
-    email: {
-      allowedToChange: false,
-      current: "",
-      new: "",
-      newButAgain: "",
-    },
-    password: {
-      allowedToChange: false,
-      current: "",
-      new: "",
-      newButAgain: "",
-    },
   });
   const [confetiAction, setConfetiAction] = useState(false);
   const getAllJoinIds =
@@ -362,18 +354,6 @@ export default function SettingsPage({
     setOpenShadCnPopUp({
       revokeId: false,
       revokeAccount: false,
-    });
-  };
-
-  const checkIfCurrentSomethingIsCorrect = async (type: string) => {
-    const req = await fetch("/api/teams/checkifsomethingiscorrect", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        checkType: type,
-      }),
     });
   };
 
@@ -776,13 +756,12 @@ export default function SettingsPage({
                 ))}
           </div>
         </div>
-        {/*<h2>Link your account(s)</h2>
-        <button
-          className={`p-2 m-2 rounded flex flex-row ${true ? "bg-green-400 dark:bg-green-500" : "bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 "}`}
-        >
-          {true && <CheckCircle2Icon />}
-          <span>Threads</span>
-        </button>*/}
+        <ThreadsSettings
+          teamId={teamId}
+          session={session}
+          configured={threadsConfigured}
+          notice={threadsNotice}
+        />
         <h3 className="text-xl">Important settings</h3>
         <AlertDialog onOpenChange={clearTextBoxState}>
           <AlertDialogTrigger asChild>
@@ -830,76 +809,9 @@ export default function SettingsPage({
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      {/**  const [updateLoginDetails, setUpdateLoginDetails] = useState({
-        email: {
-          allowedToChange: false,
-          current: "",
-          new: "",
-          newButAgain: "",
-        },
-        password: {
-          allowedToChange: false,
-          current: "",
-          new: "",
-          newButAgain: "",
-        },
-      }); */}
       <div>
         <h2 className="text-2xl">Change account settings</h2>
-        {/**        <div className="flex flex-col gap-1">
-  <span>
-    Please enter you current email to change it:{" "}
-    <input
-      type="email"
-      value={updateLoginDetails.email.current}
-      onChange={(e) =>
-        setUpdateLoginDetails({
-          email: {
-            allowedToChange: false,
-            current: e.target.value,
-            new: updateLoginDetails.email.new,
-            newButAgain: updateLoginDetails.email.newButAgain,
-          },
-          password: updateLoginDetails.password,
-        })
-      }
-      className="border mr-2 rounded"
-    />
-    <Button
-      onClick={() => {
-        checkIfCurrentSomethingIsCorrect("email");
-      }}
-    >
-      <CloudCheckIcon />
-    </Button>
-  </span>
-  <span>
-    Please enter you current password to change it:{" "}
-    <input
-      type="password"
-      value={updateLoginDetails.password.current}
-      onChange={(e) =>
-        setUpdateLoginDetails({
-          email: updateLoginDetails.email,
-          password: {
-            allowedToChange: false,
-            current: e.target.value,
-            new: updateLoginDetails.password.new,
-            newButAgain: updateLoginDetails.password.newButAgain,
-          },
-        })
-      }
-      className="border mr-2 rounded"
-    />
-    <Button
-      onClick={() => {
-        checkIfCurrentSomethingIsCorrect("email");
-      }}
-    >
-      <CloudCheckIcon />
-    </Button>
-  </span>
-</div> */}
+        <AccountSettings session={session} />
         <div>
           {" "}
           <AlertDialog onOpenChange={clearTextBoxState}>

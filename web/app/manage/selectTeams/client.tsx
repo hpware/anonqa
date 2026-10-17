@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { redirect, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 
 export default function Page({
   userid,
@@ -43,42 +44,62 @@ export default function Page({
   const [loading, setLoading] = useState<boolean>(false);
   const sendCreateRequest = async () => {
     setLoading(true);
-    const req = await fetch("/api/teams/createTeam", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(createNewTeamTextBoxes),
-    });
-    if (!req.ok) {
+    try {
+      const req = await fetch("/api/teams/createTeam", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createNewTeamTextBoxes),
+      });
+      const res = await req.json();
+      if (!req.ok || !res.success) {
+        toast.error(res.message || "Could not create the team.");
+        return;
+      }
+      setOpenCreationDialog(false);
+      setCreateNewTeamTextBoxes({ team_handle: "", team_name: "" });
+      router.push(`/manage/${res.teamId}`);
+    } catch {
+      toast.error("Could not create the team. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setCreateNewTeamTextBoxes({ team_handle: "", team_name: "" });
   };
   const sendJoinRequest = async () => {
-    setJoinCodeTextBox("");
+    setLoading(true);
     try {
       const req = await fetch("/api/teams/joincode/join", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: joinCodeTextBox,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: joinCodeTextBox.trim() }),
       });
-      if (!req.ok) {
-        // put join fail message
-      }
       const res = await req.json();
-      if (!res.success) {
+      if (!req.ok || !res.success) {
+        toast.error(res.message || "Could not join the team.");
+        return;
       }
-    } catch (e) {}
+      setJoinCodeTextBox("");
+      setOpenJoinDialog(false);
+      router.push(`/manage/${res.teamId}`);
+    } catch {
+      toast.error("Could not join the team. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <>
       <div>
         <div className="absolute inset-0 flex flex-col justify-center text-center align-middle">
           <span className="text-xl font-bold barlow mb-3">Your teams</span>
+          {teams.length === 0 && (
+            <p>
+              Create a team for your questions, or join one with an invite code.
+            </p>
+          )}
+          <Link className="text-blue-600 underline" href="/manage/account">
+            Account settings
+          </Link>
           {/* team component */}
           <div className="flex flex-col gap-2 max-h-1/2 overflow-y-scroll noscrollbar ph-no-capture">
             {teams.map((i) => (
@@ -161,12 +182,18 @@ export default function Page({
               <AlertDialogCancel className="cursor-pointer">
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction
-                className="transition-all duration-300 cursor-pointer"
+              <Button
+                disabled={
+                  loading ||
+                  !createNewTeamTextBoxes.team_name.trim() ||
+                  !/^[a-zA-Z0-9_-]{1,64}$/.test(
+                    createNewTeamTextBoxes.team_handle,
+                  )
+                }
                 onClick={sendCreateRequest}
               >
-                Continue
-              </AlertDialogAction>
+                {loading ? "Creating…" : "Create team"}
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -190,12 +217,12 @@ export default function Page({
               <AlertDialogCancel className="cursor-pointer">
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction
-                className="transition-all duration-300 cursor-pointer"
+              <Button
+                disabled={loading || !joinCodeTextBox.trim()}
                 onClick={sendJoinRequest}
               >
-                Continue
-              </AlertDialogAction>
+                {loading ? "Joining…" : "Join team"}
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

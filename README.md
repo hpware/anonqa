@@ -1,7 +1,7 @@
 # anon qa app
 ![](https://hackatime-badge.hackclub.com/U087ATD163V/anon-ngl-app)
 
-A free and self hostable alternative to `ngl.link`, with no paid subscription, just a simple app that you and your friends can share to manage their QAs (also team support is coming soon!).
+A free and self hostable alternative to `ngl.link`, with no paid subscription, just a simple app that you and your friends can share to manage their QAs (including shared team accounts).
 
 The prod service is hosted on Vercel and Convex's Public Cloud infra. https://anonqa.pleaseuse.me
 
@@ -36,6 +36,8 @@ Where I live Taiwan, a lot of ppl use sites like `ngl.link` or `marshmellow` for
 ## Features
 - AI Message flagging
 - Team Management.
+- Account email/password changes.
+- Threads account linking and answer posting (requires Meta app configuration).
 - Customizable random messages
 - Customizable Placeholders
 - LIVE updates (from the dashboard)

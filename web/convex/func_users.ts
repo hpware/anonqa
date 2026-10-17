@@ -108,11 +108,11 @@ export const getTeams = query({
     if (sessionUserId !== args.userId) {
       return [];
     }
-    const data = filter(
+    const data = await filter(
       ctx.db.query("users"),
       (doc) => !doc.deleted && doc.controlableUsers.includes(args.userId),
     ).collect();
-    return data;
+    return data.map(({ threads_auth_token, ...team }) => team);
   },
 });
 
@@ -537,5 +537,102 @@ export const revokeSession = mutation({
       .withIndex("by_session", (q) => q.eq("sessionId", args.session))
       .unique();
     if (session) await ctx.db.delete(session._id);
+  },
+});
+
+// Password hashes are only returned to the Next.js server after session verification.
+export const getAccountCredentials = query({
+  args: { session: v.string(), secret: v.string() },
+  handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
+    const userId = await requireValidSession(ctx, args.session);
+    const account = await ctx.db
+      .query("login")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .unique();
+    if (!account || account.deleted) throw new Error("Account not found.");
+    return { email: account.email, passwordHash: account.passwordHashed };
+  },
+});
+
+export const getAccountProfile = query({
+  args: { session: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await requireValidSession(ctx, args.session);
+    const account = await ctx.db
+      .query("login")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .unique();
+    if (!account || account.deleted) throw new Error("Account not found.");
+    return { email: account.email, fname: account.fname };
+  },
+});
+
+export const updateAccountCredentials = mutation({
+  args: {
+    session: v.string(),
+    secret: v.string(),
+    expectedPasswordHash: v.string(),
+    expectedEmail: v.string(),
+    email: v.optional(v.string()),
+    passwordHash: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireServerSecret(args.secret);
+    const userId = await requireValidSession(ctx, args.session);
+    const account = await ctx.db
+      .query("login")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .unique();
+    if (
+      !account ||
+      account.deleted ||
+      account.passwordHashed !== args.expectedPasswordHash ||
+      account.email !== args.expectedEmail
+    ) {
+      return {
+        success: false as const,
+        message: "Account changed. Please verify your current password again.",
+      };
+    }
+    if (!args.email && !args.passwordHash)
+      throw new Error("No changes supplied.");
+    if (args.email) {
+      if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(args.email) ||
+        args.email.length > 320
+      )
+        throw new Error("Invalid email.");
+      const accounts = await ctx.db.query("login").collect();
+      if (
+        accounts.some(
+          (other) =>
+            other._id !== account._id &&
+            other.email.toLowerCase() === args.email!.toLowerCase(),
+        )
+      ) {
+        return {
+          success: false as const,
+          message: "This email is already linked to an account.",
+        };
+      }
+    }
+    await ctx.db.patch(account._id, {
+      ...(args.email ? { email: args.email } : {}),
+      ...(args.passwordHash ? { passwordHashed: args.passwordHash } : {}),
+    });
+    const sessions = await ctx.db
+      .query("session")
+      .withIndex("by_account", (q) => q.eq("userAccount", userId))
+      .collect();
+    for (const session of sessions) await ctx.db.delete(session._id);
+    const session = uuidv4();
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    await ctx.db.insert("session", {
+      userAccount: userId,
+      sessionId: session,
+      expires_at: expiresAt,
+    });
+    return { success: true as const, session, expiresAt };
   },
 });
